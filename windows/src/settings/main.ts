@@ -591,6 +591,49 @@ function chatProvidersSection(
   );
 }
 
+// ── Claude Code (subscription) section ───────────────────────────────────────
+
+/** The chat through the user's own Claude Code CLI, on its subscription (claude_code.rs). */
+function claudeCodeSection(): HTMLElement {
+  const p = providerDef("claude-code");
+  const input = h("input", {
+    type: "text",
+    placeholder: "C:\\Users\\…\\project",
+    style: "flex:1 1 auto;min-width:0",
+    spellcheck: "false",
+    autocomplete: "off",
+  }) as HTMLInputElement;
+  input.value = settings.claudeCodeDir;
+  const saveBtn = h("button", { text: CHAT_STRINGS.save });
+  const use = h("button", {});
+  const refresh = () => {
+    const inUse = settings.chatProvider === "claude-code";
+    use.textContent = inUse ? CHAT_STRINGS.inUse : CHAT_STRINGS.useInChat;
+    use.className = inUse ? "" : "primary";
+    (use as HTMLButtonElement).disabled = inUse;
+  };
+  saveBtn.addEventListener("click", () => {
+    settings.claudeCodeDir = input.value.trim();
+    void save();
+  });
+  use.addEventListener("click", () => {
+    settings.claudeCodeDir = input.value.trim();
+    settings.chatProvider = "claude-code";
+    void save().then(refresh);
+  });
+  refresh();
+  return h(
+    "section",
+    {},
+    h("h2", {}, h("span", { text: t("Claude Code (subscription)") })),
+    h("div", { class: "hint", text: t("Chat through the Claude Code installed on this computer, on its Claude Pro or Max subscription: no API key needed. It works in the folder below (empty: your home folder) and can read the files there. Run claude once in a terminal to sign in first.") }),
+    h("div", { class: "row" },
+      h("label", {}, h("i", { class: "dot", style: `background:${p.accent};margin-right:8px` }), h("span", { text: p.name })),
+      input, saveBtn, use,
+    ),
+  );
+}
+
 // ── Local models section ──────────────────────────────────────────────────────
 
 type LocalId = "ollama" | "lmstudio" | "custom";
@@ -1367,6 +1410,7 @@ async function render() {
     planSection(status),
     apiSection(hasKey),
     chatProvidersSection(chatKeys, keyChanged),
+    claudeCodeSection(),
     localSection(customKey),
     activePillsSection(connected),
     integrationsSection(present),

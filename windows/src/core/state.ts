@@ -128,6 +128,8 @@ export interface Settings {
   ollamaUrl: string;
   lmstudioUrl: string;
   customUrl: string;
+  /** Folder the Claude Code chat works in; empty means the home folder. */
+  claudeCodeDir: string;
   /** Global shortcuts the user changed, by action id (see core/shortcuts.ts). */
   shortcuts: Bindings;
   /**
@@ -186,6 +188,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ollamaUrl: "",
   lmstudioUrl: "",
   customUrl: "",
+  claudeCodeDir: "",
   shortcuts: {},
   mochiOutfit: DEFAULT_OUTFIT,
   pillColors: {},

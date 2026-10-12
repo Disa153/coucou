@@ -50,6 +50,8 @@ pub struct Settings {
     pub lmstudio_url: String,
     /// Any other OpenAI-compatible server; its key, if any, is in the keychain.
     pub custom_url: String,
+    /// The folder the "Claude Code (subscription)" chat works in (claude_code.rs); empty means home.
+    pub claude_code_dir: String,
     /// Global shortcuts the user changed, by action id; the others keep their
     /// default (see shortcuts.rs).
     pub shortcuts: crate::shortcuts::Bindings,
@@ -147,6 +149,7 @@ impl Default for Settings {
             ollama_url: String::new(),
             lmstudio_url: String::new(),
             custom_url: String::new(),
+            claude_code_dir: String::new(),
             shortcuts: Default::default(),
             mochi_outfit: "auto".into(),
             pill_colors: BTreeMap::new(),
@@ -941,6 +944,7 @@ mod tests {
                 "ollamaUrl",
                 "lmstudioUrl",
                 "customUrl",
+                "claudeCodeDir",
                 "shortcuts",
                 "mochiOutfit",
                 "pillColors",

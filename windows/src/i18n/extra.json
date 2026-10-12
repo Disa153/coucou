@@ -3899,6 +3899,28 @@
    "pt-BR": "Este código também inclui a chave de acesso e a chave de ponta a ponta do relay {host}. «Parear de novo» cria uma chave e uma sala novas.",
    "ru": "Этот код также содержит ключ доступа и сквозной ключ для ретранслятора {host}. «Сопрячь заново» создаёт новый ключ и новую комнату.",
    "id": "Kode ini juga memuat kunci akses dan kunci ujung ke ujung untuk relay {host}. «Sandingkan ulang» membuat kunci dan ruang baru."
+  },
+  "Claude Code (subscription)": {
+   "zh-Hans": "Claude Code（订阅）",
+   "hi": "Claude Code (सदस्यता)",
+   "es": "Claude Code (suscripción)",
+   "ar": "Claude Code (الاشتراك)",
+   "fr": "Claude Code (abonnement)",
+   "bn": "Claude Code (সাবস্ক্রিপশন)",
+   "pt-BR": "Claude Code (assinatura)",
+   "ru": "Claude Code (подписка)",
+   "id": "Claude Code (langganan)"
+  },
+  "Chat through the Claude Code installed on this computer, on its Claude Pro or Max subscription: no API key needed. It works in the folder below (empty: your home folder) and can read the files there. Run claude once in a terminal to sign in first.": {
+   "zh-Hans": "通过本机安装的 Claude Code 聊天，使用其 Claude Pro 或 Max 订阅：无需 API 密钥。它在下方文件夹中工作（留空：你的主文件夹），并可读取其中的文件。请先在终端运行一次 claude 以登录。",
+   "hi": "इस कंप्यूटर पर इंस्टॉल Claude Code के ज़रिए चैट करें, उसकी Claude Pro या Max सदस्यता पर: API कुंजी की ज़रूरत नहीं। यह नीचे दिए फ़ोल्डर में काम करता है (खाली: आपका होम फ़ोल्डर) और वहाँ की फ़ाइलें पढ़ सकता है। पहले साइन इन के लिए टर्मिनल में एक बार claude चलाएँ।",
+   "es": "Chatea a través del Claude Code instalado en este ordenador, con su suscripción Claude Pro o Max: sin clave de API. Trabaja en la carpeta de abajo (vacía: tu carpeta personal) y puede leer sus archivos. Ejecuta claude una vez en una terminal para iniciar sesión.",
+   "ar": "تحدّث عبر Claude Code المثبّت على هذا الكمبيوتر، باشتراك Claude Pro أو Max: لا حاجة لمفتاح API. يعمل في المجلد أدناه (فارغ: مجلدك الرئيسي) ويمكنه قراءة الملفات فيه. شغّل claude مرة في الطرفية لتسجيل الدخول أولًا.",
+   "fr": "Discutez via le Claude Code installé sur cet ordinateur, avec son abonnement Claude Pro ou Max : aucune clé d'API. Il travaille dans le dossier ci-dessous (vide : votre dossier personnel) et peut en lire les fichiers. Lancez claude une fois dans un terminal pour vous connecter.",
+   "bn": "এই কম্পিউটারে ইনস্টল করা Claude Code-এর মাধ্যমে চ্যাট করুন, এর Claude Pro বা Max সাবস্ক্রিপশনে: API কী লাগবে না। এটি নিচের ফোল্ডারে কাজ করে (খালি: আপনার হোম ফোল্ডার) এবং সেখানকার ফাইল পড়তে পারে। আগে সাইন ইন করতে টার্মিনালে একবার claude চালান।",
+   "pt-BR": "Converse pelo Claude Code instalado neste computador, com a assinatura Claude Pro ou Max dele: sem chave de API. Ele trabalha na pasta abaixo (vazia: sua pasta pessoal) e pode ler os arquivos dela. Rode claude uma vez num terminal para entrar.",
+   "ru": "Чат через Claude Code, установленный на этом компьютере, по его подписке Claude Pro или Max: API-ключ не нужен. Он работает в папке ниже (пусто — домашняя папка) и может читать файлы в ней. Сначала один раз запустите claude в терминале, чтобы войти.",
+   "id": "Mengobrol lewat Claude Code yang terpasang di komputer ini, dengan langganan Claude Pro atau Max-nya: tanpa kunci API. Ia bekerja di folder di bawah (kosong: folder rumah Anda) dan bisa membaca file di sana. Jalankan claude sekali di terminal untuk masuk terlebih dahulu."
   }
  }
 }

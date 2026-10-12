@@ -3,6 +3,7 @@
 mod agent_hooks;
 mod agents;
 mod chat;
+mod claude_code;
 mod claude;
 mod codex_plan;
 mod config_file;
