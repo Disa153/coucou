@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Собачки — реалистичнее</title>
+<style>
+  :root { --bg:#0B0C0F; --card:#16181D; --line:#262931; --text:#E9EAEE; --dim:#8D919B; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  main { max-width:980px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 24px; }
+  .row { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+  @media (max-width:720px) { .row { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; text-align:center; }
+  .card h2 { font-size:16px; margin:6px 0 2px; }
+  .card p { color:var(--dim); font-size:13px; margin:0; }
+  canvas { display:block; margin:0 auto; }
+  .states { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .states figure { margin:0; }
+  .states figcaption { color:var(--dim); font-size:11.5px; }
+  h3 { font-size:15px; margin:30px 0 12px; }
+  .island { background:#000; border-radius:24px; padding:6px 18px 6px 8px; display:flex; align-items:center; gap:10px;
+            width:fit-content; max-width:100%; margin:0 auto 10px; border:1px solid #1d1f25; }
+  .island b { font-size:13.5px; font-weight:600; }
+  .island span { color:var(--dim); font-size:12.5px; }
+  .pills { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .pill { display:flex; align-items:center; gap:8px; background:#121419; border:1px solid #23262e; border-radius:999px; padding:3px 12px 3px 4px; font-size:12.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Собачки — реалистичнее</h1>
+  <p class="sub">Настоящая форма морды, шерсть, глаза с радужкой и бликом, влажный нос. По-прежнему рисуется кодом, без картинок.</p>
+
+  <div class="row">
+    <div class="card"><canvas data-dog="corgi" data-size="230"></canvas><h2>Корги</h2><p>пемброк: рыжий с белым, большие стоячие уши</p></div>
+    <div class="card"><canvas data-dog="shepherd" data-size="230"></canvas><h2>Овчарка</h2><p>немецкая: рыжая с чёрным чепраком и маской</p></div>
+  </div>
+
+  <h3>Состояния</h3>
+  <div class="row">
+    <div class="card"><div class="states" data-states="corgi"></div></div>
+    <div class="card"><div class="states" data-states="shepherd"></div></div>
+  </div>
+
+  <h3>В острове и на плашках</h3>
+  <div class="island"><canvas data-dog="corgi" data-size="40" data-state="working"></canvas><div><b>Claude Code</b> <span>· правит main.rs</span></div></div>
+  <div class="island"><canvas data-dog="shepherd" data-size="40" data-state="approval"></canvas><div><b>Нужно разрешение</b> <span>· npm install</span></div></div>
+  <div class="pills">
+    <div class="pill"><canvas data-dog="corgi" data-size="24"></canvas>Cursor</div>
+    <div class="pill"><canvas data-dog="shepherd" data-size="24"></canvas>Music</div>
+  </div>
+</main>
+
+<script>
+const BREEDS = {
+  corgi: {
+    base: ["#E39A4E", "#B8662A"], light: "#FBF6EF", lightShade: "#E6DCCF",
+    earOut: ["#D7883F", "#A85A22"], earIn: "#F2BBA6", earFur: "#FFF4EA",
+    iris: "#4A2A14", fur: "#9C5524", furLight: "#F7C98F",
+    earH: 0.78, earW: 0.5, earTilt: 0.38, earX: 0.34,
+  },
+  shepherd: {
+    base: ["#D29A57", "#9C6630"], dark: "#1F1915", darkHi: "#3A2E26", mask: "#2A211B",
+    earOut: ["#2C241F", "#141110"], earIn: "#6B4A33", earFur: "#C9965E",
+    iris: "#3A2210", fur: "#6E4520", furLight: "#EDBE7E",
+    earH: 0.86, earW: 0.4, earTilt: 0.2, earX: 0.3,
+  },
+};
+
+// Fixed pseudo-random numbers, so the fur does not flicker between frames.
+function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+function headPath(S) {
+  const p = new Path2D();
+  p.moveTo(0, -0.56*S);
+  p.bezierCurveTo(0.3*S, -0.58*S, 0.5*S, -0.4*S, 0.52*S, -0.08*S);
+  p.bezierCurveTo(0.54*S, 0.18*S, 0.42*S, 0.3*S, 0.3*S, 0.42*S);
+  p.bezierCurveTo(0.22*S, 0.56*S, 0.1*S, 0.62*S, 0, 0.62*S);
+  p.bezierCurveTo(-0.1*S, 0.62*S, -0.22*S, 0.56*S, -0.3*S, 0.42*S);
+  p.bezierCurveTo(-0.42*S, 0.3*S, -0.54*S, 0.18*S, -0.52*S, -0.08*S);
+  p.bezierCurveTo(-0.5*S, -0.4*S, -0.3*S, -0.58*S, 0, -0.56*S);
+  p.closePath();
+  return p;
+}
+
+function earPath(S, b) {
+  const h = b.earH*S, w = b.earW*S, p = new Path2D();
+  p.moveTo(-w/2, 0);
+  p.bezierCurveTo(-w*0.5, -h*0.45, -w*0.16, -h*0.88, -w*0.02, -h);
+  p.quadraticCurveTo(w*0.04, -h*1.02, w*0.08, -h*0.97);
+  p.bezierCurveTo(w*0.3, -h*0.7, w*0.55, -h*0.35, w/2, 0);
+  p.closePath();
+  return p;
+}
+
+function drawEar(x, S, b, side, lift, rand) {
+  x.save();
+  x.translate(side*b.earX*S, -0.36*S);
+  x.rotate(side*(b.earTilt - lift));
+  x.scale(side, 1);
+  const outer = earPath(S, b);
+  const g = x.createLinearGradient(0, -b.earH*S, 0, 0);
+  g.addColorStop(0, b.earOut[1]); g.addColorStop(1, b.earOut[0]);
+  x.fillStyle = g; x.fill(outer);
+  x.save();
+  x.translate(S*0.02, -S*0.06); x.scale(0.68, 0.74);
+  const inner = earPath(S, b);
+  const ig = x.createLinearGradient(0, -b.earH*S, 0, 0);
+  ig.addColorStop(0, shade(b.earIn, -0.35)); ig.addColorStop(1, b.earIn);
+  x.fillStyle = ig; x.fill(inner);
+  x.clip(inner);
+  x.strokeStyle = b.earFur; x.lineWidth = Math.max(0.6, S*0.008); x.lineCap = "round"; x.globalAlpha = 0.75;
+  for (let i = 0; i < 26; i++) {
+    const px = (rand() - 0.5)*b.earW*S*0.9, py = -rand()*b.earH*S*0.45;
+    x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + S*0.02, py - S*0.06, px + S*0.01*(rand()-0.3), py - S*0.12); x.stroke();
+  }
+  x.restore();
+  x.restore();
+}
+
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (c) => Math.max(0, Math.min(255, Math.round(c + (amt < 0 ? c*amt : (255 - c)*amt))));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+
+function furEdge(x, S, path, color, count, rand, len) {
+  x.save();
+  x.strokeStyle = color; x.lineCap = "round"; x.lineWidth = Math.max(0.5, S*0.007);
+  for (let i = 0; i < count; i++) {
+    const a = rand()*Math.PI*2, r = 0.5 + rand()*0.06;
+    const px = Math.cos(a)*r*S, py = Math.sin(a)*r*S*1.05 + 0.02*S;
+    const dp = x.getTransform().transformPoint(new DOMPoint(px, py));
+    if (!x.isPointInPath(path, dp.x, dp.y)) continue;
+    x.globalAlpha = 0.35 + rand()*0.4;
+    x.beginPath(); x.moveTo(px, py);
+    x.lineTo(px + Math.cos(a)*S*len, py + Math.sin(a)*S*len + S*0.01);
+    x.stroke();
+  }
+  x.restore();
+}
+
+function eye(x, S, b, side, state, blink, look) {
+  const ex = side*0.2*S, ey = -0.06*S, r = 0.075*S;
+  x.save(); x.translate(ex, ey); x.rotate(side*-0.12);
+  if (state === "finished") {
+    x.strokeStyle = "#1A120C"; x.lineWidth = S*0.022; x.lineCap = "round";
+    x.beginPath(); x.arc(0, r*0.5, r*1.0, Math.PI*1.15, Math.PI*1.85); x.stroke();
+    x.restore(); return;
+  }
+  const open = Math.max(0.08, 1 - blink) * (state === "approval" ? 1.15 : 1);
+  // Socket shadow.
+  x.fillStyle = "rgba(40,20,8,0.28)";
+  x.beginPath(); x.ellipse(0, r*0.1, r*1.55, r*1.25, 0, 0, Math.PI*2); x.fill();
+  // The eye, almond shaped.
+  const almond = new Path2D();
+  almond.moveTo(-r*1.25, 0);
+  almond.bezierCurveTo(-r*0.7, -r*1.2*open, r*0.7, -r*1.2*open, r*1.25, -r*0.05);
+  almond.bezierCurveTo(r*0.7, r*1.05*open, -r*0.7, r*1.05*open, -r*1.25, 0);
+  x.fillStyle = "#120B07"; x.fill(almond);
+  x.save(); x.clip(almond);
+  const lx = look*r*0.45;
+  const ig = x.createRadialGradient(lx, 0, r*0.1, lx, 0, r*0.95);
+  ig.addColorStop(0, shade(b.iris, 0.35)); ig.addColorStop(0.7, b.iris); ig.addColorStop(1, "#140C06");
+  x.fillStyle = ig; x.beginPath(); x.arc(lx, 0, r*0.95, 0, Math.PI*2); x.fill();
+  x.fillStyle = "#050302"; x.beginPath(); x.arc(lx, 0, r*(state === "approval" ? 0.6 : 0.45), 0, Math.PI*2); x.fill();
+  x.fillStyle = "rgba(255,255,255,0.92)"; x.beginPath(); x.arc(lx + r*0.32, -r*0.34, r*0.22, 0, Math.PI*2); x.fill();
+  x.fillStyle = "rgba(255,255,255,0.45)"; x.beginPath(); x.arc(lx - r*0.3, r*0.32, r*0.1, 0, Math.PI*2); x.fill();
+  x.restore();
+  x.strokeStyle = "#0E0805"; x.lineWidth = S*0.012; x.stroke(almond);
+  x.restore();
+}
+
+function nose(x, S, state) {
+  const ny = 0.24*S, w = 0.19*S;
+  const p = new Path2D();
+  p.moveTo(-w/2, ny - w*0.18);
+  p.bezierCurveTo(-w*0.45, ny - w*0.5, w*0.45, ny - w*0.5, w/2, ny - w*0.18);
+  p.bezierCurveTo(w*0.48, ny + w*0.18, w*0.12, ny + w*0.36, 0, ny + w*0.42);
+  p.bezierCurveTo(-w*0.12, ny + w*0.36, -w*0.48, ny + w*0.18, -w/2, ny - w*0.18);
+  const g = x.createLinearGradient(0, ny - w*0.5, 0, ny + w*0.4);
+  g.addColorStop(0, "#3A3230"); g.addColorStop(1, "#0C0908");
+  x.fillStyle = g; x.fill(p);
+  x.fillStyle = "#050404";
+  for (const sd of [-1, 1]) { x.beginPath(); x.ellipse(sd*w*0.22, ny + w*0.02, w*0.1, w*0.06, sd*0.5, 0, Math.PI*2); x.fill(); }
+  x.fillStyle = "rgba(255,255,255,0.55)";
+  x.beginPath(); x.ellipse(-w*0.08, ny - w*0.26, w*0.16, w*0.06, -0.2, 0, Math.PI*2); x.fill();
+  // Mouth.
+  x.strokeStyle = "#1B120D"; x.lineWidth = S*0.014; x.lineCap = "round";
+  const my = ny + w*0.95;
+  x.beginPath(); x.moveTo(0, ny + w*0.42); x.lineTo(0, my - w*0.15);
+  x.moveTo(-w*0.75, my - w*0.25); x.quadraticCurveTo(-w*0.35, my + w*0.3, 0, my - w*0.15);
+  x.quadraticCurveTo(w*0.35, my + w*0.3, w*0.75, my - w*0.25); x.stroke();
+  if (state === "finished") {
+    const tg = x.createLinearGradient(0, my, 0, my + w*1.2);
+    tg.addColorStop(0, "#E2566F"); tg.addColorStop(1, "#F27D92");
+    x.fillStyle = tg;
+    x.beginPath(); x.moveTo(-w*0.36, my - w*0.02);
+    x.bezierCurveTo(-w*0.42, my + w*1.1, w*0.42, my + w*1.1, w*0.36, my - w*0.02); x.closePath(); x.fill();
+    x.strokeStyle = "rgba(150,30,50,0.6)"; x.lineWidth = S*0.008;
+    x.beginPath(); x.moveTo(0, my + w*0.1); x.lineTo(0, my + w*0.6); x.stroke();
+  }
+}
+
+function draw(c, dog, state, t) {
+  const b = BREEDS[dog], size = +c.dataset.size, dpr = devicePixelRatio || 1;
+  const W = size, H = Math.round(size*1.32);
+  if (c.width !== Math.round(W*dpr)) { c.width = W*dpr; c.height = H*dpr; c.style.width = W+"px"; c.style.height = H+"px"; }
+  const x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
+  const S = size*0.62;
+  const tiny = size < 50;
+  const rand = rng(dog === "corgi" ? 7 : 11);
+
+  const breathe = Math.sin(t*2 + size)*0.012;
+  const tilt = state === "working" ? Math.sin(t*0.9)*0.08 : state === "approval" ? 0.12 : Math.sin(t*0.5)*0.025;
+  const hop = state === "finished" ? -Math.abs(Math.sin(t*4.5))*S*0.05 : 0;
+  x.translate(W/2, H*0.6 + hop); x.rotate(tilt); x.scale(1 + breathe, 1 - breathe);
+
+  // Neck and chest under the head.
+  const chest = new Path2D();
+  chest.moveTo(-0.36*S, 0.3*S); chest.quadraticCurveTo(-0.5*S, 0.6*S, -0.42*S, 0.8*S);
+  chest.lineTo(0.42*S, 0.8*S); chest.quadraticCurveTo(0.5*S, 0.6*S, 0.36*S, 0.3*S); chest.closePath();
+  x.fillStyle = dog === "corgi" ? b.light : b.dark; x.fill(chest);
+  if (dog === "shepherd") { x.fillStyle = b.base[1]; x.beginPath(); x.ellipse(0, 0.74*S, 0.26*S, 0.14*S, 0, 0, Math.PI*2); x.fill(); }
+
+  const twitchCycle = (t*0.6 + size*0.05) % 4.2;
+  const twitch = twitchCycle < 0.3 ? Math.sin(twitchCycle/0.3*Math.PI)*0.16 : 0;
+  const lift = state === "approval" ? 0.12 : 0;
+  drawEar(x, S, b, -1, lift, rng(3));
+  drawEar(x, S, b, 1, lift + twitch, rng(5));
+
+  const head = headPath(S);
+  const hg = x.createRadialGradient(-0.12*S, -0.25*S, S*0.05, 0, 0, S*0.75);
+  hg.addColorStop(0, shade(b.base[0], 0.12)); hg.addColorStop(0.65, b.base[0]); hg.addColorStop(1, b.base[1]);
+  x.fillStyle = hg; x.fill(head);
+
+  x.save(); x.clip(head);
+  if (dog === "corgi") {
+    const blaze = new Path2D();
+    blaze.moveTo(-0.035*S, -0.56*S); blaze.lineTo(0.035*S, -0.56*S);
+    blaze.bezierCurveTo(0.05*S, -0.2*S, 0.08*S, -0.06*S, 0.2*S, 0.08*S);
+    blaze.bezierCurveTo(0.42*S, 0.2*S, 0.4*S, 0.7*S, 0, 0.7*S);
+    blaze.bezierCurveTo(-0.4*S, 0.7*S, -0.42*S, 0.2*S, -0.2*S, 0.08*S);
+    blaze.bezierCurveTo(-0.08*S, -0.06*S, -0.05*S, -0.2*S, -0.035*S, -0.56*S);
+    const wg = x.createLinearGradient(0, -0.5*S, 0, 0.7*S);
+    wg.addColorStop(0, b.light); wg.addColorStop(1, b.lightShade);
+    x.fillStyle = wg; x.fill(blaze);
+    furEdge(x, S, blaze, b.light, 140, rand, 0.035);
+  } else {
+    // Black saddle from the crown, a widow's peak between the eyes, the black mask on the muzzle.
+    const cap = new Path2D();
+    cap.moveTo(-0.6*S, -0.7*S); cap.lineTo(0.6*S, -0.7*S); cap.lineTo(0.6*S, -0.2*S);
+    cap.bezierCurveTo(0.4*S, -0.16*S, 0.24*S, -0.2*S, 0.12*S, -0.16*S);
+    cap.bezierCurveTo(0.05*S, -0.1*S, 0.04*S, 0.05*S, 0, 0.1*S);
+    cap.bezierCurveTo(-0.04*S, 0.05*S, -0.05*S, -0.1*S, -0.12*S, -0.16*S);
+    cap.bezierCurveTo(-0.24*S, -0.2*S, -0.4*S, -0.16*S, -0.6*S, -0.2*S); cap.closePath();
+    const cg = x.createLinearGradient(0, -0.6*S, 0, 0.1*S);
+    cg.addColorStop(0, b.dark); cg.addColorStop(1, b.darkHi);
+    x.fillStyle = cg; x.fill(cap);
+    furEdge(x, S, cap, b.dark, 120, rand, 0.04);
+    const mask = new Path2D();
+    mask.ellipse(0, 0.36*S, 0.24*S, 0.3*S, 0, 0, Math.PI*2);
+    const mg = x.createRadialGradient(0, 0.3*S, 0, 0, 0.36*S, 0.3*S);
+    mg.addColorStop(0, b.mask); mg.addColorStop(0.75, b.mask); mg.addColorStop(1, "rgba(42,33,27,0)");
+    x.fillStyle = mg; x.fill(mask);
+    x.fillStyle = b.furLight;
+    for (const sd of [-1, 1]) { x.beginPath(); x.ellipse(sd*0.2*S, -0.19*S, 0.06*S, 0.03*S, sd*0.25, 0, Math.PI*2); x.fill(); }
+  }
+  // Muzzle volume and fur.
+  const mz = x.createRadialGradient(0, 0.3*S, 0, 0, 0.3*S, 0.3*S);
+  mz.addColorStop(0, "rgba(255,255,255,0.12)"); mz.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = mz; x.beginPath(); x.arc(0, 0.3*S, 0.3*S, 0, Math.PI*2); x.fill();
+  if (!tiny) {
+    x.strokeStyle = b.fur; x.lineCap = "round"; x.lineWidth = Math.max(0.5, S*0.006);
+    for (let i = 0; i < 160; i++) {
+      const a = rand()*Math.PI*2, r = (0.3 + rand()*0.25)*S;
+      const px = Math.cos(a)*r, py = Math.sin(a)*r*1.05;
+      x.globalAlpha = 0.18 + rand()*0.2;
+      x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a)*S*0.04, py + Math.sin(a)*S*0.04 + S*0.01); x.stroke();
+    }
+    x.globalAlpha = 1;
+    // Whisker dots.
+    x.fillStyle = "rgba(30,18,10,0.45)";
+    for (const sd of [-1, 1]) for (let i = 0; i < 4; i++) {
+      x.beginPath(); x.arc(sd*(0.08 + (i % 2)*0.05)*S, (0.36 + Math.floor(i/2)*0.05)*S, S*0.008, 0, Math.PI*2); x.fill();
+    }
+  }
+  // Soft shadow at the edge for roundness.
+  const vg = x.createRadialGradient(0, 0, S*0.3, 0, 0.05*S, S*0.66);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.28)");
+  x.fillStyle = vg; x.fill(head);
+  x.restore();
+
+  // Fur fringe outside the outline.
+  if (!tiny) furEdge(x, S, head, b.base[1], 220, rng(13), 0.03);
+
+  const blinkPhase = (t + size*0.07) % 4;
+  const blink = blinkPhase < 0.16 ? Math.sin(blinkPhase/0.16*Math.PI) : 0;
+  const look = state === "working" ? Math.sin(t*1.3) : 0;
+  eye(x, S, b, -1, state, blink, look);
+  eye(x, S, b, 1, state, blink, look);
+  nose(x, S, state);
+
+  if (state === "working" && !tiny) {
+    x.setTransform(dpr,0,0,dpr,0,0);
+    x.fillStyle = "#4F8BFF";
+    for (let i = 0; i < 3; i++) {
+      x.globalAlpha = 0.35 + 0.65*Math.max(0, Math.sin(t*5 - i*0.8));
+      x.beginPath(); x.arc(W*0.74 + i*W*0.07, H*0.12, W*0.022, 0, Math.PI*2); x.fill();
+    }
+    x.globalAlpha = 1;
+  }
+  if (state === "approval" && !tiny) {
+    x.setTransform(dpr,0,0,dpr,0,0);
+    x.fillStyle = "#FF8A3D"; x.font = `700 ${W*0.18}px system-ui`; x.fillText("!", W*0.8, H*0.22);
+  }
+}
+
+for (const box of document.querySelectorAll("[data-states]")) {
+  for (const [st, label] of [["idle","ждёт"],["working","работает"],["approval","разрешение"],["finished","готово"]]) {
+    const f = document.createElement("figure"), c = document.createElement("canvas");
+    c.dataset.dog = box.dataset.states; c.dataset.size = "96"; c.dataset.state = st;
+    const cap = document.createElement("figcaption"); cap.textContent = label;
+    f.append(c, cap); box.append(f);
+  }
+}
+const canvases = [...document.querySelectorAll("canvas[data-dog]")];
+const t0 = performance.now();
+(function frame(now) {
+  const t = (now - t0)/1000;
+  for (const c of canvases) draw(c, c.dataset.dog, c.dataset.state || "idle", t);
+  requestAnimationFrame(frame);
+})(t0);
+</script>
+</body>
+</html>
