@@ -50,14 +50,24 @@ final class LANLiveActivity {
             if let current = activity {
                 activity = nil
                 shown = nil
-                Task { await current.end(nil, dismissalPolicy: .immediate) }
+                let id = current.id
+                Task.detached {
+                    for a in Activity<MochiActivityAttributes>.activities where a.id == id {
+                        await a.end(nil, dismissalPolicy: .immediate)
+                    }
+                }
             }
             return
         }
         if let current = activity, current.activityState == .active || current.activityState == .stale {
             guard state != shown else { return }
             shown = state
-            Task { await current.update(ActivityContent(state: state, staleDate: nil)) }
+            let id = current.id
+            Task.detached {
+                for a in Activity<MochiActivityAttributes>.activities where a.id == id {
+                    await a.update(ActivityContent(state: state, staleDate: nil))
+                }
+            }
             return
         }
         activity = nil
