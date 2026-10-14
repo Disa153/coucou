@@ -1,0 +1,73 @@
+name: iPhone for Windows (sideload)
+
+# The iPhone app built with LAN_LINK: it pairs with Coucou for Windows/Linux over
+# the local network (docs/ANDROID_LINK.md) instead of iCloud. Unsigned .ipa, to be
+# installed with Sideloadly / AltStore and a free Apple ID (they sign it).
+
+on:
+  push:
+    branches: [iphone-windows-link]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: cd NotchBuddy && xcodegen
+
+      - name: Build iPhone app (LAN link, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project NotchBuddy/NotchBuddy.xcodeproj \
+            -scheme CoucouPhone \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            COUCOU_PHONE_LINK=LAN_LINK \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tee build.log | grep -E "error:|warning: .*LAN|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Show errors
+        if: failure()
+        run: grep -E "error:" -A3 build.log | head -150 || true
+
+      - name: Package .ipa
+        run: |
+          APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          echo "App: $APP"
+          rm -rf Payload && mkdir Payload
+          cp -R "$APP" Payload/
+          # The widgets and the notification card are extensions: each needs its own
+          # App ID and an App Group, which a free Apple ID handles badly. The app works without them.
+          rm -rf Payload/*.app/PlugIns
+          zip -qry Coucou-iPhone-Windows.ipa Payload
+          ls -lh Coucou-iPhone-Windows.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Coucou-iPhone-Windows
+          path: Coucou-iPhone-Windows.ipa
+
+      - name: Publish as a pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete iphone-windows-latest --yes --cleanup-tag || true
+          gh release create iphone-windows-latest Coucou-iPhone-Windows.ipa \
+            --prerelease \
+            --target "${{ github.sha }}" \
+            --title "Coucou for iPhone, linked to Windows" \
+            --notes "Unsigned build of the iPhone app that pairs with Coucou for Windows over Wi-Fi. Install with Sideloadly and your Apple ID. Built from ${{ github.sha }}."

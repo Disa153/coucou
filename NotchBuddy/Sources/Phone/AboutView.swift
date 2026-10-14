@@ -6,6 +6,9 @@ import UIKit
 struct AboutView: View {
     let link: PhoneLink
     @State private var showGuide = false
+    #if LAN_LINK
+    @State private var showPairing = false
+    #endif
     @AppStorage(PhoneSettings.notifyDoneKey) private var notifyDone = true
     @AppStorage(PhoneSettings.mochiSoundsKey) private var mochiSounds = true
     @AppStorage(PhoneSettings.quietHoursKey) private var quietHours = false
@@ -38,10 +41,23 @@ struct AboutView: View {
             }
 
             Section("Connection") {
+                #if LAN_LINK
+                Button {
+                    showPairing = true
+                } label: {
+                    LabeledContent("Computer") {
+                        Label(link.status == .ready ? "Connected" : "Not connected",
+                              systemImage: link.status == .ready ? "checkmark.circle" : "exclamationmark.circle")
+                            .foregroundStyle(link.status == .ready ? .green : .orange)
+                    }
+                }
+                .sheet(isPresented: $showPairing) { LANPairingView() }
+                #else
                 LabeledContent("iCloud") {
                     Label(iCloudText, systemImage: link.status == .ready ? "checkmark.icloud" : "exclamationmark.icloud")
                         .foregroundStyle(link.status == .ready ? .green : .orange)
                 }
+                #endif
                 LabeledContent("Notifications") {
                     Text(link.notificationsAllowed == false ? "Off" : "On")
                         .foregroundStyle(link.notificationsAllowed == false ? .orange : .secondary)

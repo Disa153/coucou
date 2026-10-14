@@ -31,7 +31,20 @@ struct HomeView: View {
         // A widget tile was tapped: open that Mochi.
         .onOpenURL { url in
             if let id = SharedSession.sessionId(from: url) { open(id) }
+            #if LAN_LINK
+            // A pairing QR code scanned with the Camera (Coucou for Windows/Linux).
+            if let pairing = LANPairing.parse(url.absoluteString) {
+                onboardingDone = true
+                LANLink.shared.proposedPairing = pairing
+            }
+            #endif
         }
+        #if LAN_LINK
+        .sheet(isPresented: Binding(get: { LANLink.shared.proposedPairing != nil && onboardingDone },
+                                    set: { if !$0 { LANLink.shared.proposedPairing = nil } })) {
+            LANPairingView()
+        }
+        #endif
         // A notification, Siri, Spotlight or the Control Center asked for a session.
         .onChange(of: link.openPillId) { _, id in
             guard let id else { return }
@@ -49,7 +62,11 @@ struct HomeView: View {
         }
         // First launch: how to connect the Mac.
         .fullScreenCover(isPresented: Binding(get: { !onboardingDone }, set: { if !$0 { onboardingDone = true } })) {
+            #if LAN_LINK
+            LANPairingView()
+            #else
             OnboardingView()
+            #endif
         }
         // The opening: Mochi alone while the app loads, then he flies to his tile.
         .overlay {
@@ -493,6 +510,9 @@ struct SessionRow: View {
 
 struct EmptySessionsView: View {
     let status: PhoneLink.Status
+    #if LAN_LINK
+    @State private var showPairing = false
+    #endif
 
     var body: some View {
         VStack(spacing: 8) {
@@ -500,13 +520,34 @@ struct EmptySessionsView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            #if LAN_LINK
+            if LANLink.shared.state != .connected && LANLink.shared.state != .connecting {
+                Button(LANLink.shared.pairing == nil ? "Pair with your computer" : "Computer settings") {
+                    showPairing = true
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 4)
+            }
+            #endif
         }
+        #if LAN_LINK
+        .sheet(isPresented: $showPairing) { LANPairingView() }
+        #endif
         .frame(maxWidth: .infinity)
         .padding(24)
         .glassCard()
     }
 
     private var message: String {
+        #if LAN_LINK
+        switch LANLink.shared.state {
+        case .unpaired: return "Pair this iPhone with Coucou on your computer to see your agents here."
+        case .connecting: return "Connecting to your computer…"
+        case .connected: return "No session yet. Start Claude Code on your computer."
+        case .offline(let reason): return reason
+        case .rejected: return "The computer refused this iPhone's code. Pair again."
+        }
+        #else
         switch status {
         case .starting: "Connecting to iCloud…"
         case .noAccount(let reason): "\(reason) Sign in to iCloud with the same account as your Mac."
@@ -514,6 +555,7 @@ struct EmptySessionsView: View {
         case .failed(let message): message
         case .ready: "No session yet. Start Claude Code, Cursor or Codex on your Mac."
         }
+        #endif
     }
 }
 

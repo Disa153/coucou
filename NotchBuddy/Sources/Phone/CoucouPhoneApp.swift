@@ -18,6 +18,9 @@ struct CoucouPhoneApp: App {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await PhoneLink.shared.refresh() } }
+            #if LAN_LINK
+            if phase == .background { LANLink.shared.enterBackground() }
+            #endif
         }
     }
 }
@@ -27,8 +30,11 @@ final class PhoneAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         NotificationActions.register()
+        #if !LAN_LINK
+        // Both go through iCloud and Apple push: not in the LAN build.
         LiveActivityLink.shared.start()
         application.registerForRemoteNotifications()
+        #endif
         Task { await PhoneLink.shared.start() }
         return true
     }

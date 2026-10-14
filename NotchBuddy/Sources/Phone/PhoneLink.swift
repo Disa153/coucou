@@ -101,7 +101,9 @@ final class PhoneLink {
     /// A session to open, from a notification, a shortcut or the Control Center.
     var openPillId: String?
 
-    @ObservationIgnored private let container = CKContainer(identifier: PhoneLink.containerID)
+    // Made on use: a CKContainer can't even be created without the iCloud entitlement
+    // (the sideloaded LAN_LINK build has none).
+    @ObservationIgnored private var container: CKContainer { CKContainer(identifier: PhoneLink.containerID) }
     @ObservationIgnored private var database: CKDatabase { container.privateCloudDatabase }
     @ObservationIgnored private var changeToken: CKServerChangeToken?
     @ObservationIgnored private var firstFetchDone = false
@@ -117,12 +119,27 @@ final class PhoneLink {
         let authorization = Task {
             (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
         }
+        #if LAN_LINK
+        LANLink.shared.start()
+        // The intro doesn't wait long for a computer that may be off.
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            firstSyncDone = true
+        }
+        notificationsAllowed = await authorization.value
+        return
+        #else
         await refresh()
         notificationsAllowed = await authorization.value
+        #endif
     }
 
     /// Checks the account, makes sure the subscription exists, then fetches new records.
     func refresh() async {
+        #if LAN_LINK
+        LANLink.shared.wake()
+        return
+        #endif
         do {
             let accountStatus = try await container.accountStatus()
             guard accountStatus == .available else {
@@ -144,6 +161,9 @@ final class PhoneLink {
 
     /// Called on a CloudKit push. Returns true when new records arrived.
     func handlePush() async -> Bool {
+        #if LAN_LINK
+        return false
+        #endif
         let gotNew = await fetchChanges()
         await notifyNewApprovals()
         await postEvents()
@@ -411,6 +431,11 @@ final class PhoneLink {
     /// Answers the question a session waits on. The Mac takes it within ~2 s,
     /// only if it is still the same question and the picks are among its choices.
     func answer(fingerprint: String, pillId: String, selections: [[String]]) async -> Bool {
+        #if LAN_LINK
+        let sent = await LANLink.shared.answer(fingerprint: fingerprint, picks: selections)
+        if !sent { lastPong = "Answer not sent: the computer isn't connected" }
+        return sent
+        #endif
         let record = CKRecord(recordType: "Answer",
                               recordID: CKRecord.ID(recordName: "answer-\(UUID().uuidString)", zoneID: Self.zoneID))
         record["fingerprint"] = fingerprint
@@ -433,6 +458,9 @@ final class PhoneLink {
     /// False when no new detail came back in time (Mac asleep, sync off, older build).
     @discardableResult
     func requestServiceDetail(_ pillId: String) async -> Bool {
+        #if LAN_LINK
+        return false
+        #endif
         let previous = serviceDetails[pillId]?.fetchedAt
         guard await sendServiceRequest(kind: ServiceDetail.refreshKind, target: "", pillId: pillId) else { return false }
         // The new detail usually comes with a push; fetch anyway in case it doesn't.
@@ -449,6 +477,9 @@ final class PhoneLink {
     /// Asks the Mac to run an action it offered on this service. Face ID first.
     /// True only when the Mac's result for this request came back and it worked.
     func runServiceAction(_ action: ServiceActionDef, pillId: String) async -> Bool {
+        #if LAN_LINK
+        return false
+        #endif
         guard await OwnerCheck.confirm(reason: "\(action.title) from your Mac") else { return false }
         // The result already shown (from an earlier action) doesn't count for this one.
         let previous = serviceDetails[pillId]?.lastAction
@@ -482,6 +513,10 @@ final class PhoneLink {
     /// Sends an instruction to continue a session on the Mac. The Mac takes it
     /// within ~15 s and deletes it; it never runs twice.
     func sendInstruction(_ text: String, pillId: String) async -> Bool {
+        #if LAN_LINK
+        lastPong = "Instructions can't be sent to a Windows computer yet"
+        return false
+        #endif
         let record = CKRecord(recordType: "Instruction",
                               recordID: CKRecord.ID(recordName: "instruction-\(UUID().uuidString)", zoneID: Self.zoneID))
         record["pillId"] = pillId
@@ -508,6 +543,16 @@ final class PhoneLink {
     /// Sends allow / deny for one exact request. The Mac applies it only if the
     /// fingerprint still matches the request it is waiting on.
     func decide(_ decision: Decision, fingerprint: String, pillId: String, summary: String) async -> Bool {
+        #if LAN_LINK
+        guard await LANLink.shared.decide(decision, fingerprint: fingerprint) else {
+            lastPong = "Decision not sent: the computer isn't connected"
+            return false
+        }
+        history.insert(DecisionLog(decision: decision, pillId: pillId, summary: summary, date: .now), at: 0)
+        history = Array(history.prefix(50))
+        DecisionLog.save(history)
+        return true
+        #endif
         let record = CKRecord(recordType: "Decision",
                               recordID: CKRecord.ID(recordName: "decision-\(UUID().uuidString)", zoneID: Self.zoneID))
         record["fingerprint"] = fingerprint
@@ -547,6 +592,9 @@ final class PhoneLink {
 
     /// Writes a Pong linked to the latest Ping.
     func sendPong() async {
+        #if LAN_LINK
+        return
+        #endif
         guard let ping = pings.first else { return }
         let record = CKRecord(recordType: "Pong",
                               recordID: CKRecord.ID(recordName: UUID().uuidString, zoneID: Self.zoneID))
@@ -565,6 +613,34 @@ final class PhoneLink {
             lastPong = "Pong failed: \(error.localizedDescription)"
         }
     }
+
+    #if LAN_LINK
+    /// The sessions from the computer on the local network (LANLink).
+    func applyLAN(_ items: [SessionItem]) {
+        var newEvents: [AgentNotifier.Event] = []
+        for item in items {
+            if let event = AgentNotifier.event(for: item) { newEvents.append(event) }
+        }
+        sessions = items.sorted { $0.updatedAt > $1.updatedAt }
+        firstSyncDone = true
+        updateWidgets()
+        Task {
+            for event in newEvents { await AgentNotifier.post(event, turn: nil) }
+            await removeAnsweredNotifications()
+        }
+    }
+
+    func lanStateChanged(_ state: LANLink.State) {
+        switch state {
+        case .connected: status = .ready
+        case .connecting: status = .starting
+        case .unpaired: status = .zoneMissing
+        case .rejected: status = .failed("This computer no longer accepts this iPhone. Pair again.")
+        case .offline(let reason): status = .failed(reason)
+        }
+        if state != .connecting { firstSyncDone = true }
+    }
+    #endif
 
     private func describe(_ status: CKAccountStatus) -> String {
         switch status {
