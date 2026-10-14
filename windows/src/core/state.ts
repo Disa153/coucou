@@ -1,5 +1,6 @@
 // App state — mirror of AppState.swift (the parts the island needs).
 
+import type { Breed } from "../mochi/breeds";
 import type { BotEmoteName, BotStateName, IslandMode, IslandViewName } from "./layout";
 import type { EyeShape } from "../mochi/engine";
 import {
@@ -141,6 +142,8 @@ export interface Settings {
    * Same raw values as the Mac's "mochiOutfit"; read it through parseOutfit.
    */
   mochiOutfit: string;
+  /** Mochi or a dog (src/mochi/breeds.ts); read it through parseBreed. */
+  mochiBreed: string;
   /**
    * A colour of the user's own for a pill's Mochi, by pill ID ("#RRGGBB").
    * Empty means the catalog's colours; read it through core/pill-colors.ts.
@@ -197,6 +200,7 @@ export const DEFAULT_SETTINGS: Settings = {
   chatsDir: "",
   shortcuts: {},
   mochiOutfit: DEFAULT_OUTFIT,
+  mochiBreed: "mochi",
   pillColors: {},
   language: "",
 };
@@ -265,6 +269,8 @@ class AppState {
 
   /** Outfit shown on Mochi while the pointer rests on a wardrobe button. */
   wardrobePreview: Outfit | null = null;
+  /** The breed under the pointer in the wardrobe. */
+  breedPreview: Breed | null = null;
 
   lastActivity = performance.now();
 

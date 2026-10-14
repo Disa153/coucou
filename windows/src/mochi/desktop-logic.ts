@@ -9,12 +9,15 @@
 
 import type { BotEmoteName, BotStateName } from "../core/layout";
 import type { Outfit } from "./wardrobe";
+import type { Breed } from "./breeds";
 
 /** What the island tells the desktop window, whenever it changes. */
 export interface DesktopSnapshot {
   state: BotStateName;
   /** He is always the main Mochi, so always dressed (try-ons included). */
   outfit: Outfit;
+  /** Mochi or a dog (./breeds.ts); missing from an older island, read as Mochi. */
+  breed?: Breed;
   soundEnabled: boolean;
   soundVolume: number;
   /** Tray → Pause: he dozes off and stays asleep. */

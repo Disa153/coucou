@@ -1,6 +1,7 @@
 // The island: DOM shell, sizing animation, Mochi placement, mouse handling.
 // Mirrors IslandRootView.swift + IslandWindowController.swift.
 
+import { parseBreed } from "../mochi/breeds";
 import { Tracked, Spring, clamp } from "../core/anim";
 import { Bridge, IS_TAURI, onDragDrop } from "../core/bridge";
 import {
@@ -249,6 +250,18 @@ export class Island {
       },
       previewOutfit: (outfit) => {
         State.wardrobePreview = outfit;
+        State.notify();
+      },
+      chooseBreed: (breed) => {
+        if (parseBreed(State.settings.mochiBreed) === breed) return;
+        State.settings.mochiBreed = breed;
+        void Bridge.saveSettings(State.settings);
+        Sound.play("pop");
+        this.engine.triggerEmote("happy");
+        State.notify();
+      },
+      previewBreed: (breed) => {
+        State.breedPreview = breed;
         State.notify();
       },
     };
@@ -1087,6 +1100,7 @@ export class Island {
     const showOutfit = mainFocused || State.mode !== "expanded" || inWardrobe;
     const outfit = State.wardrobePreview ?? this.seasons.get(parseOutfit(State.settings.mochiOutfit));
     this.engine.setOutfit(showOutfit ? outfit : "none", !inWardrobe);
+    this.engine.breed = showOutfit ? (State.breedPreview ?? parseBreed(State.settings.mochiBreed)) : "mochi";
     // Dances while music plays: always in the compact island, expanded only on
     // the music pill's card (BotCanvasView, macOS). Asked every frame.
     this.engine.setDancing(islandDances({
@@ -1151,6 +1165,7 @@ export class Island {
     this.greetingShown = greetingActive;
     // A wardrobe try-on never outlives the wardrobe.
     if (State.wardrobePreview && !(expanded && State.view === "wardrobe")) State.wardrobePreview = null;
+    if (State.breedPreview && !(expanded && State.view === "wardrobe")) State.breedPreview = null;
 
     this.header.sync();
     for (const [name, view] of this.views) {

@@ -2,6 +2,7 @@
 // colours and wording are copied from the Swift views so both platforms read
 // identically.
 
+import type { Breed } from "../mochi/breeds";
 import { h, svg, clear, dot } from "./dom";
 import { ICONS } from "./icons";
 import { Ticker } from "./ticker";
@@ -53,6 +54,8 @@ export interface ViewActions {
   chooseOutfit(selection: OutfitSelection): void;
   /** Wardrobe hover: shows an outfit on Mochi without keeping it; null ends it. */
   previewOutfit(outfit: Outfit | null): void;
+  chooseBreed(breed: Breed): void;
+  previewBreed(breed: Breed | null): void;
 }
 
 export interface ViewHost {

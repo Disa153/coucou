@@ -199,6 +199,7 @@ class DesktopMochi {
     if (!ctx) return;
     const engine = this.engine;
     engine.setOutfit(this.snap.outfit, true);
+    engine.breed = this.snap.breed ?? "mochi";
     if (!this.asleep) {
       // Windows: the global cursor. Linux: only while the pointer is over him.
       const fresh = this.mode === "poll" || now - this.lastPointer < 1500;

@@ -8,6 +8,9 @@ import { Ease, lerp, type EaseFn } from "../core/anim";
 import { Sound } from "../core/sound";
 import type { BotEmoteName, BotStateName } from "../core/layout";
 import { PUMPKIN_BODY, drawOutfitBehind, drawOutfitFront, makeHead } from "./outfits";
+import {
+  cuteBody, drawCuteBehind, drawCuteMarkings, drawCuteNose, drawRealDog, isRealistic, realEyeFor, type Breed,
+} from "./breeds";
 import type { Outfit } from "./wardrobe";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -207,6 +210,8 @@ export class BotEngine {
   // Outfit (the main Mochi only — minis never wear one). `outfit` is what is
   // drawn; it changes only once the previous one has left.
   outfit: Outfit = "none";
+  /** Mochi, or a dog (./breeds.ts). The main Mochi only: minis stay Mochi. */
+  breed: Breed = "mochi";
   /** 0 = gone, 1 = fully on. */
   outfitPresence = 0;
   private outfitTarget: Outfit = "none";
@@ -786,12 +791,32 @@ export class BotEngine {
       x.translate(-cx, -cy);
     }
 
+    const breed: Breed = this.isMini ? "mochi" : this.breed;
+    if (isRealistic(breed)) {
+      x.save();
+      x.translate(cx, cy);
+      if (this.tilt !== 0) x.rotate(this.tilt);
+      x.scale(this.sx, this.sy);
+      const eye = realEyeFor(this.eyeOverride ?? this.cfg.eye);
+      drawRealDog(x, breed, {
+        R, eye, open: this.open, gaze: Math.max(-1, Math.min(1, this.yaw * 2.2)),
+        alert: this.state === "approval" || this.state === "question", t: now(),
+      });
+      x.restore();
+      x.restore();
+      if (this.badge && this.badgeS > 0.01) this.drawBadge(x, this.badge, R, cx, cy - R * 0.5);
+      this.drawParticles(x, R, cx, cy);
+      return;
+    }
+
     this.drawHandsBehind(x, R, rx, ry, cx, cy);
 
     x.save();
     x.translate(cx, cy);
     if (this.tilt !== 0) x.rotate(this.tilt);
     x.scale(this.sx, this.sy);
+
+    drawCuteBehind(x, breed, R, rx, ry, this.yaw, now(), this.state === "approval");
 
     const dressed = !this.isMini && this.outfit !== "none";
     const head = dressed ? makeHead(R, this.yaw, this.pitch, this.physDx, this.physDy) : null;
@@ -800,6 +825,7 @@ export class BotEngine {
 
     const body = this.bodyPath(rx, ry, R);
     this.drawBody(x, body, R, rx, ry);
+    drawCuteMarkings(x, breed, body, R, rx, ry, this.yaw);
 
     const blushVal = Math.max(this.blush, this.tint * 0.5) * (1 - this.morph);
     if (blushVal > 0.01) {
@@ -817,6 +843,7 @@ export class BotEngine {
 
     this.drawEyes(x, body, R, rx, ry);
     if (this.morph > 0.05) this.drawMouth(x, body, R);
+    else drawCuteNose(x, breed, body, R, rx, ry, this.yaw, (this.eyeOverride ?? this.cfg.eye) === "happy");
 
     if (head) drawOutfitFront(x, this.outfit, head, outfitState);
 
@@ -872,8 +899,9 @@ export class BotEngine {
       if (pumpkin <= 0.001) return;
     } else {
       const g = x.createLinearGradient(rx * 0.7, -ry * 0.85, -rx * 0.8, ry * 0.9);
-      g.addColorStop(0, rgba(BASE_TOP));
-      g.addColorStop(1, rgba(BASE_BOTTOM));
+      const dog = this.isMini ? null : cuteBody(this.breed);
+      g.addColorStop(0, dog ? dog[0] : rgba(BASE_TOP));
+      g.addColorStop(1, dog ? dog[1] : rgba(BASE_BOTTOM));
       x.fillStyle = g;
       x.fill(body);
     }

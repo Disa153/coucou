@@ -3,6 +3,7 @@
 // to show, and handles the drag out of the island. The window itself lives in
 // src-tauri/src/desktop.rs and draws him in src/desktop/main.ts.
 
+import { parseBreed } from "../mochi/breeds";
 import { Bridge, emitToWindow, onEvent, type DesktopMode } from "../core/bridge";
 import type { BotEmoteName } from "../core/layout";
 import { Sound } from "../core/sound";
@@ -168,6 +169,7 @@ export class DesktopLink {
     const snapshot: DesktopSnapshot = {
       state: State.effectiveState,
       outfit: State.wardrobePreview ?? this.seasons.get(parseOutfit(State.settings.mochiOutfit)),
+      breed: State.breedPreview ?? parseBreed(State.settings.mochiBreed),
       soundEnabled: State.settings.soundEnabled,
       soundVolume: State.settings.soundVolume,
       paused: State.paused,

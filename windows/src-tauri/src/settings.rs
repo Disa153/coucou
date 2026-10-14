@@ -63,6 +63,9 @@ pub struct Settings {
     /// season), "none" or an outfit id — the Mac's raw values. The island reads
     /// anything it doesn't know as "auto", so the value is stored as it comes.
     pub mochi_outfit: String,
+    /// Mochi or a dog ("corgi", "shepherd", "corgiReal", "shepherdReal"), picked in the
+    /// wardrobe; stored as it comes, the island reads anything else as Mochi.
+    pub mochi_breed: String,
     /// A colour of the user's own for a pill's Mochi, by pill ID ("#RRGGBB"),
     /// picked in Settings → Active pills. Empty means the catalog's colours.
     /// Kept as it comes, like `mochi_outfit`: src/core/pill-colors.ts reads
@@ -158,6 +161,7 @@ impl Default for Settings {
             chats_dir: String::new(),
             shortcuts: Default::default(),
             mochi_outfit: "auto".into(),
+            mochi_breed: "mochi".into(),
             pill_colors: BTreeMap::new(),
             language: String::new(),
             desktop_mochi: DesktopMochiPref::default(),
@@ -448,6 +452,7 @@ mod tests {
   "chatsDir": "/home/me/chats",
   "shortcuts": { "openChat": { "keys": "Ctrl+Shift+K", "enabled": false } },
   "mochiOutfit": "witchHat",
+  "mochiBreed": "corgi",
   "pillColors": { "integration_claude": "#2DD4BF" },
   "language": "pt-BR",
   "desktopMochi": { "onDesktop": true, "spot": { "x": 1500.5, "y": -300.0, "space": "screen" } },
@@ -958,6 +963,7 @@ mod tests {
                 "chatsDir",
                 "shortcuts",
                 "mochiOutfit",
+                "mochiBreed",
                 "pillColors",
                 "language",
                 "desktopMochi",

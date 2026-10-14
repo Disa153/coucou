@@ -3987,6 +3987,83 @@
    "pt-BR": "Nada tocando — toque música em qualquer player",
    "ru": "Ничего не играет — включите музыку в любом плеере",
    "id": "Tidak ada yang diputar — putar musik di pemutar mana pun"
+  },
+  "Breed": {
+   "zh-Hans": "品种",
+   "hi": "नस्ल",
+   "es": "Raza",
+   "ar": "السلالة",
+   "fr": "Race",
+   "bn": "জাত",
+   "pt-BR": "Raça",
+   "ru": "Порода",
+   "id": "Ras"
+  },
+  "no outfits": {
+   "zh-Hans": "不能穿装扮",
+   "hi": "पोशाक नहीं",
+   "es": "sin disfraces",
+   "ar": "بلا أزياء",
+   "fr": "sans tenues",
+   "bn": "পোশাক ছাড়া",
+   "pt-BR": "sem fantasias",
+   "ru": "без нарядов",
+   "id": "tanpa kostum"
+  },
+  "Mochi": {
+   "zh-Hans": "Mochi",
+   "hi": "Mochi",
+   "es": "Mochi",
+   "ar": "Mochi",
+   "fr": "Mochi",
+   "bn": "Mochi",
+   "pt-BR": "Mochi",
+   "ru": "Mochi",
+   "id": "Mochi"
+  },
+  "Corgi": {
+   "zh-Hans": "柯基",
+   "hi": "कॉर्गी",
+   "es": "Corgi",
+   "ar": "كورجي",
+   "fr": "Corgi",
+   "bn": "করগি",
+   "pt-BR": "Corgi",
+   "ru": "Корги",
+   "id": "Corgi"
+  },
+  "Shepherd": {
+   "zh-Hans": "牧羊犬",
+   "hi": "शेफ़र्ड",
+   "es": "Pastor alemán",
+   "ar": "راعي ألماني",
+   "fr": "Berger allemand",
+   "bn": "শেফার্ড",
+   "pt-BR": "Pastor-alemão",
+   "ru": "Овчарка",
+   "id": "Gembala Jerman"
+  },
+  "Corgi (realistic)": {
+   "zh-Hans": "柯基（写实）",
+   "hi": "कॉर्गी (असली जैसा)",
+   "es": "Corgi (realista)",
+   "ar": "كورجي (واقعي)",
+   "fr": "Corgi (réaliste)",
+   "bn": "করগি (বাস্তবসম্মত)",
+   "pt-BR": "Corgi (realista)",
+   "ru": "Корги (реалистичный)",
+   "id": "Corgi (realistis)"
+  },
+  "Shepherd (realistic)": {
+   "zh-Hans": "牧羊犬（写实）",
+   "hi": "शेफ़र्ड (असली जैसा)",
+   "es": "Pastor alemán (realista)",
+   "ar": "راعي ألماني (واقعي)",
+   "fr": "Berger allemand (réaliste)",
+   "bn": "শেফার্ড (বাস্তবসম্মত)",
+   "pt-BR": "Pastor-alemão (realista)",
+   "ru": "Овчарка (реалистичная)",
+   "id": "Gembala Jerman (realistis)"
   }
  }
 }
