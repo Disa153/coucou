@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Собачки для Coucou</title>
+<style>
+  :root { --bg:#0B0C0F; --card:#16181D; --line:#262931; --text:#E9EAEE; --dim:#8D919B; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  main { max-width:980px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 26px; }
+  .row { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+  @media (max-width:720px) { .row { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; text-align:center; }
+  .card h2 { font-size:16px; margin:6px 0 2px; }
+  .card p { color:var(--dim); font-size:13px; margin:0; }
+  canvas { display:block; margin:0 auto; }
+  .states { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+  .states figure { margin:0; }
+  .states figcaption { color:var(--dim); font-size:11.5px; margin-top:2px; }
+  h3 { font-size:15px; margin:34px 0 12px; }
+  .island { background:#000; border-radius:22px; padding:8px 18px 8px 10px; display:flex; align-items:center; gap:10px;
+            width:fit-content; max-width:100%; margin:0 auto 10px; border:1px solid #1d1f25; }
+  .island b { font-size:13.5px; font-weight:600; }
+  .island span { color:var(--dim); font-size:12.5px; }
+  .pills { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .pill { display:flex; align-items:center; gap:8px; background:#121419; border:1px solid #23262e; border-radius:999px; padding:4px 12px 4px 5px; font-size:12.5px; }
+  .note { color:var(--dim); font-size:13px; margin-top:26px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Собачки для Coucou</h1>
+  <p class="sub">Набросок: Mochi остаётся собой, просто с ушками, окрасом и носом. Глаза и состояния те же, что у Mochi.</p>
+
+  <div class="row">
+    <div class="card"><canvas data-dog="mochi" data-size="150"></canvas><h2>Mochi</h2><p>как сейчас</p></div>
+    <div class="card"><canvas data-dog="corgi" data-size="150"></canvas><h2>Корги</h2><p>рыжий, белая мордочка, большие ушки</p></div>
+    <div class="card"><canvas data-dog="shepherd" data-size="150"></canvas><h2>Овчарка</h2><p>чёрный чепрак, рыжие «брови», тёмная маска</p></div>
+  </div>
+
+  <h3>Состояния</h3>
+  <div class="row">
+    <div class="card"><div class="states" data-states="corgi"></div><p style="margin-top:8px">Корги</p></div>
+    <div class="card"><div class="states" data-states="shepherd"></div><p style="margin-top:8px">Овчарка</p></div>
+    <div class="card"><div class="states" data-states="mochi"></div><p style="margin-top:8px">Mochi для сравнения</p></div>
+  </div>
+
+  <h3>В острове и на плашках</h3>
+  <div class="island"><canvas data-dog="corgi" data-size="34" data-state="working"></canvas><div><b>Claude Code</b> <span>· правит main.rs</span></div></div>
+  <div class="island"><canvas data-dog="shepherd" data-size="34" data-state="approval"></canvas><div><b>Нужно разрешение</b> <span>· npm install</span></div></div>
+  <div class="pills">
+    <div class="pill"><canvas data-dog="corgi" data-size="22" data-mini="1"></canvas>Cursor</div>
+    <div class="pill"><canvas data-dog="shepherd" data-size="22" data-mini="1"></canvas>Music</div>
+    <div class="pill"><canvas data-dog="mochi" data-size="22" data-mini="1"></canvas>GitHub</div>
+  </div>
+
+  <p class="note">Выбирать будет в гардеробе (правый клик по Mochi), рядом с шапками: «Корги» и «Овчарка». Шапки и костюмы будут надеваться и на собачек.</p>
+</main>
+
+<script>
+const INK = "#1A1412";
+const STATE_TINT = { idle:null, working:"#4F8BFF", approval:"#FF8A3D", finished:"#3DD68C" };
+
+const DOGS = {
+  mochi: { top:"#EDEDEF", bottom:"#C4C5CA" },
+  corgi: { top:"#F2A65E", bottom:"#C9752E", ears:"corgi", earCol:"#D98940", earIn:"#F7C4B0" },
+  shepherd: { top:"#D9A25E", bottom:"#A86F35", ears:"shepherd", earCol:"#2B231E", earIn:"#5A4130" },
+};
+
+function bodyPath(rx, ry) {
+  const p = new Path2D(); const n = 72, e = 2/2.7;
+  for (let i = 0; i <= n; i++) {
+    const a = i/n*Math.PI*2, c = Math.cos(a), s = Math.sin(a);
+    const x = rx*Math.sign(c)*Math.pow(Math.abs(c), e), y = ry*Math.sign(s)*Math.pow(Math.abs(s), e);
+    i ? p.lineTo(x,y) : p.moveTo(x,y);
+  }
+  p.closePath(); return p;
+}
+
+function ear(x, d, side, rx, ry, R, twitch) {
+  const tall = d.ears === "corgi" ? 0.95 : 1.15;
+  const wide = d.ears === "corgi" ? 0.62 : 0.5;
+  x.save();
+  x.translate(side*rx*0.52, -ry*0.62);
+  x.rotate(side*(d.ears === "corgi" ? 0.42 : 0.26) + side*twitch);
+  const h = R*tall, w = R*wide;
+  const shape = (s) => {
+    x.beginPath();
+    x.moveTo(-w/2*s, 0);
+    x.quadraticCurveTo(-w*0.42*s, -h*0.6*s, -w*0.06*s, -h*s);
+    x.quadraticCurveTo(0, -h*1.04*s, w*0.06*s, -h*s);
+    x.quadraticCurveTo(w*0.42*s, -h*0.6*s, w/2*s, 0);
+    x.closePath();
+  };
+  shape(1); x.fillStyle = d.earCol; x.fill();
+  x.translate(0, -h*0.08); shape(0.6); x.fillStyle = d.earIn; x.fill();
+  x.restore();
+}
+
+function eyes(x, kind, rx, ry, R, blink, look) {
+  x.fillStyle = INK; x.strokeStyle = INK; x.lineCap = "round";
+  for (const sd of [-1, 1]) {
+    const ex = sd*0.36*rx + look*rx*0.12, ey = 0.1*ry;
+    const w = R*0.25, h = R*0.27;
+    if (kind === "happy") {
+      x.lineWidth = R*0.075; x.beginPath();
+      x.arc(ex, ey + h*0.15, w*0.42, Math.PI*1.12, Math.PI*1.88); x.stroke();
+    } else {
+      const hh = Math.max(R*0.04, h*(1 - blink));
+      const ww = kind === "wide" ? w*1.1 : w*0.62;
+      x.beginPath(); x.roundRect(ex - ww/2, ey - hh/2, ww, hh, Math.min(ww, hh)/2); x.fill();
+    }
+  }
+}
+
+function draw(c, dogName, state, t, mini) {
+  const d = DOGS[dogName], size = +c.dataset.size, dpr = devicePixelRatio || 1;
+  const pad = dogName === "mochi" ? 1.0 : 1.55;
+  const W = size*1.25, H = size*pad;
+  if (c.width !== Math.round(W*dpr)) { c.width = W*dpr; c.height = H*dpr; c.style.width = W+"px"; c.style.height = H+"px"; }
+  const x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
+  const R = size*0.42, rx = R*1.08, ry = R*0.9;
+  const bob = Math.sin(t*2.2 + size)*R*0.03 * (state === "working" ? 2 : 1);
+  x.save(); x.translate(W/2, H - ry - R*0.18 + bob);
+  if (state === "finished") x.translate(0, -Math.abs(Math.sin(t*5))*R*0.12);
+  const body = bodyPath(rx, ry);
+  const twitchCycle = (t*0.7 + size*0.13) % 4;
+  const twitch = twitchCycle < 0.25 ? Math.sin(twitchCycle/0.25*Math.PI)*0.18 : 0;
+
+  if (d.ears) { ear(x, d, -1, rx, ry, R, 0); ear(x, d, 1, rx, ry, R, twitch); }
+
+  const g = x.createLinearGradient(rx*0.7, -ry*0.85, -rx*0.8, ry*0.9);
+  g.addColorStop(0, d.top); g.addColorStop(1, d.bottom);
+  x.fillStyle = g; x.fill(body);
+
+  x.save(); x.clip(body);
+  if (dogName === "corgi") {
+    x.fillStyle = "#FBF7F2";
+    x.beginPath(); x.ellipse(0, ry*0.78, rx*0.62, ry*0.62, 0, 0, Math.PI*2); x.fill();
+    x.beginPath(); x.roundRect(-R*0.09, -ry*1.1, R*0.18, ry*1.3, R*0.09); x.fill();
+  } else if (dogName === "shepherd") {
+    x.fillStyle = "#2B231E";
+    x.beginPath(); x.ellipse(0, -ry*1.0, rx*1.25, ry*0.72, 0, 0, Math.PI*2); x.fill();
+    x.fillStyle = "#E7B572";
+    for (const sd of [-1,1]) { x.beginPath(); x.ellipse(sd*0.36*rx, -ry*0.33, R*0.1, R*0.06, 0, 0, Math.PI*2); x.fill(); }
+    x.fillStyle = "#4A3428";
+    x.beginPath(); x.ellipse(0, ry*0.72, rx*0.42, ry*0.4, 0, 0, Math.PI*2); x.fill();
+  }
+  const tint = STATE_TINT[state];
+  if (tint) {
+    const tg = x.createLinearGradient(0, ry, 0, -ry);
+    tg.addColorStop(0, tint + "88"); tg.addColorStop(1, tint + "00");
+    x.fillStyle = tg; x.fill(body);
+  }
+  if (!mini) {
+    const sh = x.createRadialGradient(0,0,R*0.15,0,0,R*1.25);
+    sh.addColorStop(0.6,"rgba(0,0,0,0)"); sh.addColorStop(1,"rgba(0,0,0,0.2)"); x.fillStyle = sh; x.fill(body);
+    const hl = x.createRadialGradient(rx*0.34,-ry*0.46,0,rx*0.34,-ry*0.46,R*0.42);
+    hl.addColorStop(0, dogName === "shepherd" ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.5)"); hl.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle = hl; x.fill(body);
+  }
+
+  const blinkPhase = (t + size*0.07) % 3.6;
+  const blink = blinkPhase < 0.14 ? Math.sin(blinkPhase/0.14*Math.PI) : 0;
+  const look = state === "working" ? Math.sin(t*1.4)*0.8 : 0;
+  const kind = state === "finished" ? "happy" : state === "approval" ? "wide" : "pill";
+  eyes(x, kind, rx, ry, R, blink, look);
+
+  if (!mini) {
+    x.fillStyle = "rgba(255,120,150,0.35)";
+    for (const sd of [-1,1]) { x.beginPath(); x.ellipse(sd*rx*0.58, ry*0.32, R*0.15, R*0.09, 0, 0, Math.PI*2); x.fill(); }
+  }
+
+  if (dogName !== "mochi") {
+    const ny = ry*0.42, nw = R*(mini ? 0.26 : 0.2);
+    x.fillStyle = "#14100E";
+    x.beginPath(); x.moveTo(-nw/2, ny - nw*0.25); x.quadraticCurveTo(0, ny - nw*0.45, nw/2, ny - nw*0.25);
+    x.quadraticCurveTo(nw*0.3, ny + nw*0.4, 0, ny + nw*0.45); x.quadraticCurveTo(-nw*0.3, ny + nw*0.4, -nw/2, ny - nw*0.25); x.fill();
+    if (!mini) {
+      x.strokeStyle = "#14100E"; x.lineWidth = R*0.045; x.lineCap = "round";
+      const my = ny + nw*0.75;
+      x.beginPath(); x.moveTo(0, ny + nw*0.4); x.lineTo(0, my - nw*0.1);
+      x.moveTo(-nw*0.55, my - nw*0.15); x.quadraticCurveTo(-nw*0.25, my + nw*0.25, 0, my - nw*0.1);
+      x.quadraticCurveTo(nw*0.25, my + nw*0.25, nw*0.55, my - nw*0.15); x.stroke();
+      if (state === "finished") {
+        x.fillStyle = "#FF6F8E";
+        x.beginPath(); x.roundRect(-nw*0.28, my - nw*0.02, nw*0.56, nw*0.7, nw*0.28); x.fill();
+      }
+    }
+  }
+  x.restore();
+
+  if (state === "working" && !mini && size > 60) {
+    x.fillStyle = STATE_TINT.working;
+    for (let i = 0; i < 3; i++) {
+      const a = 0.4 + 0.6*Math.max(0, Math.sin(t*5 - i*0.8));
+      x.globalAlpha = a; x.beginPath(); x.arc(rx*0.95 + i*R*0.16, -ry*1.05, R*0.05, 0, Math.PI*2); x.fill();
+    }
+    x.globalAlpha = 1;
+  }
+  x.restore();
+}
+
+for (const box of document.querySelectorAll("[data-states]")) {
+  for (const [st, label] of [["idle","ждёт"],["working","работает"],["approval","разрешение"],["finished","готово"]]) {
+    const f = document.createElement("figure");
+    const c = document.createElement("canvas");
+    c.dataset.dog = box.dataset.states; c.dataset.size = "58"; c.dataset.state = st;
+    f.append(c); const cap = document.createElement("figcaption"); cap.textContent = label; f.append(cap); box.append(f);
+  }
+}
+const canvases = [...document.querySelectorAll("canvas[data-dog]")];
+const t0 = performance.now();
+(function frame(now) {
+  const t = (now - t0)/1000;
+  for (const c of canvases) draw(c, c.dataset.dog, c.dataset.state || "idle", t, !!c.dataset.mini);
+  requestAnimationFrame(frame);
+})(t0);
+</script>
+</body>
+</html>
