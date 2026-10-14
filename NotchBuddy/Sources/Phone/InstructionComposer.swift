@@ -24,10 +24,18 @@ struct InstructionComposer: View {
                 composer
                 status
             } else {
+                #if LAN_LINK
+                // Linked to Windows: writing to Claude goes through the Chat tab.
+                Label("To write to Claude, open the Chat tab at the bottom. It answers through Claude Code on your computer.",
+                      systemImage: "bubble.left.and.text.bubble.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                #else
                 Label("To write to Claude from here, turn on \"Let my iPhone send instructions to Claude Code\" in Coucou's Settings on your Mac (GitHub version).",
                       systemImage: "info.circle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                #endif
             }
         }
         // Floating, like Messages on iOS 26: no bar behind it, the screen
