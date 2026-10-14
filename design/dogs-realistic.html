@@ -32,7 +32,7 @@
 <body>
 <main>
   <h1>Собачки — реалистичнее</h1>
-  <p class="sub">Настоящая форма морды, шерсть, глаза с радужкой и бликом, влажный нос. По-прежнему рисуется кодом, без картинок.</p>
+  <p class="sub">Гладкие контуры без «шерстинок», пропорции морды по настоящим породам. Рисуется кодом, без картинок.</p>
 
   <div class="row">
     <div class="card"><canvas data-dog="corgi" data-size="230"></canvas><h2>Корги</h2><p>пемброк: рыжий с белым, большие стоячие уши</p></div>
@@ -57,94 +57,85 @@
 <script>
 const BREEDS = {
   corgi: {
-    base: ["#E39A4E", "#B8662A"], light: "#FBF6EF", lightShade: "#E6DCCF",
-    earOut: ["#D7883F", "#A85A22"], earIn: "#F2BBA6", earFur: "#FFF4EA",
-    iris: "#4A2A14", fur: "#9C5524", furLight: "#F7C98F",
-    earH: 0.78, earW: 0.5, earTilt: 0.38, earX: 0.34,
+    base: ["#EEA55A", "#BF6B2C"], light: "#FFFBF5", lightShade: "#EADFD2",
+    earOut: ["#E0904A", "#B4612A"], earIn: ["#F6C9B6", "#E7A08C"],
+    iris: "#4A2A14",
+    // Head: wide cheeks, short tapered muzzle; ears big, wide-set, leaning out.
+    head: { top: -0.5, cheekX: 0.52, cheekY: 0.04, muzzleX: 0.21, muzzleY: 0.44, chin: 0.56 },
+    ear: { h: 0.74, w: 0.5, tilt: 0.36, x: 0.31, y: -0.3 },
+    eyeX: 0.21, eyeY: -0.07, noseY: 0.28,
   },
   shepherd: {
-    base: ["#D29A57", "#9C6630"], dark: "#1F1915", darkHi: "#3A2E26", mask: "#2A211B",
-    earOut: ["#2C241F", "#141110"], earIn: "#6B4A33", earFur: "#C9965E",
-    iris: "#3A2210", fur: "#6E4520", furLight: "#EDBE7E",
-    earH: 0.86, earW: 0.4, earTilt: 0.2, earX: 0.3,
+    base: ["#DCA563", "#A46B33"], dark: "#1E1814", darkSoft: "rgba(30,24,20,0)",
+    earOut: ["#2A221D", "#151110"], earIn: ["#D6A66E", "#8E6038"],
+    iris: "#3A2210",
+    // Head: longer wedge, strong muzzle; ears tall, close to upright.
+    head: { top: -0.54, cheekX: 0.47, cheekY: -0.04, muzzleX: 0.18, muzzleY: 0.52, chin: 0.64 },
+    ear: { h: 0.86, w: 0.42, tilt: 0.17, x: 0.27, y: -0.36 },
+    eyeX: 0.19, eyeY: -0.1, noseY: 0.36,
   },
 };
 
-// Fixed pseudo-random numbers, so the fur does not flicker between frames.
-function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
-
-function headPath(S) {
+function headPath(S, h) {
   const p = new Path2D();
-  p.moveTo(0, -0.56*S);
-  p.bezierCurveTo(0.3*S, -0.58*S, 0.5*S, -0.4*S, 0.52*S, -0.08*S);
-  p.bezierCurveTo(0.54*S, 0.18*S, 0.42*S, 0.3*S, 0.3*S, 0.42*S);
-  p.bezierCurveTo(0.22*S, 0.56*S, 0.1*S, 0.62*S, 0, 0.62*S);
-  p.bezierCurveTo(-0.1*S, 0.62*S, -0.22*S, 0.56*S, -0.3*S, 0.42*S);
-  p.bezierCurveTo(-0.42*S, 0.3*S, -0.54*S, 0.18*S, -0.52*S, -0.08*S);
-  p.bezierCurveTo(-0.5*S, -0.4*S, -0.3*S, -0.58*S, 0, -0.56*S);
+  p.moveTo(0, h.top*S);
+  p.bezierCurveTo(h.cheekX*0.62*S, h.top*S, h.cheekX*S, (h.top + 0.2)*S, h.cheekX*S, h.cheekY*S);
+  p.bezierCurveTo(h.cheekX*S, (h.cheekY + 0.22)*S, (h.muzzleX + 0.1)*S, (h.muzzleY - 0.08)*S, h.muzzleX*S, h.muzzleY*S);
+  p.bezierCurveTo((h.muzzleX - 0.03)*S, (h.chin - 0.04)*S, 0.08*S, h.chin*S, 0, h.chin*S);
+  p.bezierCurveTo(-0.08*S, h.chin*S, -(h.muzzleX - 0.03)*S, (h.chin - 0.04)*S, -h.muzzleX*S, h.muzzleY*S);
+  p.bezierCurveTo(-(h.muzzleX + 0.1)*S, (h.muzzleY - 0.08)*S, -h.cheekX*S, (h.cheekY + 0.22)*S, -h.cheekX*S, h.cheekY*S);
+  p.bezierCurveTo(-h.cheekX*S, (h.top + 0.2)*S, -h.cheekX*0.62*S, h.top*S, 0, h.top*S);
   p.closePath();
   return p;
 }
 
-function earPath(S, b) {
-  const h = b.earH*S, w = b.earW*S, p = new Path2D();
+function earPath(S, e) {
+  const h = e.h*S, w = e.w*S, p = new Path2D();
   p.moveTo(-w/2, 0);
-  p.bezierCurveTo(-w*0.5, -h*0.45, -w*0.16, -h*0.88, -w*0.02, -h);
-  p.quadraticCurveTo(w*0.04, -h*1.02, w*0.08, -h*0.97);
-  p.bezierCurveTo(w*0.3, -h*0.7, w*0.55, -h*0.35, w/2, 0);
+  p.bezierCurveTo(-w*0.46, -h*0.5, -w*0.2, -h*0.9, -w*0.04, -h*0.99);
+  p.quadraticCurveTo(w*0.02, -h*1.02, w*0.07, -h*0.98);
+  p.bezierCurveTo(w*0.26, -h*0.8, w*0.5, -h*0.42, w/2, 0);
   p.closePath();
   return p;
 }
 
-function drawEar(x, S, b, side, lift, rand) {
+function drawEar(x, S, b, side, lift) {
+  const e = b.ear;
   x.save();
-  x.translate(side*b.earX*S, -0.36*S);
-  x.rotate(side*(b.earTilt - lift));
+  x.translate(side*e.x*S, e.y*S);
+  x.rotate(side*(e.tilt - lift));
   x.scale(side, 1);
-  const outer = earPath(S, b);
-  const g = x.createLinearGradient(0, -b.earH*S, 0, 0);
-  g.addColorStop(0, b.earOut[1]); g.addColorStop(1, b.earOut[0]);
+  const outer = earPath(S, e);
+  const g = x.createLinearGradient(-e.w*S/2, 0, e.w*S/2, -e.h*S);
+  g.addColorStop(0, b.earOut[0]); g.addColorStop(1, b.earOut[1]);
   x.fillStyle = g; x.fill(outer);
-  x.save();
-  x.translate(S*0.02, -S*0.06); x.scale(0.68, 0.74);
-  const inner = earPath(S, b);
-  const ig = x.createLinearGradient(0, -b.earH*S, 0, 0);
-  ig.addColorStop(0, shade(b.earIn, -0.35)); ig.addColorStop(1, b.earIn);
+  x.translate(S*0.015, -S*0.05); x.scale(0.66, 0.76);
+  const inner = earPath(S, e);
+  const ig = x.createLinearGradient(0, 0, 0, -e.h*S);
+  ig.addColorStop(0, b.earIn[0]); ig.addColorStop(1, b.earIn[1]);
   x.fillStyle = ig; x.fill(inner);
-  x.clip(inner);
-  x.strokeStyle = b.earFur; x.lineWidth = Math.max(0.6, S*0.008); x.lineCap = "round"; x.globalAlpha = 0.75;
-  for (let i = 0; i < 26; i++) {
-    const px = (rand() - 0.5)*b.earW*S*0.9, py = -rand()*b.earH*S*0.45;
-    x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + S*0.02, py - S*0.06, px + S*0.01*(rand()-0.3), py - S*0.12); x.stroke();
-  }
-  x.restore();
+  // Depth: the inside of the ear is darker towards its outer edge.
+  const dg = x.createLinearGradient(-e.w*S/2, 0, e.w*S/2, 0);
+  dg.addColorStop(0, "rgba(0,0,0,0)"); dg.addColorStop(1, "rgba(60,25,10,0.28)");
+  x.fillStyle = dg; x.fill(inner);
   x.restore();
 }
 
+function softBlob(x, cx, cy, rx, ry, color, alpha, rot = 0) {
+  x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(1, ry/rx);
+  const g = x.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, color.replace("ALPHA", alpha)); g.addColorStop(1, color.replace("ALPHA", 0));
+  x.fillStyle = g; x.beginPath(); x.arc(0, 0, rx, 0, Math.PI*2); x.fill();
+  x.restore();
+}
 function shade(hex, amt) {
   const n = parseInt(hex.slice(1), 16);
   const f = (c) => Math.max(0, Math.min(255, Math.round(c + (amt < 0 ? c*amt : (255 - c)*amt))));
   return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
 }
 
-function furEdge(x, S, path, color, count, rand, len) {
-  x.save();
-  x.strokeStyle = color; x.lineCap = "round"; x.lineWidth = Math.max(0.5, S*0.007);
-  for (let i = 0; i < count; i++) {
-    const a = rand()*Math.PI*2, r = 0.5 + rand()*0.06;
-    const px = Math.cos(a)*r*S, py = Math.sin(a)*r*S*1.05 + 0.02*S;
-    const dp = x.getTransform().transformPoint(new DOMPoint(px, py));
-    if (!x.isPointInPath(path, dp.x, dp.y)) continue;
-    x.globalAlpha = 0.35 + rand()*0.4;
-    x.beginPath(); x.moveTo(px, py);
-    x.lineTo(px + Math.cos(a)*S*len, py + Math.sin(a)*S*len + S*0.01);
-    x.stroke();
-  }
-  x.restore();
-}
-
 function eye(x, S, b, side, state, blink, look) {
-  const ex = side*0.2*S, ey = -0.06*S, r = 0.075*S;
+  const ex = side*b.eyeX*S, ey = b.eyeY*S, r = 0.072*S;
   x.save(); x.translate(ex, ey); x.rotate(side*-0.12);
   if (state === "finished") {
     x.strokeStyle = "#1A120C"; x.lineWidth = S*0.022; x.lineCap = "round";
@@ -174,8 +165,8 @@ function eye(x, S, b, side, state, blink, look) {
   x.restore();
 }
 
-function nose(x, S, state) {
-  const ny = 0.24*S, w = 0.19*S;
+function nose(x, S, b, state) {
+  const ny = b.noseY*S, w = 0.18*S;
   const p = new Path2D();
   p.moveTo(-w/2, ny - w*0.18);
   p.bezierCurveTo(-w*0.45, ny - w*0.5, w*0.45, ny - w*0.5, w/2, ny - w*0.18);
@@ -205,117 +196,115 @@ function nose(x, S, state) {
   }
 }
 
+
 function draw(c, dog, state, t) {
   const b = BREEDS[dog], size = +c.dataset.size, dpr = devicePixelRatio || 1;
   const W = size, H = Math.round(size*1.32);
   if (c.width !== Math.round(W*dpr)) { c.width = W*dpr; c.height = H*dpr; c.style.width = W+"px"; c.style.height = H+"px"; }
   const x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
-  const S = size*0.62;
-  const tiny = size < 50;
-  const rand = rng(dog === "corgi" ? 7 : 11);
+  const S = size*0.6, tiny = size < 50;
 
-  const breathe = Math.sin(t*2 + size)*0.012;
-  const tilt = state === "working" ? Math.sin(t*0.9)*0.08 : state === "approval" ? 0.12 : Math.sin(t*0.5)*0.025;
+  const breathe = Math.sin(t*2 + size)*0.01;
+  const tilt = state === "working" ? Math.sin(t*0.9)*0.08 : state === "approval" ? 0.1 : Math.sin(t*0.5)*0.02;
   const hop = state === "finished" ? -Math.abs(Math.sin(t*4.5))*S*0.05 : 0;
-  x.translate(W/2, H*0.6 + hop); x.rotate(tilt); x.scale(1 + breathe, 1 - breathe);
+  x.translate(W/2, H*0.58 + hop); x.rotate(tilt); x.scale(1 + breathe, 1 - breathe);
 
-  // Neck and chest under the head.
+  // Chest.
   const chest = new Path2D();
-  chest.moveTo(-0.36*S, 0.3*S); chest.quadraticCurveTo(-0.5*S, 0.6*S, -0.42*S, 0.8*S);
-  chest.lineTo(0.42*S, 0.8*S); chest.quadraticCurveTo(0.5*S, 0.6*S, 0.36*S, 0.3*S); chest.closePath();
-  x.fillStyle = dog === "corgi" ? b.light : b.dark; x.fill(chest);
-  if (dog === "shepherd") { x.fillStyle = b.base[1]; x.beginPath(); x.ellipse(0, 0.74*S, 0.26*S, 0.14*S, 0, 0, Math.PI*2); x.fill(); }
+  chest.moveTo(-0.34*S, 0.3*S);
+  chest.bezierCurveTo(-0.52*S, 0.5*S, -0.5*S, 0.74*S, -0.44*S, 0.86*S);
+  chest.lineTo(0.44*S, 0.86*S);
+  chest.bezierCurveTo(0.5*S, 0.74*S, 0.52*S, 0.5*S, 0.34*S, 0.3*S); chest.closePath();
+  if (dog === "corgi") {
+    const cg = x.createLinearGradient(0, 0.3*S, 0, 0.86*S);
+    cg.addColorStop(0, b.lightShade); cg.addColorStop(1, b.light);
+    x.fillStyle = cg; x.fill(chest);
+  } else {
+    const cg = x.createLinearGradient(-0.5*S, 0, 0.5*S, 0);
+    cg.addColorStop(0, b.dark); cg.addColorStop(0.22, "#5A3C22"); cg.addColorStop(0.5, b.base[0]);
+    cg.addColorStop(0.78, "#5A3C22"); cg.addColorStop(1, b.dark);
+    x.fillStyle = cg; x.fill(chest);
+  }
 
   const twitchCycle = (t*0.6 + size*0.05) % 4.2;
-  const twitch = twitchCycle < 0.3 ? Math.sin(twitchCycle/0.3*Math.PI)*0.16 : 0;
-  const lift = state === "approval" ? 0.12 : 0;
-  drawEar(x, S, b, -1, lift, rng(3));
-  drawEar(x, S, b, 1, lift + twitch, rng(5));
+  const twitch = twitchCycle < 0.3 ? Math.sin(twitchCycle/0.3*Math.PI)*0.14 : 0;
+  const lift = state === "approval" ? 0.1 : 0;
+  drawEar(x, S, b, -1, lift);
+  drawEar(x, S, b, 1, lift + twitch);
 
-  const head = headPath(S);
-  const hg = x.createRadialGradient(-0.12*S, -0.25*S, S*0.05, 0, 0, S*0.75);
-  hg.addColorStop(0, shade(b.base[0], 0.12)); hg.addColorStop(0.65, b.base[0]); hg.addColorStop(1, b.base[1]);
+  const head = headPath(S, b.head);
+  const hg = x.createRadialGradient(-0.1*S, -0.24*S, S*0.04, 0, 0, S*0.72);
+  hg.addColorStop(0, shade(b.base[0], 0.14)); hg.addColorStop(0.6, b.base[0]); hg.addColorStop(1, b.base[1]);
   x.fillStyle = hg; x.fill(head);
 
   x.save(); x.clip(head);
   if (dog === "corgi") {
-    const blaze = new Path2D();
-    blaze.moveTo(-0.035*S, -0.56*S); blaze.lineTo(0.035*S, -0.56*S);
-    blaze.bezierCurveTo(0.05*S, -0.2*S, 0.08*S, -0.06*S, 0.2*S, 0.08*S);
-    blaze.bezierCurveTo(0.42*S, 0.2*S, 0.4*S, 0.7*S, 0, 0.7*S);
-    blaze.bezierCurveTo(-0.4*S, 0.7*S, -0.42*S, 0.2*S, -0.2*S, 0.08*S);
-    blaze.bezierCurveTo(-0.08*S, -0.06*S, -0.05*S, -0.2*S, -0.035*S, -0.56*S);
+    // White blaze: narrow between the eyes, opening onto the muzzle, cheeks and chin.
+    const w = new Path2D();
+    w.moveTo(-0.04*S, -0.52*S); w.lineTo(0.04*S, -0.52*S);
+    w.bezierCurveTo(0.055*S, -0.24*S, 0.07*S, -0.04*S, 0.16*S, 0.06*S);
+    w.bezierCurveTo(0.3*S, 0.12*S, 0.44*S, 0.2*S, 0.44*S, 0.38*S);
+    w.bezierCurveTo(0.44*S, 0.62*S, 0.2*S, 0.7*S, 0, 0.7*S);
+    w.bezierCurveTo(-0.2*S, 0.7*S, -0.44*S, 0.62*S, -0.44*S, 0.38*S);
+    w.bezierCurveTo(-0.44*S, 0.2*S, -0.3*S, 0.12*S, -0.16*S, 0.06*S);
+    w.bezierCurveTo(-0.07*S, -0.04*S, -0.055*S, -0.24*S, -0.04*S, -0.52*S);
+    w.closePath();
     const wg = x.createLinearGradient(0, -0.5*S, 0, 0.7*S);
     wg.addColorStop(0, b.light); wg.addColorStop(1, b.lightShade);
-    x.fillStyle = wg; x.fill(blaze);
-    furEdge(x, S, blaze, b.light, 140, rand, 0.035);
+    x.fillStyle = wg; x.fill(w);
   } else {
-    // Black saddle from the crown, a widow's peak between the eyes, the black mask on the muzzle.
+    // Black saddle from the crown with a peak between the eyes.
     const cap = new Path2D();
-    cap.moveTo(-0.6*S, -0.7*S); cap.lineTo(0.6*S, -0.7*S); cap.lineTo(0.6*S, -0.2*S);
-    cap.bezierCurveTo(0.4*S, -0.16*S, 0.24*S, -0.2*S, 0.12*S, -0.16*S);
-    cap.bezierCurveTo(0.05*S, -0.1*S, 0.04*S, 0.05*S, 0, 0.1*S);
-    cap.bezierCurveTo(-0.04*S, 0.05*S, -0.05*S, -0.1*S, -0.12*S, -0.16*S);
-    cap.bezierCurveTo(-0.24*S, -0.2*S, -0.4*S, -0.16*S, -0.6*S, -0.2*S); cap.closePath();
-    const cg = x.createLinearGradient(0, -0.6*S, 0, 0.1*S);
-    cg.addColorStop(0, b.dark); cg.addColorStop(1, b.darkHi);
+    cap.moveTo(-0.7*S, -0.8*S); cap.lineTo(0.7*S, -0.8*S); cap.lineTo(0.7*S, -0.16*S);
+    cap.bezierCurveTo(0.42*S, -0.22*S, 0.22*S, -0.26*S, 0.1*S, -0.2*S);
+    cap.bezierCurveTo(0.04*S, -0.14*S, 0.03*S, 0.0, 0, 0.06*S);
+    cap.bezierCurveTo(-0.03*S, 0.0, -0.04*S, -0.14*S, -0.1*S, -0.2*S);
+    cap.bezierCurveTo(-0.22*S, -0.26*S, -0.42*S, -0.22*S, -0.7*S, -0.16*S); cap.closePath();
+    const cg = x.createLinearGradient(0, -0.6*S, 0, 0.06*S);
+    cg.addColorStop(0, b.dark); cg.addColorStop(1, "#3A2D24");
     x.fillStyle = cg; x.fill(cap);
-    furEdge(x, S, cap, b.dark, 120, rand, 0.04);
+    // Tan brow spots.
+    x.fillStyle = "#E6B06E";
+    for (const sd of [-1, 1]) { x.beginPath(); x.ellipse(sd*0.19*S, -0.235*S, 0.055*S, 0.028*S, sd*0.2, 0, Math.PI*2); x.fill(); }
+    // Black mask over the muzzle, fading into the tan cheeks.
     const mask = new Path2D();
-    mask.ellipse(0, 0.36*S, 0.24*S, 0.3*S, 0, 0, Math.PI*2);
-    const mg = x.createRadialGradient(0, 0.3*S, 0, 0, 0.36*S, 0.3*S);
-    mg.addColorStop(0, b.mask); mg.addColorStop(0.75, b.mask); mg.addColorStop(1, "rgba(42,33,27,0)");
+    mask.moveTo(-0.16*S, 0.02*S);
+    mask.bezierCurveTo(-0.26*S, 0.16*S, -0.3*S, 0.4*S, -0.22*S, 0.56*S);
+    mask.bezierCurveTo(-0.14*S, 0.7*S, 0.14*S, 0.7*S, 0.22*S, 0.56*S);
+    mask.bezierCurveTo(0.3*S, 0.4*S, 0.26*S, 0.16*S, 0.16*S, 0.02*S);
+    mask.quadraticCurveTo(0, 0.08*S, -0.16*S, 0.02*S); mask.closePath();
+    const mg = x.createLinearGradient(0, 0.02*S, 0, 0.3*S);
+    mg.addColorStop(0, "rgba(28,22,18,0.15)"); mg.addColorStop(0.55, "rgba(28,22,18,0.85)"); mg.addColorStop(1, "rgba(24,19,16,0.97)");
     x.fillStyle = mg; x.fill(mask);
-    x.fillStyle = b.furLight;
-    for (const sd of [-1, 1]) { x.beginPath(); x.ellipse(sd*0.2*S, -0.19*S, 0.06*S, 0.03*S, sd*0.25, 0, Math.PI*2); x.fill(); }
   }
-  // Muzzle volume and fur.
-  const mz = x.createRadialGradient(0, 0.3*S, 0, 0, 0.3*S, 0.3*S);
-  mz.addColorStop(0, "rgba(255,255,255,0.12)"); mz.addColorStop(1, "rgba(255,255,255,0)");
-  x.fillStyle = mz; x.beginPath(); x.arc(0, 0.3*S, 0.3*S, 0, Math.PI*2); x.fill();
-  if (!tiny) {
-    x.strokeStyle = b.fur; x.lineCap = "round"; x.lineWidth = Math.max(0.5, S*0.006);
-    for (let i = 0; i < 160; i++) {
-      const a = rand()*Math.PI*2, r = (0.3 + rand()*0.25)*S;
-      const px = Math.cos(a)*r, py = Math.sin(a)*r*1.05;
-      x.globalAlpha = 0.18 + rand()*0.2;
-      x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a)*S*0.04, py + Math.sin(a)*S*0.04 + S*0.01); x.stroke();
-    }
-    x.globalAlpha = 1;
-    // Whisker dots.
-    x.fillStyle = "rgba(30,18,10,0.45)";
-    for (const sd of [-1, 1]) for (let i = 0; i < 4; i++) {
-      x.beginPath(); x.arc(sd*(0.08 + (i % 2)*0.05)*S, (0.36 + Math.floor(i/2)*0.05)*S, S*0.008, 0, Math.PI*2); x.fill();
-    }
-  }
-  // Soft shadow at the edge for roundness.
-  const vg = x.createRadialGradient(0, 0, S*0.3, 0, 0.05*S, S*0.66);
-  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.28)");
+  // Volume: forehead and cheek light, muzzle bridge highlight, edge shade.
+  softBlob(x, -0.12*S, -0.3*S, 0.3*S, 0.2*S, "rgba(255,255,255,ALPHA)", 0.22);
+  softBlob(x, 0, b.noseY*S - 0.16*S, 0.07*S, 0.16*S, "rgba(255,255,255,ALPHA)", dog === "corgi" ? 0.25 : 0.12);
+  for (const sd of [-1, 1]) softBlob(x, sd*0.3*S, 0.14*S, 0.18*S, 0.14*S, "rgba(255,255,255,ALPHA)", 0.1);
+  const vg = x.createRadialGradient(0, 0, S*0.32, 0, 0.04*S, S*0.68);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.26)");
   x.fillStyle = vg; x.fill(head);
   x.restore();
-
-  // Fur fringe outside the outline.
-  if (!tiny) furEdge(x, S, head, b.base[1], 220, rng(13), 0.03);
 
   const blinkPhase = (t + size*0.07) % 4;
   const blink = blinkPhase < 0.16 ? Math.sin(blinkPhase/0.16*Math.PI) : 0;
   const look = state === "working" ? Math.sin(t*1.3) : 0;
   eye(x, S, b, -1, state, blink, look);
   eye(x, S, b, 1, state, blink, look);
-  nose(x, S, state);
+  nose(x, S, b, state);
 
   if (state === "working" && !tiny) {
     x.setTransform(dpr,0,0,dpr,0,0);
     x.fillStyle = "#4F8BFF";
     for (let i = 0; i < 3; i++) {
       x.globalAlpha = 0.35 + 0.65*Math.max(0, Math.sin(t*5 - i*0.8));
-      x.beginPath(); x.arc(W*0.74 + i*W*0.07, H*0.12, W*0.022, 0, Math.PI*2); x.fill();
+      x.beginPath(); x.arc(W*0.74 + i*W*0.07, H*0.1, W*0.022, 0, Math.PI*2); x.fill();
     }
     x.globalAlpha = 1;
   }
   if (state === "approval" && !tiny) {
     x.setTransform(dpr,0,0,dpr,0,0);
-    x.fillStyle = "#FF8A3D"; x.font = `700 ${W*0.18}px system-ui`; x.fillText("!", W*0.8, H*0.22);
+    x.fillStyle = "#FF8A3D"; x.font = `700 ${W*0.18}px system-ui`; x.fillText("!", W*0.82, H*0.2);
   }
 }
 
