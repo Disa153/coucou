@@ -10,6 +10,7 @@ struct LANPairingView: View {
     var lan = LANLink.shared
     @State private var pasted = ""
     @State private var invalid = false
+    @State private var away = LANLink.shared.pairing?.awayHost ?? ""
 
     var body: some View {
         NavigationStack {
@@ -46,6 +47,20 @@ struct LANPairingView: View {
                             Button("Try again") { lan.wake() }
                         }
                         Button("Unpair", role: .destructive) { lan.unpair() }
+                    }
+                    Section {
+                        TextField("100.x.y.z", text: $away)
+                            .font(.body.monospaced())
+                            .keyboardType(.numbersAndPunctuation)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .onSubmit { lan.setAwayHost(away) }
+                        Button("Save") { lan.setAwayHost(away) }
+                            .disabled(away == (lan.pairing?.awayHost ?? ""))
+                    } header: {
+                        Text("Away from home")
+                    } footer: {
+                        Text("Install Tailscale on the computer and on this iPhone, signed in to the same account, and enter the computer's Tailscale address (100.…). When the home address does not answer, Coucou tries this one.")
                     }
                     Section {
                         Toggle("Stay connected in the background",

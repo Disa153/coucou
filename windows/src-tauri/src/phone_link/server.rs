@@ -194,10 +194,15 @@ pub fn serve(listener: TcpListener, acceptor: TlsAcceptor, shared: Arc<Shared>) 
     Handle { accept, shared: for_handle }
 }
 
-/// The local network only: private, loopback and link-local addresses.
+/// The local network only: private, loopback and link-local addresses, and a
+/// Tailscale network (100.64.0.0/10; its IPv6 range is inside fc00::/7), so the
+/// phone can reach this computer away from home through the user's own tailnet.
 pub fn is_local(ip: IpAddr) -> bool {
     match ip {
-        IpAddr::V4(v4) => v4.is_private() || v4.is_loopback() || v4.is_link_local(),
+        IpAddr::V4(v4) => {
+            let o = v4.octets();
+            v4.is_private() || v4.is_loopback() || v4.is_link_local() || (o[0] == 100 && (o[1] & 0xc0) == 64)
+        }
         IpAddr::V6(v6) => {
             if let Some(v4) = v6.to_ipv4_mapped() {
                 return is_local(IpAddr::V4(v4));
@@ -439,10 +444,10 @@ mod tests {
 
     #[test]
     fn only_the_local_network_may_connect() {
-        for ok in ["192.168.1.20", "10.0.0.5", "172.16.3.4", "172.31.255.255", "127.0.0.1", "169.254.7.7", "::1", "fd12:3456::1", "fe80::1", "::ffff:192.168.0.9"] {
+        for ok in ["192.168.1.20", "10.0.0.5", "172.16.3.4", "172.31.255.255", "127.0.0.1", "169.254.7.7", "::1", "fd12:3456::1", "fe80::1", "::ffff:192.168.0.9", "100.64.0.1", "100.101.102.103", "100.127.255.254", "fd7a:115c:a1e0::1"] {
             assert!(is_local(ok.parse().unwrap()), "{ok}");
         }
-        for no in ["8.8.8.8", "172.32.0.1", "100.64.0.1", "2001:db8::1", "::ffff:8.8.8.8", "0.0.0.0"] {
+        for no in ["8.8.8.8", "172.32.0.1", "100.63.255.255", "100.128.0.1", "2001:db8::1", "::ffff:8.8.8.8", "0.0.0.0"] {
             assert!(!is_local(no.parse().unwrap()), "{no}");
         }
     }

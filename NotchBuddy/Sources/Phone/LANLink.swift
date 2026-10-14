@@ -24,6 +24,8 @@ struct LANPairing: Codable, Equatable, Sendable {
     var fingerprint: String
     var token: String
     var name: String
+    /// Where the computer is away from home (its Tailscale address, say); tried when the home address fails.
+    var awayHost: String? = nil
 
     /// `coucou://pair?v=1&host=…&port=…&fp=…&token=…&name=…` (extra relay fields are ignored).
     static func parse(_ text: String) -> LANPairing? {
@@ -266,6 +268,8 @@ final class LANLink {
     @ObservationIgnored private var pingTask: Task<Void, Never>?
     @ObservationIgnored private var lastHeard = Date()
     @ObservationIgnored private var failures = 0
+    /// The away address answered last time: try it first next time.
+    @ObservationIgnored private var preferAway = UserDefaults.standard.bool(forKey: "lanPreferAway")
     @ObservationIgnored private var browser: NWBrowser?
     @ObservationIgnored private var searchedSinceWelcome = false
     @ObservationIgnored private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
@@ -286,6 +290,17 @@ final class LANLink {
         proposedPairing = nil
         failures = 0
         resetContent()
+        connect()
+    }
+
+    /// The address to try away from home (empty: none).
+    func setAwayHost(_ text: String) {
+        guard var updated = pairing else { return }
+        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.awayHost = cleaned.isEmpty ? nil : String(cleaned.prefix(255))
+        LANPairingStore.save(updated)
+        pairing = updated
+        failures = 0
         connect()
     }
 
@@ -366,7 +381,11 @@ final class LANLink {
         let current = generation
         state = .connecting
         publish()
-        let target = endpoint ?? .hostPort(host: NWEndpoint.Host(pairing.host),
+        // Every other try goes to the away address, when there is one.
+        let away = pairing.awayHost.flatMap { $0.isEmpty ? nil : $0 }
+        let useAway = away != nil && ((failures % 2 == 1) != preferAway)
+        let host = useAway ? away! : pairing.host
+        let target = endpoint ?? .hostPort(host: NWEndpoint.Host(host),
                                            port: NWEndpoint.Port(rawValue: pairing.port) ?? 47821)
         let socket = LANSocket(endpoint: target, fingerprint: pairing.fingerprint) { event in
             DispatchQueue.main.async {
@@ -460,6 +479,10 @@ final class LANLink {
         default: return
         }
         let cleaned = text.split(separator: "%").first.map(String.init) ?? text
+        // Reached through the away address: the home one stays as it was.
+        preferAway = cleaned == updated.awayHost
+        UserDefaults.standard.set(preferAway, forKey: "lanPreferAway")
+        guard cleaned != updated.awayHost else { return }
         guard cleaned != updated.host || port.rawValue != updated.port else { return }
         updated.host = cleaned
         updated.port = port.rawValue
