@@ -308,6 +308,7 @@ final class LANLink {
         if let socket { send(["type": "bye"], on: socket) }
         disconnect()
         LANPairingStore.delete()
+        LANLiveActivity.shared.end()
         pairing = nil
         state = .unpaired
         resetContent()
@@ -727,7 +728,9 @@ final class LANLink {
             let question = questions.values.filter { $0.pillId == session.pillId }.max { $0.createdAt < $1.createdAt }
             return SessionItem(lan: session, approval: approval, question: question, computer: name)
         }
-        PhoneLink.shared.applyLAN(items.filter { PillCatalog.isSession($0.id) })
+        let sessions = items.filter { PillCatalog.isSession($0.id) }
+        PhoneLink.shared.applyLAN(sessions)
+        LANLiveActivity.shared.update(sessions)
     }
 
     private func publish() {

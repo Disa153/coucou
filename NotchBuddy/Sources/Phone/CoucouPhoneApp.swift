@@ -20,6 +20,7 @@ struct CoucouPhoneApp: App {
             if phase == .active { Task { await PhoneLink.shared.refresh() } }
             #if LAN_LINK
             if phase == .background { LANLink.shared.enterBackground() }
+            if phase == .active { LANLiveActivity.shared.foreground() }
             #endif
         }
     }

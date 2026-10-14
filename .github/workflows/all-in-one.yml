@@ -39,7 +39,8 @@ jobs:
 
           - **Coucou-Windows-setup.exe** — install on Windows (SmartScreen: More info → Run anyway).
           - **Coucou-Windows-portable.zip** — the same without installing: unzip and run coucou.exe.
-          - **Coucou-iPhone-Windows.ipa** — install with Sideloadly and your Apple ID."
+          - **Coucou-iPhone-Windows.ipa** — install with Sideloadly and your Apple ID (Lock Screen / Dynamic Island with Allow and Deny).
+          - **Coucou-iPhone-Windows-lite.ipa** — the same without widgets and Live Activity, if the full one will not install."
 
   windows-tests:
     runs-on: windows-latest
@@ -160,16 +161,19 @@ jobs:
           APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
           rm -rf Payload && mkdir Payload
           cp -R "$APP" Payload/
-          # Extensions need their own App IDs, which a free Apple ID handles badly.
-          rm -rf Payload/*.app/PlugIns
+          # Full: with the widgets extension, which draws the Live Activity (Lock Screen,
+          # Dynamic Island, Allow / Deny), and the expanded approval notification.
           zip -qry Coucou-iPhone-Windows.ipa Payload
-          ls -lh Coucou-iPhone-Windows.ipa
+          # Lite: no extensions, for a signing tool or Apple ID that refuses them.
+          rm -rf Payload/*.app/PlugIns
+          zip -qry Coucou-iPhone-Windows-lite.ipa Payload
+          ls -lh Coucou-iPhone-Windows*.ipa
       - uses: actions/upload-artifact@v4
         with:
           name: Coucou-iPhone-Windows
-          path: Coucou-iPhone-Windows.ipa
+          path: Coucou-iPhone-Windows*.ipa
           retention-days: 7
       - name: Add to the pre-release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" Coucou-iPhone-Windows.ipa --clobber
+        run: gh release upload "$TAG" Coucou-iPhone-Windows.ipa Coucou-iPhone-Windows-lite.ipa --clobber
