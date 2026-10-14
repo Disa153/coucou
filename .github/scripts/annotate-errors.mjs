@@ -7,7 +7,7 @@ const lines = text.split(/\r?\n/);
 const blocks = [];
 for (let i = 0; i < lines.length && blocks.length < 10; i++) {
   const l = lines[i];
-  const start = /^error(\[E\d+\])?:/.test(l) || /error TS\d+/.test(l) || /^---- .* stdout ----$/.test(l) || /panicked at/.test(l);
+  const start = /^error(\[E\d+\])?:/.test(l) || /\.swift:\d+:\d+: error:/.test(l) || /error TS\d+/.test(l) || /^---- .* stdout ----$/.test(l) || /panicked at/.test(l);
   if (!start || /^error: (could not compile|aborting|test failed)/.test(l)) continue;
   const block = [l];
   for (let j = i + 1; j < lines.length && block.length < 25; j++) {

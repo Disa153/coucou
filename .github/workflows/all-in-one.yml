@@ -155,7 +155,7 @@ jobs:
           grep -q "BUILD SUCCEEDED" build.log
       - name: Show errors
         if: failure()
-        run: grep -E "error:" -A3 build.log | head -150 || true
+        run: node .github/scripts/annotate-errors.mjs build.log
       - name: Package .ipa
         run: |
           APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
