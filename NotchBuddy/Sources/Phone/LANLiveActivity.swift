@@ -61,7 +61,7 @@ final class LANLiveActivity {
             return
         }
         activity = nil
-        guard mayStart || UIApplicationState.isForeground else { return }
+        guard mayStart || UIApplication.shared.applicationState == .active else { return }
         since = Int(Date().timeIntervalSince1970)
         let fresh = Self.lead(latest, since: since) ?? state
         do {
@@ -98,7 +98,4 @@ final class LANLiveActivity {
     }
 }
 
-private extension UIApplicationState {
-    @MainActor static var isForeground: Bool { UIApplication.shared.applicationState == .active }
-}
 #endif
