@@ -10,7 +10,7 @@ import {
   wardrobeHeader, type Outfit, type OutfitSelection,
 } from "../mochi/wardrobe";
 import type { ViewActions, ViewHost } from "./views";
-import { language, tl } from "../i18n/i18n";
+import { language, t, tl } from "../i18n/i18n";
 import { BREEDS, BREED_KEYS, drawBreedIcon, isRealistic, parseBreed, type Breed } from "../mochi/breeds";
 
 const ICON = 28;
@@ -71,7 +71,7 @@ export function buildWardrobe(actions: ViewActions): ViewHost {
   const breedItems = new Map<Breed, HTMLButtonElement>();
   let hoveredBreed: Breed | null = null;
   const breedNote = (b: Breed) =>
-    isRealistic(b) ? `${tl(BREED_KEYS[b])} · ${tl("no outfits")}` : tl(BREED_KEYS[b]);
+    isRealistic(b) ? `${t(BREED_KEYS[b])} · ${t("no outfits")}` : t(BREED_KEYS[b]);
   for (const b of BREEDS) {
     const canvas = h("canvas") as HTMLCanvasElement;
     const button = h(
