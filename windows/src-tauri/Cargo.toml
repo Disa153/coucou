@@ -49,6 +49,9 @@ keyring = { version = "3", features = ["windows-native"] }
 # Same versions as wry, so nothing new is compiled.
 webview2-com = "0.39"
 wv2_core = { package = "windows-core", version = "0.62" }
+# The music pill waits on the system media session's async calls; the windows
+# crate keeps those types here (already in the tree through it).
+windows-future = "0.2"
 windows = { version = "0.61", features = [
   "Win32_Foundation",
   "Win32_Security",

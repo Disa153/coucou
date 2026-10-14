@@ -1414,7 +1414,8 @@ mod win {
 
     use tauri::Emitter;
     use windows::core::{Interface, RuntimeType};
-    use windows::Foundation::{AsyncStatus, IAsyncInfo, IAsyncOperation, TypedEventHandler};
+    use windows::Foundation::TypedEventHandler;
+    use windows_future::{AsyncStatus, IAsyncInfo, IAsyncOperation};
     use windows::Media::Control::{
         CurrentSessionChangedEventArgs, GlobalSystemMediaTransportControlsSession as Session,
         GlobalSystemMediaTransportControlsSessionManager as Manager,
