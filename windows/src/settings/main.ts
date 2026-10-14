@@ -888,7 +888,13 @@ function integrationsSection(present: Record<string, boolean>): HTMLElement {
       if (on) {
         settings.activeIntegrations = settings.activeIntegrations.filter((x) => x !== def.id);
       } else {
-        if (settings.activeIntegrations.length >= MAX_ACTIVE) return;
+        if (settings.activeIntegrations.length >= MAX_ACTIVE) {
+          // Full: say so where the count is, instead of a switch that does nothing.
+          note.style.color = "#F4505E";
+          note.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          window.setTimeout(() => (note.style.color = ""), 2500);
+          return;
+        }
         settings.activeIntegrations = [...settings.activeIntegrations, def.id];
       }
       sw.classList.toggle("on", !on);
