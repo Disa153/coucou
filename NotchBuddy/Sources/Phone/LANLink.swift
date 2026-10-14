@@ -313,6 +313,7 @@ final class LANLink {
     /// The app came to the front (or was pulled to refresh): connect if needed.
     func wake() {
         endBackgroundTask()
+        LANKeepAlive.shared.stop()
         guard pairing != nil else { return }
         switch state {
         case .connected:
@@ -330,6 +331,11 @@ final class LANLink {
     /// The app went to the background: iOS gives it a little time, then
     /// suspends it, and the connection goes with it.
     func enterBackground() {
+        // Kept alive (LANKeepAlive): the link stays open and approvals keep arriving.
+        if pairing != nil, state != .rejected, LANKeepAlive.shared.enabled {
+            LANKeepAlive.shared.start()
+            if LANKeepAlive.shared.running { return }
+        }
         guard backgroundTask == .invalid, state == .connected else { return }
         // iOS calls this on the main thread, and the task must end before it returns.
         backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Coucou link") {
@@ -405,7 +411,7 @@ final class LANLink {
             rebuild()
             LANChat.shared.linkClosed()
             guard state != .rejected, pairing != nil else { return }
-            if UIApplication.shared.applicationState == .background {
+            if UIApplication.shared.applicationState == .background, !LANKeepAlive.shared.running {
                 state = .offline("Paused while Coucou is in the background")
                 publish()
                 return

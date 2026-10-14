@@ -292,6 +292,8 @@ targets:
         UIApplicationSupportsIndirectInputEvents: YES
         UIBackgroundModes:
           - remote-notification
+          # The LAN_LINK build keeps its link open in the background (LANKeepAlive).
+          - audio
         # Portrait, except a diff opened full screen (PhoneAppDelegate decides).
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

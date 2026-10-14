@@ -47,6 +47,13 @@ struct LANPairingView: View {
                         }
                         Button("Unpair", role: .destructive) { lan.unpair() }
                     }
+                    Section {
+                        Toggle("Stay connected in the background",
+                               isOn: Binding(get: { LANKeepAlive.shared.enabled },
+                                             set: { LANKeepAlive.shared.enabled = $0 }))
+                    } footer: {
+                        Text("Approvals then arrive as notifications with Allow and Deny, without opening Coucou (press and hold the notification). Uses some battery.")
+                    }
                 }
 
                 Section {
