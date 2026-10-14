@@ -74,7 +74,10 @@ jobs:
       - name: Build the relay
         run: cargo build --release -p coucou-hook
       - name: Rust tests
-        run: cargo test --workspace
+        shell: pwsh
+        run: |
+          cargo test --workspace 2>&1 | Tee-Object -FilePath test.log
+          if ($LASTEXITCODE -ne 0) { node ../.github/scripts/annotate-errors.mjs test.log; exit 1 }
 
   windows:
     needs: release
@@ -103,7 +106,8 @@ jobs:
       - name: Build and pack the installer
         shell: pwsh
         run: |
-          npm run pack
+          npm run pack 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) { node ../.github/scripts/annotate-errors.mjs build.log; exit 1 }
           Get-ChildItem release | Format-Table Name, Length
       - name: Portable zip
         shell: pwsh
