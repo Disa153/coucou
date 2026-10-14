@@ -4,6 +4,7 @@ mod agent_hooks;
 mod agents;
 mod chat;
 mod claude_code;
+mod transcripts;
 mod claude;
 mod codex_plan;
 mod config_file;
@@ -125,6 +126,7 @@ fn save_settings(app: AppHandle, shared: State<Shared>, settings: Settings) {
     }
     integrations::settings_saved(&app, &settings.active_integrations);
     spotify::sync(&app, &settings.active_integrations);
+    transcripts::configure(&settings);
     if shortcuts_changed {
         shortcuts::apply(&app, &settings.shortcuts);
     }
@@ -778,6 +780,8 @@ pub fn run() {
             spotify::spotify_control,
             spotify::spotify_open,
             spotify::spotify_installed,
+            transcripts::chats_reveal,
+            transcripts::chats_default_dir,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -817,6 +821,7 @@ pub fn run() {
             phone_link::start_if_enabled(&handle);
             integrations::start(handle.clone());
             spotify::sync(&handle, &loaded.active_integrations);
+            transcripts::configure(&loaded);
             shortcuts::apply(&handle, &loaded.shortcuts);
             Ok(())
         })

@@ -276,7 +276,7 @@ final class LANLink {
     @ObservationIgnored private var notified: Set<String> = []
 
     static let protocolVersion = 1
-    private static let askedCaps = ["details", "answers"]
+    private static let askedCaps = ["details", "answers", "chat"]
 
     // MARK: Pairing
 
@@ -403,6 +403,7 @@ final class LANLink {
             approvals = [:]
             questions = [:]
             rebuild()
+            LANChat.shared.linkClosed()
             guard state != .rejected, pairing != nil else { return }
             if UIApplication.shared.applicationState == .background {
                 state = .offline("Paused while Coucou is in the background")
@@ -527,6 +528,7 @@ final class LANLink {
             searchedSinceWelcome = false
             startPinging()
             publish()
+            if offeredCaps.contains("chat") { send(["type": "chatModels"]) }
         case "error":
             if message["code"] as? String == "auth" {
                 state = .rejected
@@ -554,6 +556,17 @@ final class LANLink {
             UNUserNotificationCenter.current().removeDeliveredNotifications(
                 withIdentifiers: [PhoneLink.approvalNotificationID(fingerprint)])
             rebuild()
+        case "chatModels":
+            LANChat.shared.received(models: message["models"] as? [[String: Any]] ?? [])
+        case "chatDelta":
+            guard let id = message["id"] as? String, let text = message["text"] as? String else { return }
+            LANChat.shared.delta(id: id, text: text)
+        case "chatDone":
+            guard let id = message["id"] as? String else { return }
+            LANChat.shared.done(id: id, text: message["text"] as? String)
+        case "chatError":
+            guard let id = message["id"] as? String else { return }
+            LANChat.shared.failed(id: id, message: message["message"] as? String ?? "The computer could not answer.")
         default:
             break   // pong, prefs and anything newer
         }
@@ -626,6 +639,12 @@ final class LANLink {
         }
         guard state == .connected else { return false }
         return send(message)
+    }
+
+    /// A chat message, only to a computer that offered chat on this connection.
+    func sendChat(_ message: [String: Any]) {
+        guard state == .connected, offeredCaps.contains("chat") else { return }
+        send(message)
     }
 
     func decide(_ decision: Decision, fingerprint: String) async -> Bool {

@@ -11,7 +11,7 @@ import { ICONS } from "./icons";
 import { Bridge } from "../core/bridge";
 import { State, type AgentTask } from "../core/state";
 import {
-  SPOTIFY_GREEN, SPOTIFY_ID, Spotify, currentArtwork, formatTime, isAd, spotifyPosition, volumeLevel, withPlaying,
+  SPOTIFY_GREEN, SPOTIFY_ID, Spotify, currentArtwork, formatTime, isAd, playerName, spotifyPosition, volumeLevel, withPlaying,
   type SpotifyTrack,
 } from "../core/spotify";
 import { createMiniBot } from "../mochi/minibots";
@@ -312,8 +312,9 @@ export function buildSpotifyCard(): SpotifyCardHost {
   const idleAction = h("button", { class: "link-btn", style: `color:${green}d9` });
   idleAction.addEventListener("click", () => void Bridge.spotifyOpen());
   const idleSub = h("span");
+  const idleName = h("b", { text: pillDefinition(SPOTIFY_ID)?.name ?? "Spotify" });
   const idleEl = h("div", { class: "int-card" },
-    h("div", { class: "int-head" }, dot(green, 7), h("b", { text: "Spotify" }), idleSub),
+    h("div", { class: "int-head" }, dot(green, 7), idleName, idleSub),
     h("div", { class: "int-status" }, idleDot, idleText),
     h("div", { class: "int-actions" }, idleAction),
   );
@@ -365,7 +366,11 @@ export function buildSpotifyCard(): SpotifyCardHost {
     } else if (isAd(track)) {
       title.textContent = t("Advertisement");
     }
-    art.title = track.album ? t("{0} — open Spotify", { 0: track.album }) : t("Open Spotify");
+    if (s.source && s.source !== "Spotify") {
+      art.title = t("Open {0}", { 0: s.source });
+    } else {
+      art.title = track.album ? t("{0} — open Spotify", { 0: track.album }) : t("Open Spotify");
+    }
     const cover = currentArtwork(s);
     if (cover) {
       if (artImg.getAttribute("src") !== cover) artImg.setAttribute("src", cover);
@@ -401,12 +406,19 @@ export function buildSpotifyCard(): SpotifyCardHost {
     }
     volume.set(s.volume / 100);
     volumeBox.title = t("Volume {0}%", { 0: s.volume });
+    volumeBox.style.display = s.volumeSupported === false ? "none" : "";
+    title.title = s.source ? playerName(s) : "";
   }
 
   function syncIdle() {
     const installed = Spotify.state.installed || Spotify.state.running;
     idleDot.style.background = installed ? "#22C55E" : "#F4505E";
     idleText.textContent = installed ? t("Not playing") : t("Spotify not installed");
+    // Windows: any player will do, there is nothing to open or get.
+    const anyPlayer = Spotify.state.volumeSupported === false;
+    idleName.textContent = pillDefinition(SPOTIFY_ID)?.name ?? "Spotify";
+    idleAction.style.display = anyPlayer ? "none" : "";
+    if (anyPlayer) idleText.textContent = t("Not playing — start music in any player");
     idleAction.textContent = installed ? t("Open Spotify") : t("Get Spotify");
     idleSub.textContent = t(pillDefinition(SPOTIFY_ID)?.subtitle ?? N_("Integration"));
   }

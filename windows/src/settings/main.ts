@@ -13,7 +13,7 @@ import { DEFAULT_SETTINGS, type Settings } from "../core/state";
 import { SOUND_NAMES } from "../core/sound";
 import {
   MAX_DECLARED, PILL_CATEGORIES, availablePills, chooseMainPill, isComingSoon, mainPillChoices,
-  sanitizeDeclared, toggleDeclared, type PillDefinition,
+  pillDefinition, sanitizeDeclared, toggleDeclared, type PillDefinition,
 } from "../core/pills";
 import { h, clear } from "../views/dom";
 import { agentsSection } from "./agents";
@@ -634,6 +634,41 @@ function claudeCodeSection(): HTMLElement {
   );
 }
 
+// ── Saved chats section ──────────────────────────────────────────────────────
+
+/** Every conversation as a Markdown file, one per chat (transcripts.rs). */
+function savedChatsSection(): HTMLElement {
+  const input = h("input", {
+    type: "text",
+    style: "flex:1 1 auto;min-width:0",
+    spellcheck: "false",
+    autocomplete: "off",
+  }) as HTMLInputElement;
+  input.value = settings.chatsDir;
+  void Bridge.chatsDefaultDir().then((dir) => {
+    if (dir) input.placeholder = dir;
+  });
+  const saveBtn = h("button", { text: CHAT_STRINGS.save });
+  saveBtn.addEventListener("click", () => {
+    settings.chatsDir = input.value.trim();
+    void save();
+  });
+  const open = h("button", { text: t("Open folder") });
+  open.addEventListener("click", () => void Bridge.revealChats(input.value.trim()));
+  const sw = toggle(settings.saveChats, (on) => {
+    settings.saveChats = on;
+    void save();
+  });
+  return h(
+    "section",
+    {},
+    h("h2", {}, h("span", { text: t("Saved chats") })),
+    h("div", { class: "hint", text: t("Every chat, from the island or the phone, is saved as a Markdown file in this folder (empty: Documents › Coucou › sessions), one file per conversation. Share the folder with Claude to let it read past chats. Answers from Claude Code name their session, which claude --resume opens again.") }),
+    h("div", { class: "row" }, h("label", { text: t("Save chats") }), sw),
+    h("div", { class: "row" }, input, saveBtn, open),
+  );
+}
+
 // ── Local models section ──────────────────────────────────────────────────────
 
 type LocalId = "ollama" | "lmstudio" | "custom";
@@ -819,8 +854,9 @@ const INTEGRATIONS: IntegrationDef[] = [
     fields: [{ key: "notion-api-key", label: N_("Integration token"), placeholder: "ntn_…", secret: true }] },
   { id: "integration_calcom", name: "Cal.com", color: "#C9956A",
     fields: [{ key: "calcom-api-key", label: N_("API key"), placeholder: "cal_…", secret: true }] },
-  // Nothing to enter: Spotify is read over D-Bus (Linux only, see core/pills.ts).
-  { id: "integration_spotify", name: "Spotify", color: "#1DB954", fields: [] },
+  // Nothing to enter: Spotify over D-Bus on Linux, any player through the
+  // system media session on Windows (see core/pills.ts).
+  { id: "integration_spotify", name: pillDefinition("integration_spotify")?.name ?? "Spotify", color: "#1DB954", fields: [] },
 ];
 
 const MAX_ACTIVE = MAX_DECLARED;
@@ -1411,6 +1447,7 @@ async function render() {
     apiSection(hasKey),
     chatProvidersSection(chatKeys, keyChanged),
     claudeCodeSection(),
+    savedChatsSection(),
     localSection(customKey),
     activePillsSection(connected),
     integrationsSection(present),

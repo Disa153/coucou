@@ -3,8 +3,9 @@
 // SpotifyController.swift, NowPlayingViews.swift and the Mac's dance rules
 // (BotCanvasView, DesktopMochi.swift).
 //
-// Windows has no music source yet: nothing ever reports a track there, so
-// nothing plays and Mochi never dances, through the same code.
+// On Windows the same state comes from the system media session, whatever
+// player it is (Spotify, a browser tab, Яндекс Музыка…): `source` names it and
+// there is no volume to show.
 
 import type { BotStateName, IslandMode, IslandViewName } from "./layout";
 
@@ -37,12 +38,21 @@ export interface SpotifyState {
   repeat: boolean;
   /** 0…100. */
   volume: number;
+  /** The player's name when it is not necessarily Spotify (Windows). */
+  source?: string | null;
+  /** False where the player's volume cannot be read or set (Windows). */
+  volumeSupported?: boolean;
 }
 
 export const IDLE_SPOTIFY: SpotifyState = {
   running: false, installed: false, track: null, playing: false,
   position: 0, positionAt: 0, shuffle: false, repeat: false, volume: 50,
 };
+
+/** The name the card wears: the player's own, else Spotify. */
+export function playerName(s: SpotifyState): string {
+  return s.source || "Spotify";
+}
 
 /** The page's copy of the player, and the cover of the track that has one. */
 export const Spotify = {

@@ -362,6 +362,18 @@ pub async fn send(
     .await
 }
 
+/// One turn of the phone's conversation (phone_link/chat_backend.rs): the same
+/// CLI on the same subscription, the streamed text going to the phone.
+pub async fn send_for_phone(
+    chat: &Chat,
+    settings: &Settings,
+    model: &str,
+    query: String,
+    on_delta: impl FnMut(String) + Send + 'static,
+) -> Result<ChatReply, String> {
+    turn(chat, settings, model, query, None, on_delta).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -3921,6 +3921,72 @@
    "pt-BR": "Converse pelo Claude Code instalado neste computador, com a assinatura Claude Pro ou Max dele: sem chave de API. Ele trabalha na pasta abaixo (vazia: sua pasta pessoal) e pode ler os arquivos dela. Rode claude uma vez num terminal para entrar.",
    "ru": "Чат через Claude Code, установленный на этом компьютере, по его подписке Claude Pro или Max: API-ключ не нужен. Он работает в папке ниже (пусто — домашняя папка) и может читать файлы в ней. Сначала один раз запустите claude в терминале, чтобы войти.",
    "id": "Mengobrol lewat Claude Code yang terpasang di komputer ini, dengan langganan Claude Pro atau Max-nya: tanpa kunci API. Ia bekerja di folder di bawah (kosong: folder rumah Anda) dan bisa membaca file di sana. Jalankan claude sekali di terminal untuk masuk terlebih dahulu."
+  },
+  "Open folder": {
+   "zh-Hans": "打开文件夹",
+   "hi": "फ़ोल्डर खोलें",
+   "es": "Abrir carpeta",
+   "ar": "فتح المجلد",
+   "fr": "Ouvrir le dossier",
+   "bn": "ফোল্ডার খুলুন",
+   "pt-BR": "Abrir pasta",
+   "ru": "Открыть папку",
+   "id": "Buka folder"
+  },
+  "Saved chats": {
+   "zh-Hans": "已保存的聊天",
+   "hi": "सहेजी गई चैट",
+   "es": "Chats guardados",
+   "ar": "المحادثات المحفوظة",
+   "fr": "Conversations enregistrées",
+   "bn": "সংরক্ষিত চ্যাট",
+   "pt-BR": "Conversas salvas",
+   "ru": "Сохранённые чаты",
+   "id": "Obrolan tersimpan"
+  },
+  "Save chats": {
+   "zh-Hans": "保存聊天",
+   "hi": "चैट सहेजें",
+   "es": "Guardar los chats",
+   "ar": "حفظ المحادثات",
+   "fr": "Enregistrer les conversations",
+   "bn": "চ্যাট সংরক্ষণ করুন",
+   "pt-BR": "Salvar conversas",
+   "ru": "Сохранять чаты",
+   "id": "Simpan obrolan"
+  },
+  "Every chat, from the island or the phone, is saved as a Markdown file in this folder (empty: Documents › Coucou › sessions), one file per conversation. Share the folder with Claude to let it read past chats. Answers from Claude Code name their session, which claude --resume opens again.": {
+   "zh-Hans": "每次聊天（来自岛或手机）都会以 Markdown 文件保存在此文件夹中（留空：文档 › Coucou › sessions），每个对话一个文件。与 Claude 共享该文件夹即可让它阅读过去的聊天。来自 Claude Code 的回答会注明其会话，可用 claude --resume 再次打开。",
+   "hi": "हर चैट, आइलैंड से हो या फ़ोन से, इस फ़ोल्डर में Markdown फ़ाइल के रूप में सहेजी जाती है (खाली: Documents › Coucou › sessions), हर बातचीत की एक फ़ाइल। Claude को पुरानी चैट पढ़ने देने के लिए यह फ़ोल्डर उसके साथ साझा करें। Claude Code के जवाबों में उनका सत्र लिखा होता है, जिसे claude --resume फिर से खोलता है।",
+   "es": "Cada chat, desde la isla o el teléfono, se guarda como archivo Markdown en esta carpeta (vacía: Documentos › Coucou › sessions), un archivo por conversación. Comparte la carpeta con Claude para que lea los chats anteriores. Las respuestas de Claude Code indican su sesión, que claude --resume vuelve a abrir.",
+   "ar": "تُحفظ كل محادثة، من الشريط أو من الهاتف، كملف Markdown في هذا المجلد (فارغ: المستندات › Coucou › sessions)، ملف لكل محادثة. شارك المجلد مع Claude ليقرأ المحادثات السابقة. تذكر إجابات Claude Code جلستها، والتي يعيد claude --resume فتحها.",
+   "fr": "Chaque conversation, depuis l'île ou le téléphone, est enregistrée en fichier Markdown dans ce dossier (vide : Documents › Coucou › sessions), un fichier par conversation. Partage le dossier avec Claude pour qu'il lise les conversations passées. Les réponses de Claude Code indiquent leur session, que claude --resume rouvre.",
+   "bn": "আইল্যান্ড বা ফোন থেকে প্রতিটি চ্যাট এই ফোল্ডারে Markdown ফাইল হিসেবে সংরক্ষিত হয় (খালি: Documents › Coucou › sessions), প্রতিটি কথোপকথনের জন্য একটি ফাইল। আগের চ্যাট পড়তে দিতে ফোল্ডারটি Claude-এর সঙ্গে শেয়ার করুন। Claude Code-এর উত্তরে তার সেশন লেখা থাকে, যা claude --resume আবার খোলে।",
+   "pt-BR": "Cada conversa, da ilha ou do celular, é salva como arquivo Markdown nesta pasta (vazia: Documentos › Coucou › sessions), um arquivo por conversa. Compartilhe a pasta com o Claude para ele ler conversas anteriores. As respostas do Claude Code indicam a sessão, que claude --resume abre de novo.",
+   "ru": "Каждый чат — с острова или с телефона — сохраняется в эту папку файлом Markdown (пусто: Документы › Coucou › sessions), по файлу на разговор. Подключите папку к Claude, чтобы он мог читать прошлые чаты. В ответах Claude Code указана его сессия, её снова открывает claude --resume.",
+   "id": "Setiap obrolan, dari pulau atau ponsel, disimpan sebagai file Markdown di folder ini (kosong: Documents › Coucou › sessions), satu file per percakapan. Bagikan folder ini ke Claude agar ia bisa membaca obrolan lama. Jawaban dari Claude Code menyebut sesinya, yang bisa dibuka lagi dengan claude --resume."
+  },
+  "Open {0}": {
+   "zh-Hans": "打开 {0}",
+   "hi": "{0} खोलें",
+   "es": "Abrir {0}",
+   "ar": "فتح {0}",
+   "fr": "Ouvrir {0}",
+   "bn": "{0} খুলুন",
+   "pt-BR": "Abrir {0}",
+   "ru": "Открыть {0}",
+   "id": "Buka {0}"
+  },
+  "Not playing — start music in any player": {
+   "zh-Hans": "未在播放 — 在任意播放器中开始播放音乐",
+   "hi": "कुछ नहीं चल रहा — किसी भी प्लेयर में संगीत शुरू करें",
+   "es": "No se reproduce nada: pon música en cualquier reproductor",
+   "ar": "لا شيء قيد التشغيل — شغّل الموسيقى في أي مشغّل",
+   "fr": "Rien en lecture — lance de la musique dans n'importe quel lecteur",
+   "bn": "কিছু চলছে না — যেকোনো প্লেয়ারে গান চালু করুন",
+   "pt-BR": "Nada tocando — toque música em qualquer player",
+   "ru": "Ничего не играет — включите музыку в любом плеере",
+   "id": "Tidak ada yang diputar — putar musik di pemutar mana pun"
   }
  }
 }

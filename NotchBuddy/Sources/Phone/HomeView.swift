@@ -3,7 +3,7 @@ import UIKit
 
 /// The tabs, in glass on iOS 26: the agents, the services, the decisions you
 /// took, and a search through every turn.
-enum CoucouTab: Hashable { case agents, services, history, search }
+enum CoucouTab: Hashable { case agents, services, history, chat, search }
 
 struct HomeView: View {
     let link: PhoneLink
@@ -24,6 +24,12 @@ struct HomeView: View {
             Tab("History", systemImage: "clock.arrow.circlepath", value: CoucouTab.history) {
                 NavigationStack { HistoryView(link: link) }
             }
+            #if LAN_LINK
+            // Chat through Coucou on the computer (Claude Code: no API key).
+            Tab("Chat", systemImage: "bubble.left.and.text.bubble.right", value: CoucouTab.chat) {
+                NavigationStack { LANChatView() }
+            }
+            #endif
             Tab(value: CoucouTab.search, role: .search) {
                 SearchTab(link: link)
             }

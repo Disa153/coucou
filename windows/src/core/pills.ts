@@ -70,6 +70,9 @@ const ACCENT = {
   lmstudio: "#A3E635",
 };
 
+/** Only the Windows webview says "Windows" (HOST_OS below, needed before the catalog). */
+const IS_WINDOWS_PAGE = typeof navigator !== "undefined" && /Windows/.test(navigator.userAgent ?? "");
+
 export const PILL_CATALOG: readonly PillDefinition[] = [
   // ── Where you code ─────────────────────────────────────────────────────────
   { id: "integration_claude", name: "VS Code", color: "#F5F6F8", category: "workspace",
@@ -130,10 +133,10 @@ export const PILL_CATALOG: readonly PillDefinition[] = [
     subtitle: N_("Integration"), source: "n8n", support: "yes", connect: key("stripe-api-key") },
   { id: "integration_music", name: "Apple Music", color: "#FA2D48", category: "service",
     subtitle: N_("Integration"), source: "n8n", support: "no", connect: none },
-  // Spotify's MPRIS interface on the session bus (src-tauri/src/spotify.rs).
-  // Windows has nothing to read it from yet.
-  { id: "integration_spotify", name: "Spotify", color: "#1DB954", category: "service",
-    subtitle: N_("Integration"), source: "n8n", support: "linux", connect: none },
+  // Linux: Spotify's MPRIS interface on the session bus. Windows: whatever
+  // plays through the system media session, any player (src-tauri/src/spotify.rs).
+  { id: "integration_spotify", name: IS_WINDOWS_PAGE ? "Music" : "Spotify", color: "#1DB954", category: "service",
+    subtitle: N_("Integration"), source: "n8n", support: "yes", connect: none },
 ];
 
 /** The always-on pill unless the user picks another workspace tool. */

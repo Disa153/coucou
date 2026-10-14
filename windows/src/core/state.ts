@@ -130,6 +130,10 @@ export interface Settings {
   customUrl: string;
   /** Folder the Claude Code chat works in; empty means the home folder. */
   claudeCodeDir: string;
+  /** Each chat conversation is saved as a Markdown file (src-tauri/src/transcripts.rs). */
+  saveChats: boolean;
+  /** Where; empty means Documents\Coucou\sessions. */
+  chatsDir: string;
   /** Global shortcuts the user changed, by action id (see core/shortcuts.ts). */
   shortcuts: Bindings;
   /**
@@ -189,6 +193,8 @@ export const DEFAULT_SETTINGS: Settings = {
   lmstudioUrl: "",
   customUrl: "",
   claudeCodeDir: "",
+  saveChats: true,
+  chatsDir: "",
   shortcuts: {},
   mochiOutfit: DEFAULT_OUTFIT,
   pillColors: {},

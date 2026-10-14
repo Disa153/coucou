@@ -48,6 +48,8 @@ pub struct ModelInfo {
 #[derive(Default)]
 pub struct Chat {
     inner: Mutex<Conversation>,
+    /// "phone" for the phone's conversation; the island's is the default.
+    origin: &'static str,
 }
 
 #[derive(Default)]
@@ -59,6 +61,8 @@ struct Conversation {
     native: Vec<Value>,
     /// `{"role", "content": text}` turns, the same whoever answered.
     plain: Vec<Value>,
+    /// Where this conversation is saved (transcripts.rs), once its first turn is.
+    file: Option<std::path::PathBuf>,
 }
 
 /// What a provider needs to build one turn.
@@ -72,6 +76,11 @@ pub struct Turn {
 }
 
 impl Chat {
+    /// The phone's conversation: saved to files of its own.
+    pub fn for_phone() -> Self {
+        Chat { inner: Mutex::default(), origin: "phone" }
+    }
+
     pub fn reset(&self) {
         let mut c = self.inner.lock().unwrap();
         let epoch = c.epoch + 1;
@@ -102,10 +111,12 @@ impl Chat {
         if c.epoch != turn.epoch || c.owner.as_deref() != Some(turn.provider.as_str()) {
             return;
         }
+        let session = assistant.get("session_id").and_then(Value::as_str).map(str::to_string);
         c.native.push(user);
         c.native.push(assistant);
         c.plain.push(json!({ "role": "user", "content": user_text }));
         c.plain.push(json!({ "role": "assistant", "content": answer }));
+        crate::transcripts::record(&mut c.file, self.origin, &turn.provider, session.as_deref(), user_text, answer);
     }
 }
 
@@ -235,10 +246,13 @@ pub async fn send_for_phone(
     provider: &str,
     model: &str,
     query: String,
-    on_delta: impl FnMut(String),
+    on_delta: impl FnMut(String) + Send + 'static,
 ) -> Result<ChatReply, String> {
     if provider == ANTHROPIC {
         return claude::send(chat, model, query, None).await;
+    }
+    if provider == claude_code::PROVIDER {
+        return claude_code::send_for_phone(chat, settings, model, query, on_delta).await;
     }
     if let Some(p) = openai_compat::provider(provider) {
         return openai_compat::send(chat, p, model, query, None).await;

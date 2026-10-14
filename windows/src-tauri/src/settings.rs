@@ -52,6 +52,10 @@ pub struct Settings {
     pub custom_url: String,
     /// The folder the "Claude Code (subscription)" chat works in (claude_code.rs); empty means home.
     pub claude_code_dir: String,
+    /// Each chat conversation is saved as a Markdown file (transcripts.rs). On by default.
+    pub save_chats: bool,
+    /// Where they go; empty means Documents\Coucou\sessions.
+    pub chats_dir: String,
     /// Global shortcuts the user changed, by action id; the others keep their
     /// default (see shortcuts.rs).
     pub shortcuts: crate::shortcuts::Bindings,
@@ -150,6 +154,8 @@ impl Default for Settings {
             lmstudio_url: String::new(),
             custom_url: String::new(),
             claude_code_dir: String::new(),
+            save_chats: true,
+            chats_dir: String::new(),
             shortcuts: Default::default(),
             mochi_outfit: "auto".into(),
             pill_colors: BTreeMap::new(),
@@ -945,6 +951,8 @@ mod tests {
                 "lmstudioUrl",
                 "customUrl",
                 "claudeCodeDir",
+                "saveChats",
+                "chatsDir",
                 "shortcuts",
                 "mochiOutfit",
                 "pillColors",

@@ -19,7 +19,7 @@ use crate::{chat, claude, log, openai_compat, secrets, Shared};
 pub const MAX_ALLOWED: usize = 50;
 const MAX_MODEL_CHARS: usize = 200;
 
-const PROVIDERS: [&str; 7] = ["anthropic", "google", "openai", "openrouter", "ollama", "lmstudio", "custom"];
+const PROVIDERS: [&str; 8] = ["anthropic", "claude-code", "google", "openai", "openrouter", "ollama", "lmstudio", "custom"];
 
 pub struct AppChat {
     app: AppHandle,
@@ -28,7 +28,7 @@ pub struct AppChat {
 
 impl AppChat {
     pub fn new(app: AppHandle) -> Self {
-        Self { app, chat: Arc::new(Chat::default()) }
+        Self { app, chat: Arc::new(Chat::for_phone()) }
     }
 
     fn settings(&self) -> Settings {
@@ -53,7 +53,7 @@ impl ChatBackend for AppChat {
                     return Err(ChatFail::NoKey);
                 }
             }
-            let result = chat::send_for_phone(&settings, &chat, provider, model, text, |so_far| {
+            let result = chat::send_for_phone(&settings, &chat, provider, model, text, move |so_far| {
                 let _ = deltas.send(so_far);
             })
             .await;
@@ -91,6 +91,7 @@ fn key_name(provider: &str) -> Option<&'static str> {
 pub fn provider_name(provider: &str) -> String {
     match provider {
         "anthropic" => "Anthropic".into(),
+        "claude-code" => "Claude Code".into(),
         "google" => "Google".into(),
         "openai" => "OpenAI".into(),
         "openrouter" => "OpenRouter".into(),

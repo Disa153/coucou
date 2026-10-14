@@ -210,6 +210,10 @@ export const Bridge = {
   /** The user's file for one sound, as raw bytes. */
   customSound: (name: string) => call<ArrayBuffer>("custom_sound", { name }),
   revealSoundsFolder: () => call<void>("reveal_sounds_folder"),
+  /** Settings → Saved chats: opens the folder (empty: the default one). */
+  revealChats: (dir: string) => call<void>("chats_reveal", { dir }),
+  /** Where chats go when no folder is set. */
+  chatsDefaultDir: () => call<string>("chats_default_dir"),
   /** Tells the island to read the sounds folder again ("sounds-changed"). */
   reloadSounds: () => call<void>("reload_sounds"),
 
