@@ -278,9 +278,17 @@ targets:
         buildPhase: resources
       - path: Resources/sounds/error.wav
         buildPhase: resources
+      # Siri's phrases for the App Shortcuts (CoucouIntents.swift) in other languages.
+      - path: Resources/AppShortcuts.xcstrings
+        buildPhase: resources
     info:
       path: Resources/InfoPhone.plist
       properties:
+        # Other names Siri accepts for the app in its phrases ("Allow in Mochi").
+        INAlternativeAppNames:
+          - INAlternativeAppName: Mochi
+          - INAlternativeAppName: Мочи
+          - INAlternativeAppName: Куку
         CFBundleName: Coucou
         CFBundleDisplayName: Coucou
         CFBundleIdentifier: fr.louisraille.Coucou

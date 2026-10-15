@@ -35,6 +35,21 @@
 	<string>3</string>
 	<key>CoucouAPNsEnvironment</key>
 	<string>$(COUCOU_APNS_ENV)</string>
+	<key>INAlternativeAppNames</key>
+	<array>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>Mochi</string>
+		</dict>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>Мочи</string>
+		</dict>
+		<dict>
+			<key>INAlternativeAppName</key>
+			<string>Куку</string>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>

@@ -28696,6 +28696,96 @@
     },
     "简体中文" : {
 
+    },
+    "Allow the waiting command" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить ожидающую команду"
+          }
+        }
+      }
+    },
+    "Deny the waiting command" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запретить ожидающую команду"
+          }
+        }
+      }
+    },
+    "Allows the command an agent is waiting for your OK on, after you confirm it." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешает команду, которая ждёт вашего OK, после подтверждения."
+          }
+        }
+      }
+    },
+    "Denies the command an agent is waiting for your OK on." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрещает команду, которая ждёт вашего OK."
+          }
+        }
+      }
+    },
+    "Nothing is waiting for your OK." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ничего не ждёт вашего подтверждения."
+          }
+        }
+      }
+    },
+    "%@ wants to run %@. Allow it?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ хочет выполнить %2$@. Разрешить?"
+          }
+        }
+      }
+    },
+    "Not sent: the computer isn't connected." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не отправлено: компьютер не подключён."
+          }
+        }
+      }
+    },
+    "Allowed." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешено."
+          }
+        }
+      }
+    },
+    "Denied." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрещено."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

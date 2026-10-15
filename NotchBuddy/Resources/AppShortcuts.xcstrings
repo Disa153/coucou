@@ -1,0 +1,129 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Allow in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Разреши в ${applicationName}",
+              "Одобри в ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Approve in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтверди в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Allow the command in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разреши команду в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Deny in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрети в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Refuse in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отклони в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Deny the command in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запрети команду в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Ask Claude in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спроси Claude в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Tell Claude with ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скажи Claude через ${applicationName}"
+          }
+        }
+      }
+    },
+    "Send an instruction with ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправь задание через ${applicationName}"
+          }
+        }
+      }
+    },
+    "What are my agents doing in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что делают мои агенты в ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} status" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статус ${applicationName}"
+          }
+        }
+      }
+    },
+    "Agent status in ${applicationName}" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статус агентов в ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
