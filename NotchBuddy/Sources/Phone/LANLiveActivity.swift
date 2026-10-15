@@ -11,6 +11,11 @@ import UIKit
 // foreground), then updated from the background, where LANKeepAlive keeps the link
 // open. The Allow / Deny buttons (AllowApprovalIntent, DenyApprovalIntent) answer
 // through PhoneLink.decide, which goes over the link: no need to open Coucou.
+//
+// Because iOS never lets it start one from the background, Mochi stays on the Lock
+// Screen and in the Dynamic Island the whole time the computer is linked, resting
+// when nothing happens. Otherwise an approval that arrives while Coucou is closed
+// would find no activity to put its Allow / Deny buttons on.
 
 @MainActor
 final class LANLiveActivity {
@@ -20,6 +25,8 @@ final class LANLiveActivity {
     private var shown: MochiActivityState?
     private var since = Int(Date().timeIntervalSince1970)
     private var latest: [SessionItem] = []
+    /// The computer reported its sessions since the last unpairing.
+    private var linked = false
 
     private init() {
         activity = Activity<MochiActivityAttributes>.activities.first
@@ -30,6 +37,7 @@ final class LANLiveActivity {
     /// The sessions changed (LANLink.rebuild).
     func update(_ items: [SessionItem]) {
         latest = items
+        linked = true
         apply()
     }
 
@@ -41,12 +49,13 @@ final class LANLiveActivity {
     /// Unpaired or no computer: nothing to show.
     func end() {
         latest = []
+        linked = false
         apply()
     }
 
     private func apply(mayStart: Bool = false) {
         guard enabled else { return }
-        guard let state = Self.lead(latest, since: since) else {
+        guard let state = Self.lead(latest, since: since) ?? (linked ? Self.resting : nil) else {
             if let current = activity {
                 activity = nil
                 shown = nil
@@ -73,7 +82,7 @@ final class LANLiveActivity {
         activity = nil
         guard mayStart || UIApplication.shared.applicationState == .active else { return }
         since = Int(Date().timeIntervalSince1970)
-        let fresh = Self.lead(latest, since: since) ?? state
+        let fresh = Self.lead(latest, since: since) ?? Self.resting
         do {
             activity = try Activity.request(attributes: MochiActivityAttributes(),
                                             content: ActivityContent(state: fresh, staleDate: nil),
@@ -83,6 +92,12 @@ final class LANLiveActivity {
             activity = nil
         }
     }
+
+    /// Mochi with nothing to do: keeps the activity alive for the next approval.
+    static let resting = MochiActivityState(
+        pillId: "", agent: "Coucou", color: "#C0C4CC", state: BotState.idle.rawValue,
+        statusText: "All quiet", tone: "idle", stepIndex: 0, stepCount: 0, others: 0,
+        since: nil, approval: nil)
 
     /// The most urgent session, as the Mac's LiveActivityRelay.leadState picks it.
     static func lead(_ items: [SessionItem], since: Int) -> MochiActivityState? {
