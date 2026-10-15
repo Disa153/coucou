@@ -701,6 +701,15 @@ body {
   pointer-events: none;
 }
 
+/* While the agent works the label is its current step: longer than a name, so
+   it starts after the mini Mochi instead of being centred over it. */
+.pill.live .lbl {
+  left: 34px;
+  text-align: left;
+  padding: 0 8px 0 0;
+  font-weight: 500;
+}
+
 .pill:hover {
   transform: scale(1.04);
   filter: brightness(1.06);

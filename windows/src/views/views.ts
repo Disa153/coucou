@@ -19,6 +19,7 @@ import {
 } from "./usage";
 import { buildDiffCard } from "./diff";
 import { lastTextStep } from "../core/diff";
+import { pillStatus } from "../core/pill-status";
 import { Bridge } from "../core/bridge";
 import { buildRecap } from "./recap";
 import { buildWardrobe } from "./wardrobe";
@@ -408,6 +409,11 @@ function buildOverview(actions: ViewActions): ViewHost {
         }
         pruneMiniBots();
       }
+      // The labels follow each agent's latest step without rebuilding the pills.
+      for (const t of others) {
+        const pill = pills.querySelector<HTMLElement>(`.pill[data-task="${CSS.escape(t.id)}"]`);
+        if (pill) syncPillLabel(pill, t);
+      }
       spotifyPill?.sync();
     },
   };
@@ -427,15 +433,32 @@ export function hasSessionTicker(task: AgentTask): boolean {
   return isSession && (task.state !== "idle" || task.steps.length > 0);
 }
 
+function pillName(task: AgentTask): string {
+  return task.id === "integration_claude" ? "VS Code" : task.name;
+}
+
+/** The name, or what the agent is doing right now while it works (core/pill-status.ts). */
+function syncPillLabel(pill: HTMLElement, task: AgentTask) {
+  const lbl = pill.querySelector<HTMLElement>(".lbl");
+  if (!lbl) return;
+  const name = pillName(task);
+  const status = pillStatus(task);
+  const text = status ?? name;
+  if (lbl.textContent !== text) lbl.textContent = text;
+  pill.classList.toggle("live", status != null);
+  pill.title = status ? `${name} · ${status}` : "";
+}
+
 function buildPill(task: AgentTask, actions: ViewActions): HTMLElement {
-  const label = task.id === "integration_claude" ? "VS Code" : task.name;
   const canvas = createMiniBot(task, 24);
   const pill = h(
     "div",
     { class: "pill", onclick: () => actions.setFocus(task.id) },
     canvas,
-    h("span", { class: "lbl", text: label }),
+    h("span", { class: "lbl", text: pillName(task) }),
   );
+  pill.dataset.task = task.id;
+  syncPillLabel(pill, task);
   pill.style.borderColor = `${task.color}24`;
   pill.addEventListener("mouseenter", () => {
     pill.style.background = `${task.color}2e`;
