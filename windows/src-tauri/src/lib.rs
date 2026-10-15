@@ -4,6 +4,7 @@ mod agent_hooks;
 mod agents;
 mod chat;
 mod claude_code;
+mod gemini_cli;
 mod transcripts;
 mod claude;
 mod codex_plan;

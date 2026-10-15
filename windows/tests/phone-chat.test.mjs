@@ -32,9 +32,9 @@ test("the list stops at the cap", () => {
 test("only providers with a key, or a connected server, are offered", () => {
   // Claude Code needs no key: it answers on the CLI's own subscription.
   const none = usableProviders(DEFAULT_SETTINGS, {});
-  assert.deepEqual(none.map((p) => p.id), ["claude-code"]);
+  assert.deepEqual(none.map((p) => p.id), ["claude-code", "gemini-cli"]);
   const some = usableProviders({ ...DEFAULT_SETTINGS, ollamaUrl: "http://127.0.0.1:11434" }, { anthropic: true, openai: false });
-  assert.deepEqual(some.map((p) => p.id), ["anthropic", "claude-code", "ollama"]);
+  assert.deepEqual(some.map((p) => p.id), ["anthropic", "claude-code", "gemini-cli", "ollama"]);
 });
 
 test("the models of one provider are told apart from the others'", () => {

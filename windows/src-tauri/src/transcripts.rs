@@ -76,6 +76,7 @@ pub fn provider_label(provider: &str) -> &str {
     match provider {
         "" | "anthropic" => "Anthropic",
         "claude-code" => "Claude Code",
+        "gemini-cli" => "Gemini CLI",
         "openai" => "OpenAI",
         "google" => "Google",
         "openrouter" => "OpenRouter",

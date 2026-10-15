@@ -28,12 +28,12 @@ export function toggleModel(allowed: readonly string[], id: string, on: boolean)
 
 /**
  * The providers worth offering: a cloud provider that has a key, a model server whose address is
- * set, and Claude Code, which answers on the subscription its CLI is signed in with (no key).
+ * set, Claude Code and Gemini CLI, which answer on the account their CLI is signed in with (no key).
  * `hasKey` maps a provider id to "its key is saved".
  */
 export function usableProviders(settings: Settings, hasKey: Readonly<Record<string, boolean>>): ProviderDef[] {
   return PROVIDERS.filter((p) =>
-    p.id === "claude-code" || (p.key ? hasKey[p.id] === true : p.urlField !== null && settings[p.urlField] !== ""),
+    p.id === "claude-code" || p.id === "gemini-cli" || (p.key ? hasKey[p.id] === true : p.urlField !== null && settings[p.urlField] !== ""),
   );
 }
 

@@ -634,6 +634,35 @@ function claudeCodeSection(): HTMLElement {
   );
 }
 
+// ── Gemini CLI (Google account) section ──────────────────────────────────────
+
+/** The chat through the user's own Gemini CLI, on its Google sign-in (gemini_cli.rs). */
+function geminiCliSection(): HTMLElement {
+  const p = providerDef("gemini-cli");
+  const use = h("button", {});
+  const refresh = () => {
+    const inUse = settings.chatProvider === "gemini-cli";
+    use.textContent = inUse ? CHAT_STRINGS.inUse : CHAT_STRINGS.useInChat;
+    use.className = inUse ? "" : "primary";
+    (use as HTMLButtonElement).disabled = inUse;
+  };
+  use.addEventListener("click", () => {
+    settings.chatProvider = "gemini-cli";
+    void save().then(refresh);
+  });
+  refresh();
+  return h(
+    "section",
+    {},
+    h("h2", {}, h("span", { text: t("Gemini CLI (Google account)") })),
+    h("div", { class: "hint", text: t("Chat through the Gemini CLI installed on this computer, on the Google account it is signed in with: no API key needed. It works in the same folder as Claude Code above and can read the files there. Install it with npm install -g @google/gemini-cli, then run gemini once in a terminal and choose Login with Google.") }),
+    h("div", { class: "row" },
+      h("label", { style: "flex:1 1 auto" }, h("i", { class: "dot", style: `background:${p.accent};margin-right:8px` }), h("span", { text: p.name })),
+      use,
+    ),
+  );
+}
+
 // ── Saved chats section ──────────────────────────────────────────────────────
 
 /** Every conversation as a Markdown file, one per chat (transcripts.rs). */
@@ -1453,6 +1482,7 @@ async function render() {
     apiSection(hasKey),
     chatProvidersSection(chatKeys, keyChanged),
     claudeCodeSection(),
+    geminiCliSection(),
     savedChatsSection(),
     localSection(customKey),
     activePillsSection(connected),

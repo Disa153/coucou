@@ -13,7 +13,7 @@ use serde_json::{json, Value};
 use tauri::AppHandle;
 
 use crate::settings::Settings;
-use crate::{claude, claude_code, local_chat, openai_compat, secrets};
+use crate::{claude, claude_code, gemini_cli, local_chat, openai_compat, secrets};
 
 pub const ANTHROPIC: &str = "anthropic";
 
@@ -178,6 +178,10 @@ pub fn model_for(settings: &Settings, provider: &str) -> String {
         let m = settings.chat_models.get(provider).map(|m| m.trim()).unwrap_or_default();
         return if m.is_empty() { claude_code::DEFAULT_MODEL.to_string() } else { m.to_string() };
     }
+    if provider == gemini_cli::PROVIDER {
+        let m = settings.chat_models.get(provider).map(|m| m.trim()).unwrap_or_default();
+        return if m.is_empty() { gemini_cli::DEFAULT_MODEL.to_string() } else { m.to_string() };
+    }
     settings
         .chat_models
         .get(provider)
@@ -228,6 +232,9 @@ pub async fn send(
     if provider == claude_code::PROVIDER {
         return claude_code::send(app, chat, settings, &model, query, context).await;
     }
+    if provider == gemini_cli::PROVIDER {
+        return gemini_cli::send(app, chat, settings, &model, query, context).await;
+    }
     if let Some(p) = openai_compat::provider(provider) {
         return openai_compat::send(chat, p, &model, query, context).await;
     }
@@ -254,6 +261,9 @@ pub async fn send_for_phone(
     if provider == claude_code::PROVIDER {
         return claude_code::send_for_phone(chat, settings, model, query, on_delta).await;
     }
+    if provider == gemini_cli::PROVIDER {
+        return gemini_cli::send_for_phone(chat, settings, model, query, on_delta).await;
+    }
     if let Some(p) = openai_compat::provider(provider) {
         return openai_compat::send(chat, p, model, query, None).await;
     }
@@ -274,6 +284,9 @@ pub async fn models(settings: &Settings, provider: &str) -> Result<Vec<ModelInfo
     }
     if provider == claude_code::PROVIDER {
         return Ok(claude_code::models());
+    }
+    if provider == gemini_cli::PROVIDER {
+        return Ok(gemini_cli::models());
     }
     if let Some(p) = openai_compat::provider(provider) {
         let key = secrets::get(p.key).ok_or_else(no_key)?;

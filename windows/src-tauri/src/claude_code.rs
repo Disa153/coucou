@@ -48,11 +48,11 @@ fn checked_model(model: &str) -> &'static str {
 }
 
 /// A Claude Code session id is a UUID; anything else is never passed on.
-fn valid_session(id: &str) -> bool {
+pub(crate) fn valid_session(id: &str) -> bool {
     id.len() == 36 && id.chars().all(|c| c.is_ascii_hexdigit() || c == '-')
 }
 
-/// The folder Claude Code works in: the one set in Settings → Chat, or home.
+/// The folder Claude Code (and Gemini CLI, gemini_cli.rs) works in: the one set in Settings → Chat, or home.
 pub fn work_dir(settings: &Settings) -> PathBuf {
     let set = settings.claude_code_dir.trim();
     if !set.is_empty() {
@@ -65,7 +65,7 @@ pub fn work_dir(settings: &Settings) -> PathBuf {
 }
 
 /// The session to resume: the one the last answer came from, if this provider gave it.
-fn last_session(history: &[Value]) -> Option<String> {
+pub(crate) fn last_session(history: &[Value]) -> Option<String> {
     history
         .iter()
         .rev()
@@ -78,7 +78,7 @@ fn last_session(history: &[Value]) -> Option<String> {
 
 /// What goes on stdin. A fresh session after another provider answered carries
 /// the earlier turns as a transcript, so the conversation still holds together.
-fn prompt_text(
+pub(crate) fn prompt_text(
     first: bool,
     resuming: bool,
     history: &[Value],
