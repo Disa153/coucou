@@ -110,6 +110,9 @@ final class LANLiveActivity {
                 await MainActor.run {
                     let time = Date.now.formatted(date: .omitted, time: .standard)
                     LANLiveActivity.shared.diagnosis = "Shown · updated \(time): \(state.agent), \(state.statusText)"
+                    if UIApplication.shared.applicationState != .active {
+                        BackgroundLog.add("Mochi: \(state.agent), \(state.statusText)")
+                    }
                     if hold != .invalid { UIApplication.shared.endBackgroundTask(hold) }
                 }
             }

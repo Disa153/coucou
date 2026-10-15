@@ -69,6 +69,15 @@ struct LANPairingView: View {
                     } footer: {
                         Text("Approvals then arrive as notifications with Allow and Deny, without opening Coucou (press and hold the notification). Uses some battery.")
                     }
+                    Section("While in the background") {
+                        let log = BackgroundLog.entries
+                        if log.isEmpty {
+                            Text("Nothing yet.").foregroundStyle(.secondary)
+                        }
+                        ForEach(Array(log.enumerated()), id: \.offset) { _, line in
+                            Text(line).font(.caption.monospaced()).foregroundStyle(.secondary)
+                        }
+                    }
                 }
 
                 Section {

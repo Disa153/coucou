@@ -423,6 +423,7 @@ final class LANLink {
                   let type = object["type"] as? String else { return }
             receive(type, object)
         case .closed(let reason):
+            if UIApplication.shared.applicationState != .active { BackgroundLog.add("Link closed: \(reason)") }
             socket = nil
             pingTask?.cancel()
             pingTask = nil
@@ -553,6 +554,7 @@ final class LANLink {
             }
             desktopName = message["desktop"] as? String ?? pairing?.name ?? ""
             offeredCaps = Set(message["caps"] as? [String] ?? [])
+            if UIApplication.shared.applicationState != .active, state != .connected { BackgroundLog.add("Link back") }
             state = .connected
             failures = 0
             searchedSinceWelcome = false

@@ -63,6 +63,7 @@ final class LANKeepAlive {
         self.engine = engine
         self.player = player
         running = true
+        BackgroundLog.add("Keep-alive on")
         watchInterruptions()
     }
 
@@ -75,6 +76,7 @@ final class LANKeepAlive {
         player = nil
         engine = nil
         if running {
+            BackgroundLog.add("Keep-alive off")
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         }
         running = false
@@ -88,8 +90,30 @@ final class LANKeepAlive {
             let ended = (note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt)
                 .flatMap(AVAudioSession.InterruptionType.init(rawValue:)) == .ended
             MainActor.assumeIsolated {
+                BackgroundLog.add(ended ? "Audio given back: keep-alive restarts" : "Audio taken (call, Siri, another app)")
                 guard ended else { return }
                 let keeper = LANKeepAlive.shared
+                keeper.stop()
+                keeper.start()
+            }
+        })
+        // AirPods, a car, headphones: the engine stops when the audio route changes, and
+        // without a restart iOS suspends Coucou a few seconds later.
+        observers.append(center.addObserver(forName: .AVAudioEngineConfigurationChange,
+                                            object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated {
+                BackgroundLog.add("Audio route changed: keep-alive restarts")
+                let keeper = LANKeepAlive.shared
+                keeper.stop()
+                keeper.start()
+            }
+        })
+        observers.append(center.addObserver(forName: AVAudioSession.routeChangeNotification,
+                                            object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated {
+                let keeper = LANKeepAlive.shared
+                guard keeper.running, keeper.engine?.isRunning == false else { return }
+                BackgroundLog.add("Audio stopped after a route change: keep-alive restarts")
                 keeper.stop()
                 keeper.start()
             }
