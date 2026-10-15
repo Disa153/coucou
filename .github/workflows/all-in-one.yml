@@ -39,7 +39,7 @@ jobs:
 
           - **Coucou-Windows-setup.exe** — install on Windows (SmartScreen: More info → Run anyway).
           - **Coucou-Windows-portable.zip** — the same without installing: unzip and run coucou.exe.
-          - **Coucou-iPhone-Windows.ipa** — install with Sideloadly and your Apple ID (Lock Screen / Dynamic Island with Allow and Deny).
+          - **Coucou-iPhone-Windows.ipa** — install with AltStore or SideStore and your Apple ID (Lock Screen / Dynamic Island with Allow and Deny). Not Sideloadly: since iOS 26 the widgets extension only launches when the installer signs it as AltStore does, and Sideloadly does not, so Mochi and the buttons never show.
           - **Coucou-iPhone-Windows-lite.ipa** — the same without widgets and Live Activity, if the full one will not install."
 
   windows-tests:
