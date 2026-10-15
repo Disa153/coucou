@@ -66,6 +66,11 @@ struct AboutView: View {
                     Text(LiveActivityLink.shared.activitiesEnabled ? "On" : "Off")
                         .foregroundStyle(LiveActivityLink.shared.activitiesEnabled ? Color.secondary : Color.orange)
                 }
+                #if LAN_LINK
+                Text(LANLiveActivity.shared.diagnosis)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                #endif
                 if link.notificationsAllowed == false || !LiveActivityLink.shared.activitiesEnabled {
                     Button("Open iPhone Settings") {
                         if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }

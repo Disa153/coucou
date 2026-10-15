@@ -1,6 +1,7 @@
 #if LAN_LINK
 import ActivityKit
 import Foundation
+import Observation
 import UIKit
 
 // Mochi on the Lock Screen and in the Dynamic Island, linked to Coucou for Windows.
@@ -18,10 +19,13 @@ import UIKit
 // would find no activity to put its Allow / Deny buttons on.
 
 @MainActor
+@Observable
 final class LANLiveActivity {
     static let shared = LANLiveActivity()
 
-    private var activity: Activity<MochiActivityAttributes>?
+    @ObservationIgnored private var activity: Activity<MochiActivityAttributes>?
+    /// What happened to Mochi's activity last, shown under Live Activities in Settings.
+    private(set) var diagnosis = "Not started yet: open Coucou with the computer linked"
     private var shown: MochiActivityState?
     private var since = Int(Date().timeIntervalSince1970)
     private var latest: [SessionItem] = []
@@ -33,6 +37,13 @@ final class LANLiveActivity {
     }
 
     var enabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
+
+    /// The widgets extension draws the Live Activity; a signing tool may have left it out.
+    static var hasWidgets: Bool {
+        guard let dir = Bundle.main.builtInPlugInsURL,
+              let names = try? FileManager.default.contentsOfDirectory(atPath: dir.path) else { return false }
+        return names.contains { $0.hasSuffix(".appex") && $0.localizedCaseInsensitiveContains("widget") }
+    }
 
     /// The sessions changed (LANLink.rebuild).
     func update(_ items: [SessionItem]) {
@@ -54,7 +65,14 @@ final class LANLiveActivity {
     }
 
     private func apply(mayStart: Bool = false) {
-        guard enabled else { return }
+        guard enabled else {
+            diagnosis = "Off: turn Live Activities on for Coucou in iPhone Settings"
+            return
+        }
+        guard Self.hasWidgets else {
+            diagnosis = "Not shown: this install has no widgets extension (lite .ipa, or the signing tool removed it)"
+            return
+        }
         guard let state = Self.lead(latest, since: since) ?? (linked ? Self.resting : nil) else {
             if let current = activity {
                 activity = nil
@@ -69,6 +87,7 @@ final class LANLiveActivity {
             return
         }
         if let current = activity, current.activityState == .active || current.activityState == .stale {
+            diagnosis = "Shown"
             guard state != shown else { return }
             shown = state
             let id = current.id
@@ -80,7 +99,10 @@ final class LANLiveActivity {
             return
         }
         activity = nil
-        guard mayStart || UIApplication.shared.applicationState == .active else { return }
+        guard mayStart || UIApplication.shared.applicationState == .active else {
+            diagnosis = "Waiting: open Coucou once to show Mochi again"
+            return
+        }
         since = Int(Date().timeIntervalSince1970)
         let fresh = Self.lead(latest, since: since) ?? Self.resting
         do {
@@ -88,8 +110,10 @@ final class LANLiveActivity {
                                             content: ActivityContent(state: fresh, staleDate: nil),
                                             pushType: nil)
             shown = fresh
+            diagnosis = "Shown (\(Activity<MochiActivityAttributes>.activities.count) on screen)"
         } catch {
             activity = nil
+            diagnosis = "iOS refused to show it: \(error.localizedDescription)"
         }
     }
 
