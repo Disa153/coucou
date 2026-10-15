@@ -190,8 +190,11 @@ final class LANLiveActivity {
             agent: PillCatalog.definition(for: task.id)?.name ?? (task.name.isEmpty ? "Agent" : task.name),
             color: task.color,
             state: (urgency == 0 ? BotState.approval : task.state).rawValue,
-            statusText: MochiActivityState.statusText(state: task.state, urgency: urgency,
-                                                      stepIndex: task.stepIndex, stepCount: task.steps.count),
+            // Built on the iPhone from the computer on the same Wi-Fi, never pushed through
+            // the relay: the step may be shown here, unlike in the Mac's pushes.
+            statusText: (urgency == 3 ? task.liveStep : nil)
+                ?? MochiActivityState.statusText(state: task.state, urgency: urgency,
+                                                 stepIndex: task.stepIndex, stepCount: task.steps.count),
             tone: MochiActivityState.tone(urgency: urgency),
             stepIndex: max(0, task.stepIndex),
             stepCount: task.steps.count,

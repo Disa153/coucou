@@ -306,7 +306,8 @@ struct ListView: View {
                     Text(session.title)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
-                    Text(session.agent)
+                    // While it works: what it is doing right now, else the agent.
+                    Text(session.isWorking && !session.currentStep.isEmpty ? session.currentStep : session.agent)
                         .font(.caption)
                         .opacity(0.6)
                         .lineLimit(1)

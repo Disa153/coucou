@@ -19,6 +19,20 @@ extension SessionItem {
     var isWaitingForYou: Bool { urgency <= 1 }
     var isWorking: Bool { urgency == 3 }
 
+    /// What the agent is doing right now ("Bash · npm test", "main.ts"), one short
+    /// line, while it works; nil otherwise, so the usual text shows. Same rule as
+    /// the overview pills on Windows (windows/src/core/pill-status.ts).
+    var liveStep: String? {
+        guard isWorking, let step = currentStep else { return nil }
+        return SessionItem.oneLine(step)
+    }
+
+    static func oneLine(_ text: String, limit: Int = 80) -> String? {
+        let line = text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).joined(separator: " ")
+        guard !line.isEmpty else { return nil }
+        return line.count > limit ? String(line.prefix(limit - 1)) + "…" : line
+    }
+
     var statusText: String {
         if needsApproval || state == .approval { return "waiting for your OK" }
         if !question.isEmpty || state == .question { return "has a question" }

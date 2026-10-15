@@ -468,9 +468,10 @@ struct SessionRow: View {
                     .lineLimit(1)
                 // The agent under the project name; for a session without a project
                 // name (title is the agent already), what runs in it.
-                Text(session.title == session.pillName
+                // While it works: what it is doing right now.
+                Text(session.liveStep ?? (session.title == session.pillName
                      ? (PillCatalog.definition(for: session.id)?.sessionSubtitle ?? session.pillName)
-                     : session.pillName)
+                     : session.pillName))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
