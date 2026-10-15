@@ -55,6 +55,7 @@ final class LANLiveActivity {
     /// Coucou is on screen: the only moment iOS lets it start an activity.
     func foreground() {
         apply(mayStart: true)
+        confirm()
     }
 
     /// Unpaired or no computer: nothing to show.
@@ -91,6 +92,7 @@ final class LANLiveActivity {
             ?? Activity<MochiActivityAttributes>.activities.first { Self.isLive($0) }
         if let current = live {
             activity = current
+            heartbeat()
             guard state != shown else { return }
             // A new command waiting for your OK lights the screen and opens the Dynamic Island.
             let alert = state.tone == "waiting" && state.approval != nil && state.approval != shown?.approval
@@ -103,7 +105,7 @@ final class LANLiveActivity {
                     ? AlertConfiguration(title: "\(state.agent)", body: "waiting for your OK", sound: .default)
                     : nil
                 for a in Activity<MochiActivityAttributes>.activities where a.id == id {
-                    await a.update(ActivityContent(state: state, staleDate: nil), alertConfiguration: config)
+                    await a.update(ActivityContent(state: state, staleDate: Self.staleDate()), alertConfiguration: config)
                 }
                 await MainActor.run {
                     let time = Date.now.formatted(date: .omitted, time: .standard)
@@ -122,13 +124,43 @@ final class LANLiveActivity {
         let fresh = Self.lead(latest, since: since) ?? Self.resting
         do {
             activity = try Activity.request(attributes: MochiActivityAttributes(),
-                                            content: ActivityContent(state: fresh, staleDate: nil),
+                                            content: ActivityContent(state: fresh, staleDate: Self.staleDate()),
                                             pushType: nil)
             shown = fresh
+            heartbeat()
             diagnosis = "Shown (\(Activity<MochiActivityAttributes>.activities.count) on screen)"
         } catch {
             activity = nil
             diagnosis = "iOS refused to show it: \(error.localizedDescription)"
+        }
+    }
+
+    /// How long Mochi's state holds without news from the computer. Past it, iOS
+    /// marks the activity stale: the timer stops and it says the computer went quiet,
+    /// instead of "working" forever after iOS suspended Coucou.
+    nonisolated static func staleDate() -> Date { Date.now.addingTimeInterval(120) }
+
+    @ObservationIgnored private var beat: Timer?
+
+    /// While Coucou runs (and the link is open), re-confirms what Mochi shows.
+    private func heartbeat() {
+        guard beat == nil else { return }
+        beat = Timer.scheduledTimer(withTimeInterval: 45, repeats: true) { _ in
+            MainActor.assumeIsolated { LANLiveActivity.shared.confirm() }
+        }
+    }
+
+    private func confirm() {
+        guard let state = shown, let current = activity, Self.isLive(current), linked else {
+            beat?.invalidate()
+            beat = nil
+            return
+        }
+        let id = current.id
+        Task.detached {
+            for a in Activity<MochiActivityAttributes>.activities where a.id == id {
+                await a.update(ActivityContent(state: state, staleDate: Self.staleDate()))
+            }
         }
     }
 

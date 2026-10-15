@@ -24,9 +24,9 @@ struct MochiLiveActivity: Widget {
                         Text(state.agent)
                             .font(.headline)
                             .lineLimit(1)
-                        Text(state.statusText)
+                        Text(context.isStale ? "Your Mac went quiet" : state.statusText)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(state.toneColor)
+                            .foregroundStyle(context.isStale ? Color.secondary : state.toneColor)
                             .lineLimit(1)
                             .contentTransition(.interpolate)
                     }
@@ -51,7 +51,7 @@ struct MochiLiveActivity: Widget {
                             if state.stepCount > 0 {
                                 StepsBar(index: state.stepIndex, count: state.stepCount, color: state.toneColor)
                             }
-                            if let since = state.sinceDate, state.isActive {
+                            if let since = state.sinceDate, state.isActive, !context.isStale {
                                 Text(since, style: .timer)
                                     .font(.caption.monospacedDigit())
                                     .foregroundStyle(.secondary)
