@@ -177,3 +177,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" Coucou-iPhone-Windows.ipa Coucou-iPhone-Windows-lite.ipa --clobber
+      # A release of its own per iPhone build number, kept when all-in-one-latest moves on.
+      - name: Keep this build as its own release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" NotchBuddy/Resources/InfoPhone.plist)
+          KEEP="iphone-build-$BUILD"
+          if gh release view "$KEEP" >/dev/null 2>&1; then
+            gh release upload "$KEEP" Coucou-iPhone-Windows.ipa Coucou-iPhone-Windows-lite.ipa --clobber
+          else
+            gh release create "$KEEP" Coucou-iPhone-Windows.ipa Coucou-iPhone-Windows-lite.ipa \
+              --target "${{ github.sha }}" \
+              --title "Coucou iPhone build $BUILD (Windows link)" \
+              --notes "Coucou for iPhone, build $BUILD, paired with Coucou for Windows over Wi-Fi: Mochi on the Lock Screen and in the Dynamic Island with Allow / Deny, and Siri (\"Allow in Coucou\" / «Разреши в Coucou»).
+
+          Install with **AltStore or SideStore**, not Sideloadly: since iOS 26 the widgets extension only launches when the installer signs it as AltStore does, otherwise Mochi and the buttons never show.
+
+          Built from ${{ github.sha }} on the all-in-one branch."
+          fi
