@@ -25,7 +25,7 @@ final class LANLiveActivity {
 
     @ObservationIgnored private var activity: Activity<MochiActivityAttributes>?
     /// What happened to Mochi's activity last, shown under Live Activities in Settings.
-    private(set) var diagnosis = "Not started yet: open Coucou with the computer linked"
+    var diagnosis = "Not started yet: open Coucou with the computer linked"
     private var shown: MochiActivityState?
     private var since = Int(Date().timeIntervalSince1970)
     private var latest: [SessionItem] = []
@@ -86,14 +86,29 @@ final class LANLiveActivity {
             }
             return
         }
-        if let current = activity, current.activityState == .active || current.activityState == .stale {
-            diagnosis = "Shown"
+        // The activity on screen, even if this object lost track of it (the app was relaunched).
+        let live = [activity].compactMap { $0 }.first { Self.isLive($0) }
+            ?? Activity<MochiActivityAttributes>.activities.first { Self.isLive($0) }
+        if let current = live {
+            activity = current
             guard state != shown else { return }
+            // A new command waiting for your OK lights the screen and opens the Dynamic Island.
+            let alert = state.tone == "waiting" && state.approval != nil && state.approval != shown?.approval
             shown = state
             let id = current.id
+            // In the background iOS may suspend the app before an update lands: hold it until done.
+            let hold = UIApplication.shared.beginBackgroundTask(withName: "Mochi update")
             Task.detached {
+                let config = alert
+                    ? AlertConfiguration(title: "\(state.agent)", body: "waiting for your OK", sound: .default)
+                    : nil
                 for a in Activity<MochiActivityAttributes>.activities where a.id == id {
-                    await a.update(ActivityContent(state: state, staleDate: nil))
+                    await a.update(ActivityContent(state: state, staleDate: nil), alertConfiguration: config)
+                }
+                await MainActor.run {
+                    let time = Date.now.formatted(date: .omitted, time: .standard)
+                    LANLiveActivity.shared.diagnosis = "Shown · updated \(time): \(state.agent), \(state.statusText)"
+                    if hold != .invalid { UIApplication.shared.endBackgroundTask(hold) }
                 }
             }
             return
@@ -115,6 +130,10 @@ final class LANLiveActivity {
             activity = nil
             diagnosis = "iOS refused to show it: \(error.localizedDescription)"
         }
+    }
+
+    private static func isLive(_ a: Activity<MochiActivityAttributes>) -> Bool {
+        a.activityState == .active || a.activityState == .stale
     }
 
     /// Mochi with nothing to do: keeps the activity alive for the next approval.
