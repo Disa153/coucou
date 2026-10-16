@@ -220,7 +220,7 @@ targets:
         CFBundleName: Coucou
         CFBundleDisplayName: Coucou
         CFBundleIdentifier: fr.louisraille.Coucou
-        CFBundleVersion: "8"
+        CFBundleVersion: "9"
         CFBundleShortVersionString: "1.1"
         CFBundlePackageType: APPL
         LSUIElement: YES
@@ -303,7 +303,7 @@ targets:
         CFBundleName: Coucou
         CFBundleDisplayName: Coucou
         CFBundleIdentifier: fr.louisraille.Coucou
-        CFBundleVersion: "8"
+        CFBundleVersion: "9"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: APPL
         LSRequiresIPhoneOS: YES
@@ -321,7 +321,8 @@ targets:
         ITSAppUsesNonExemptEncryption: NO
         NSFaceIDUsageDescription: "Coucou asks for Face ID before allowing a command from your iPhone."
         NSMicrophoneUsageDescription: "Coucou uses the microphone when you dictate an instruction for Claude Code."
-        NSSpeechRecognitionUsageDescription: "Coucou turns your voice into the text of an instruction for Claude Code."
+        NSSpeechRecognitionUsageDescription: "Coucou turns your voice into the text of an instruction for Claude Code or a chat message."
+        NSCameraUsageDescription: "Coucou takes a photo when you want to show it in the chat."
         NSSupportsLiveActivities: YES
         # The LAN_LINK build talks to Coucou for Windows/Linux on the local network
         # and finds it again with DNS-SD (docs/ANDROID_LINK.md).
@@ -394,7 +395,7 @@ targets:
         CFBundleName: CoucouWidgets
         CFBundleDisplayName: Coucou
         CFBundleIdentifier: fr.louisraille.Coucou.Widgets
-        CFBundleVersion: "8"
+        CFBundleVersion: "9"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: XPC!
         NSExtension:
@@ -437,7 +438,7 @@ targets:
         CFBundleName: CoucouNotificationContent
         CFBundleDisplayName: Coucou
         CFBundleIdentifier: fr.louisraille.Coucou.NotificationContent
-        CFBundleVersion: "8"
+        CFBundleVersion: "9"
         CFBundleShortVersionString: "1.0"
         CFBundlePackageType: XPC!
         NSExtension:

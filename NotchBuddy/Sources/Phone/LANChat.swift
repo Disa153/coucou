@@ -1,12 +1,18 @@
 #if LAN_LINK
 import Foundation
 import Observation
+import PhotosUI
 import SwiftUI
+import UIKit
 
 // Chat from the iPhone through Coucou on the Windows/Linux computer (docs/ANDROID_LINK.md,
 // "Capabilities and chat"). The phone sends text and gets text back; the computer asks the
 // provider. With Claude Code ticked on the computer, the answer comes from the Claude
 // subscription its CLI is signed in with: no API key anywhere.
+//
+// Photos go first, as `chatImage` lines (a JPEG in base64 parts that each fit a line), then
+// the `chatSend` names them in "images". The computer saves them where Claude Code or
+// Gemini CLI can read them; other providers refuse photos.
 
 struct LANChatModel: Identifiable, Equatable {
     let id: String
@@ -20,6 +26,61 @@ struct LANChatMessage: Identifiable, Equatable {
     var text: String
     var failed = false
     var done = false
+    /// Small JPEGs of the photos sent with it, to show in the bubble.
+    var thumbnails: [Data] = []
+}
+
+/// A photo ready to send: a JPEG no larger than the computer takes, and its thumbnail.
+struct LANChatPhoto: Identifiable, Hashable, Sendable {
+    let id = UUID()
+    let jpeg: Data
+    let thumbnail: Data
+
+    static let maxSide: CGFloat = 1600
+    /// Bytes of JPEG per `chatImage` line: in base64 it stays well under the 64 KiB line.
+    static let partBytes = 36_000
+
+    /// Scaled down to `maxSide`, as JPEG. Nil when the image cannot be read.
+    nonisolated static func make(from image: UIImage) -> LANChatPhoto? {
+        let big = scaled(image, maxSide: maxSide)
+        var quality: CGFloat = 0.75
+        var jpeg = big.jpegData(compressionQuality: quality)
+        // The computer takes 4 MB per photo.
+        while let j = jpeg, j.count > 3_500_000, quality > 0.3 {
+            quality -= 0.15
+            jpeg = big.jpegData(compressionQuality: quality)
+        }
+        guard let jpeg, let thumb = scaled(image, maxSide: 200).jpegData(compressionQuality: 0.7) else { return nil }
+        return LANChatPhoto(jpeg: jpeg, thumbnail: thumb)
+    }
+
+    nonisolated static func make(from data: Data) -> LANChatPhoto? {
+        UIImage(data: data).flatMap(make(from:))
+    }
+
+    nonisolated private static func scaled(_ image: UIImage, maxSide: CGFloat) -> UIImage {
+        let size = image.size
+        let longest = max(size.width, size.height)
+        guard longest > 0 else { return image }
+        let ratio = min(1, maxSide / longest)
+        let target = CGSize(width: (size.width * ratio).rounded(), height: (size.height * ratio).rounded())
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: target, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: target))
+        }
+    }
+
+    /// The `chatImage` lines of this photo.
+    func lines(id: String) -> [[String: Any]] {
+        let parts = stride(from: 0, to: jpeg.count, by: Self.partBytes).map {
+            jpeg.subdata(in: $0..<min($0 + Self.partBytes, jpeg.count))
+        }
+        return parts.enumerated().map { index, piece in
+            ["type": "chatImage", "id": id, "part": index, "parts": parts.count, "data": piece.base64EncodedString()]
+        }
+    }
 }
 
 @MainActor
@@ -38,6 +99,13 @@ final class LANChat {
     }
 
     static let maxText = 4000
+    static let maxPhotos = 4
+
+    /// Claude Code and Gemini CLI read photos; the API providers don't take them here.
+    static func takesPhotos(_ model: String) -> Bool {
+        model.hasPrefix("claude-code/") || model.hasPrefix("gemini-cli/")
+    }
+    var selectedTakesPhotos: Bool { Self.takesPhotos(selectedModel) }
 
     private init() {
         selectedModel = UserDefaults.standard.string(forKey: "lanChatModel") ?? ""
@@ -98,20 +166,39 @@ final class LANChat {
     // MARK: From the user
 
     @discardableResult
-    func send(_ text: String) -> Bool {
+    func send(_ text: String, photos: [LANChatPhoto] = []) -> Bool {
         let trimmed = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxText))
-        guard !trimmed.isEmpty, running == nil, !selectedModel.isEmpty else { return false }
-        let id = "p" + String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(24))
-        messages.append(LANChatMessage(id: "u" + id, role: .user, text: trimmed, done: true))
+        let photos = Array(photos.prefix(Self.maxPhotos))
+        guard !trimmed.isEmpty || !photos.isEmpty, running == nil, !selectedModel.isEmpty else { return false }
+        guard photos.isEmpty || selectedTakesPhotos else { return false }
+        let id = Self.newID("p")
+        messages.append(LANChatMessage(id: "u" + id, role: .user, text: trimmed, done: true,
+                                       thumbnails: photos.map(\.thumbnail)))
         messages.append(LANChatMessage(id: id, role: .assistant, text: ""))
         running = id
         let model = selectedModel
         Task {
-            let sent = await LANLink.shared.sendWhenConnected(
-                ["type": "chatSend", "id": id, "model": model, "text": trimmed])
+            var imageIDs: [String] = []
+            for photo in photos {
+                let imageID = Self.newID("i")
+                for line in photo.lines(id: imageID) {
+                    guard await LANLink.shared.sendWhenConnected(line) else {
+                        self.failed(id: id, message: "Not connected to your computer.")
+                        return
+                    }
+                }
+                imageIDs.append(imageID)
+            }
+            var message: [String: Any] = ["type": "chatSend", "id": id, "model": model, "text": trimmed]
+            if !imageIDs.isEmpty { message["images"] = imageIDs }
+            let sent = await LANLink.shared.sendWhenConnected(message)
             if !sent { self.failed(id: id, message: "Not connected to your computer.") }
         }
         return true
+    }
+
+    private static func newID(_ prefix: String) -> String {
+        prefix + String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(24))
     }
 
     func cancel() {
@@ -136,6 +223,12 @@ final class LANChat {
 struct LANChatView: View {
     @State private var draft = ""
     @FocusState private var focused: Bool
+    @State private var photos: [LANChatPhoto] = []
+    @State private var pickerItems: [PhotosPickerItem] = []
+    @State private var showLibrary = false
+    @State private var showCamera = false
+    @State private var dictation = Dictation()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         let chat = LANChat.shared
@@ -177,9 +270,45 @@ struct LANChatView: View {
                     .disabled(chat.messages.isEmpty)
                 }
             }
+            // Above the keyboard: put it away.
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button {
+                    focused = false
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                }
+                .accessibilityLabel("Hide keyboard")
+            }
         }
         .onAppear { if chat.offered { chat.requestModels() } }
         .onChange(of: chat.offered) { _, offered in if offered { chat.requestModels() } }
+        .onChange(of: dictation.transcript) { _, words in
+            if dictation.isRecording { draft = dictation.prefix + words }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { dictation.stop() }
+        }
+        .onDisappear { dictation.stop() }
+        .photosPicker(isPresented: $showLibrary, selection: $pickerItems,
+                      maxSelectionCount: max(1, LANChat.maxPhotos - photos.count), matching: .images)
+        .onChange(of: pickerItems) { _, items in
+            guard !items.isEmpty else { return }
+            pickerItems = []
+            Task {
+                for item in items {
+                    guard let data = try? await item.loadTransferable(type: Data.self) else { continue }
+                    let photo = await Task.detached { LANChatPhoto.make(from: data) }.value
+                    if let photo, photos.count < LANChat.maxPhotos { photos.append(photo) }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker { image in
+                if let photo = LANChatPhoto.make(from: image), photos.count < LANChat.maxPhotos { photos.append(photo) }
+            }
+            .ignoresSafeArea()
+        }
     }
 
     private func unavailable(_ chat: LANChat) -> String? {
@@ -222,13 +351,102 @@ struct LANChatView: View {
     }
 
     private func composer(_ chat: LANChat) -> some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            TextField("Message", text: $draft, axis: .vertical)
-                .lineLimit(1...6)
-                .focused($focused)
+        VStack(alignment: .leading, spacing: 8) {
+            if !photos.isEmpty { attachedPhotos(chat) }
+            HStack(alignment: .bottom, spacing: 8) {
+                attachMenu(chat)
+                HStack(alignment: .bottom, spacing: 6) {
+                    TextField(dictation.isRecording ? "Listening…" : "Message", text: $draft, axis: .vertical)
+                        .lineLimit(1...6)
+                        .focused($focused)
+                    micButton
+                }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .glassCard(cornerRadius: 20)
+                sendButton(chat)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    /// Photo library or camera; photos only for a model that reads them.
+    private func attachMenu(_ chat: LANChat) -> some View {
+        Menu {
+            Button {
+                showLibrary = true
+            } label: {
+                Label("Photo Library", systemImage: "photo.on.rectangle")
+            }
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button {
+                    showCamera = true
+                } label: {
+                    Label("Take Photo", systemImage: "camera")
+                }
+            }
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 32))
+                .symbolRenderingMode(.hierarchical)
+        }
+        .accessibilityLabel("Add a photo")
+        .disabled(!chat.selectedTakesPhotos || photos.count >= LANChat.maxPhotos || chat.running != nil)
+    }
+
+    private func attachedPhotos(_ chat: LANChat) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(photos) { photo in
+                        ZStack(alignment: .topTrailing) {
+                            lanChatThumbnail(photo.thumbnail, size: 64)
+                            Button {
+                                photos.removeAll { $0.id == photo.id }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 20))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .black.opacity(0.6))
+                            }
+                            .accessibilityLabel("Remove photo")
+                            .offset(x: 6, y: -6)
+                        }
+                    }
+                }
+                .padding(.top, 6)
+                .padding(.trailing, 6)
+            }
+            if !chat.selectedTakesPhotos {
+                Text("Photos work only with Claude Code or Gemini CLI. Pick one of them above.")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+        }
+    }
+
+    private var micButton: some View {
+        Button {
+            Task { await dictation.toggle(startingFrom: draft) }
+        } label: {
+            Image(systemName: dictation.isRecording ? "waveform" : "mic.fill")
+                .font(.system(size: 17))
+                .foregroundStyle(dictation.isRecording ? Color.red : Color.secondary)
+                .symbolEffect(.variableColor.iterative, isActive: dictation.isRecording)
+        }
+        .accessibilityLabel(dictation.isRecording ? "Stop dictation" : "Dictate")
+        .contextMenu {
+            Picker("Dictation language", selection: $dictation.localeID) {
+                ForEach(Dictation.languages, id: \.self) { id in
+                    Text(Locale.current.localizedString(forIdentifier: id) ?? id).tag(id)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func sendButton(_ chat: LANChat) -> some View {
+        Group {
             if chat.running != nil {
                 Button {
                     chat.cancel()
@@ -238,16 +456,69 @@ struct LANChatView: View {
                 .accessibilityLabel("Stop")
             } else {
                 Button {
-                    if chat.send(draft) { draft = "" }
+                    dictation.stop()
+                    if chat.send(draft, photos: photos) {
+                        draft = ""
+                        photos = []
+                    }
                 } label: {
                     Image(systemName: "arrow.up.circle.fill").font(.system(size: 32))
                 }
                 .accessibilityLabel("Send")
-                .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || chat.selectedModel.isEmpty)
+                .disabled(!canSend(chat))
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+    }
+
+    private func canSend(_ chat: LANChat) -> Bool {
+        let hasText = !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard !chat.selectedModel.isEmpty, hasText || !photos.isEmpty else { return false }
+        return photos.isEmpty || chat.selectedTakesPhotos
+    }
+}
+
+/// A photo as a small rounded square.
+@MainActor func lanChatThumbnail(_ data: Data, size: CGFloat) -> some View {
+    Group {
+        if let image = UIImage(data: data) {
+            Image(uiImage: image).resizable().scaledToFill()
+        } else {
+            Color.secondary.opacity(0.2)
+        }
+    }
+    .frame(width: size, height: size)
+    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+}
+
+/// The camera, for one photo.
+private struct CameraPicker: UIViewControllerRepresentable {
+    let onImage: (UIImage) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ picker: UIImagePickerController, context: Context) {}
+
+    @MainActor final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: CameraPicker
+        init(_ parent: CameraPicker) { self.parent = parent }
+
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage { parent.onImage(image) }
+            parent.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.dismiss()
+        }
     }
 }
 
@@ -258,10 +529,17 @@ private struct LANChatBubble: View {
     var body: some View {
         HStack {
             if message.role == .user { Spacer(minLength: 40) }
-            Group {
+            VStack(alignment: .leading, spacing: 8) {
+                if !message.thumbnails.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(Array(message.thumbnails.enumerated()), id: \.offset) { _, data in
+                            lanChatThumbnail(data, size: 72)
+                        }
+                    }
+                }
                 if message.text.isEmpty && waiting {
                     ProgressView().padding(.vertical, 4)
-                } else {
+                } else if !message.text.isEmpty {
                     Text(rendered)
                         .textSelection(.enabled)
                         .foregroundStyle(message.failed ? Color.red : Color.primary)

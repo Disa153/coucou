@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>9</string>
 	<key>CoucouAPNsEnvironment</key>
 	<string>$(COUCOU_APNS_ENV)</string>
 	<key>INAlternativeAppNames</key>
@@ -59,7 +59,9 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Coucou uses the microphone when you dictate an instruction for Claude Code.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Coucou turns your voice into the text of an instruction for Claude Code.</string>
+	<string>Coucou turns your voice into the text of an instruction for Claude Code or a chat message.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Coucou takes a photo when you want to show it in the chat.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

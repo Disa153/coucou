@@ -95,7 +95,8 @@ and re-reads that switch for every message. The user also chooses which provider
 |---|---|---|
 | phone to computer | `chatModels` | none: ask for the allowed list |
 | computer to phone | `chatModels` | `models[]`: `{id: "provider/model", provider, label}`, only what the user allowed |
-| phone to computer | `chatSend` | `id` (1 to 64 chars of `[A-Za-z0-9_-]`, made by the phone), `model` (an `id` from the list), `text` (at most 4000 characters) |
+| phone to computer | `chatSend` | `id` (1 to 64 chars of `[A-Za-z0-9_-]`, made by the phone), `model` (an `id` from the list), `text` (at most 4000 characters); `images` (optional, at most 4 `chatImage` ids sent just before; then `text` may be empty) |
+| phone to computer | `chatImage` | `id` (same rules as a message id), `part` (from 0), `parts` (at most 160), `data`: one base64 piece of a JPEG or PNG, at most 4 MB in all. Photos only go to Claude Code and Gemini CLI models (`no_images` otherwise); the computer saves them in `.coucou-phone` in the CLI's working folder for a day. A photo not whole when its `chatSend` comes fails it with `image_missing` |
 | computer to phone | `chatDelta` | `id`, `text` appended to the answer (pieces of at most 8 KiB) |
 | computer to phone | `chatDone` | `id`; `text` only if the streamed text must be replaced by this full answer |
 | computer to phone | `chatError` | `id`, `reason`, `message` |
