@@ -19,9 +19,15 @@ Approve Claude Code permissions, watch your session work, drop a file, chat with
 
 ---
 
+> [!NOTE]
+> **This is a fork.** Coucou is by Louis Raillé ([Louis-CFM/coucou](https://github.com/Louis-CFM/coucou)); this fork, [Disa153/coucou](https://github.com/Disa153/coucou), tries to improve Coucou for Windows. Not affiliated with the original project. **Это форк:** Coucou создал Louis Raillé, а я пробую улучшать версию для Windows.
+
 ## Install
 
-Download **[Coucou-Windows.msi](https://github.com/Louis-CFM/coucou/releases/download/windows-latest/Coucou-Windows.msi)**
+This fork: download **[Coucou-Windows-setup.exe](https://github.com/Disa153/coucou/releases/download/channel-stable/Coucou-Windows-setup.exe)**
+from the [stable release](https://github.com/Disa153/coucou/releases/tag/channel-stable) and run it; it then updates itself
+(**Settings → General → Updates**, installed only when you click). The original project's builds:
+**[Coucou-Windows.msi](https://github.com/Louis-CFM/coucou/releases/download/windows-latest/Coucou-Windows.msi)**
 (Windows Installer) or **[Coucou-Windows-setup.exe](https://github.com/Louis-CFM/coucou/releases/download/windows-latest/Coucou-Windows-setup.exe)**,
 always the newest version, and run it. The .exe installs for the current user only, with no admin prompt; the .msi may ask for admin rights.
 

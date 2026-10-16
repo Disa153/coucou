@@ -26,6 +26,11 @@ Approve permissions, watch your agents work, drop a file, chat with Claude — a
 
 </div>
 
+> [!NOTE]
+> **This is a fork.** Coucou was made by **Louis Raillé** ([@Louis-CFM](https://github.com/Louis-CFM)) — the app, Mochi and everything described below are his work: [Louis-CFM/coucou](https://github.com/Louis-CFM/coucou). This fork, [Disa153/coucou](https://github.com/Disa153/coucou), is where I try to improve it, mostly Coucou for Windows and an iPhone app that pairs with it over Wi-Fi. It is not affiliated with the original project, and its builds are not the official ones.
+>
+> **Это форк.** Coucou создал **Louis Raillé** ([@Louis-CFM](https://github.com/Louis-CFM)): приложение, Mochi и всё, что описано ниже, — его работа ([Louis-CFM/coucou](https://github.com/Louis-CFM/coucou)). Я взял его проект и пробую его улучшать — в основном Coucou для Windows и приложение для iPhone, которое связывается с ним по Wi-Fi. Форк не связан с оригинальным проектом, а его сборки — не официальные.
+
 ---
 
 ## Why
@@ -189,6 +194,20 @@ No API key, no Claude Code, no setup — open **Settings → General → Demo**,
 Nothing is written to disk during the demo — no Keychain entries, no hook files, no recap history. Your real sessions and keys are saved and restored exactly as they were when you stop.
 
 ## Install
+
+### This fork: Windows and iPhone
+
+**Windows 10/11.** Download **[Coucou-Windows-setup.exe](https://github.com/Disa153/coucou/releases/download/channel-stable/Coucou-Windows-setup.exe)** from the [stable release](https://github.com/Disa153/coucou/releases/tag/channel-stable) and run it. It installs for your user only, with no admin prompt. Windows shows a SmartScreen warning the first time: click **More info**, then **Run anyway** (the installer isn't code-signed). After that Coucou updates itself: **Settings → General → Updates** checks every few hours, and an update is installed only when you click **Install and restart**. Every update is signed, and Coucou refuses anything else.
+
+**iPhone (iOS 18 or later), paired with Coucou for Windows.** This iPhone app talks to the Windows app over your Wi-Fi, not to a Mac through iCloud, and it is not on the App Store or TestFlight. Install it with [AltStore](https://altstore.io) or [SideStore](https://sidestore.io) and your own Apple ID:
+
+1. Install AltStore on your iPhone (AltServer for Windows, from the AltStore site).
+2. Download **[Coucou-iPhone-Windows.ipa](https://github.com/Disa153/coucou/releases/download/all-in-one-latest/Coucou-iPhone-Windows.ipa)** on the iPhone and open it with AltStore (Share → AltStore, or **My Apps → +**). *Lite* `.ipa` without widgets and Live Activity: [Coucou-iPhone-Windows-lite.ipa](https://github.com/Disa153/coucou/releases/download/all-in-one-latest/Coucou-iPhone-Windows-lite.ipa).
+3. On the computer: **Settings → Phone**, turn on the phone link and show the pairing code; scan it with the iPhone. Both must be on the same Wi-Fi.
+
+With a free Apple ID, AltStore renews the app every 7 days while AltServer runs on the computer on the same Wi-Fi.
+
+The Mac app, Linux and Android below are the original project's: install them from [Louis-CFM/coucou](https://github.com/Louis-CFM/coucou#install).
 
 ### App Store
 
