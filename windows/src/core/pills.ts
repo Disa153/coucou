@@ -25,7 +25,7 @@ export const PILL_CATEGORIES: { id: PillCategory; title: string }[] = [
  * Whether the pill does anything on this build:
  * - `yes`: works on Windows and Linux;
  * - `windows`: Windows only (the app behind it has no Linux build);
- * - `linux`: Linux only (what drives it is Linux's: Spotify through MPRIS);
+ * - `linux`: Linux only (what drives it is Linux's);
  * - `soon`: can be declared, shows "Coming soon" (macOS has it, this build not yet);
  * - `no`: macOS only, never offered here.
  */
@@ -75,7 +75,7 @@ const IS_WINDOWS_PAGE = typeof navigator !== "undefined" && /Windows/.test(navig
 
 export const PILL_CATALOG: readonly PillDefinition[] = [
   // ── Where you code ─────────────────────────────────────────────────────────
-  { id: "integration_claude", name: "VS Code", color: "#F5F6F8", category: "workspace",
+  { id: "integration_claude", name: "Claude Code", color: "#F5F6F8", category: "workspace",
     subtitle: N_("Integration"), source: "claudeCode", support: "yes", connect: hooks },
   // Claude Code in Cursor's terminal: the same hooks as Claude Code.
   { id: "agent_cursor", name: "Cursor", color: "#C0C4CC", category: "workspace",

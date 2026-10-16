@@ -434,7 +434,7 @@ export function hasSessionTicker(task: AgentTask): boolean {
 }
 
 function pillName(task: AgentTask): string {
-  return task.id === "integration_claude" ? "VS Code" : task.name;
+  return task.id === "integration_claude" ? pillDefinition(task.id)!.name : task.name;
 }
 
 /** The name, or what the agent is doing right now while it works (core/pill-status.ts). */

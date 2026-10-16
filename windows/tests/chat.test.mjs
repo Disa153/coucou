@@ -54,7 +54,8 @@ test("a provider without a key is never asked for its models", async () => {
   $(".model-btn").fire("click");
   await flush();
   assert.ok($(".chat-body").classList.contains("picking"));
-  assert.deepEqual(chips(), ["Anthropic", "Google", "OpenAI", "OpenRouter"]);
+  // Claude Code and Gemini CLI (this fork) need no key: they sit next to Anthropic.
+  assert.deepEqual(chips(), ["Anthropic", "Claude Code", "Gemini CLI", "Google", "OpenAI", "OpenRouter"]);
   assert.deepEqual(sent("secret_present"), [{ key: "anthropic-api-key" }]);
   assert.deepEqual(sent("chat_models"), []);
   assert.match($(".picker-status").textContent, /No API key/);
@@ -83,7 +84,7 @@ test("switching provider saves it and asks the new provider only", async () => {
   $(".model-btn").fire("click");
   await flush();
   assert.deepEqual(sent("chat_models"), []);
-  view.el.find(".picker-chip")[1].fire("click");
+  view.el.find(".picker-chip").find((c) => c.textContent === "Google").fire("click");
   await flush();
   assert.equal(State.settings.chatProvider, "google");
   assert.deepEqual(sent("chat_models"), [{ provider: "google" }]);
