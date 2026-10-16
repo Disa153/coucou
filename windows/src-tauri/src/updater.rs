@@ -33,6 +33,13 @@ const PUBLIC_KEY: &str = "sjtOpogg4BrmBSPWPorn4tsn/VN+cEyDxjT6Qsg4gLU=";
 const RELEASES: &str = "https://github.com/Disa153/coucou/releases/download/";
 /// The page with the "Promote beta to stable" workflow, for the beta tester.
 pub const PROMOTE_PAGE: &str = "https://github.com/Disa153/coucou/actions/workflows/promote-stable.yml";
+/// The owner's GitHub token that runs that workflow from Coucou (Credential Manager, never the webview).
+pub const RELEASE_TOKEN: &str = "release-token";
+const API: &str = "https://api.github.com/repos/Disa153/coucou";
+const PROMOTE_WORKFLOW: &str = "promote-stable.yml";
+/// A fine-grained token for this repository that may only run workflows,
+/// prefilled on GitHub's page (the repository is picked there).
+pub const TOKEN_PAGE: &str = "https://github.com/settings/personal-access-tokens/new?name=Coucou%20release&description=Runs%20%22Promote%20beta%20to%20stable%22%20from%20Coucou&target_name=Disa153&expires_in=none&actions=write";
 const MANIFEST_LIMIT: usize = 64 * 1024;
 const INSTALLER_LIMIT: usize = 400 * 1024 * 1024;
 const BETA_SALT: &str = "coucou-beta:";
@@ -193,6 +200,9 @@ pub struct UpdateInfo {
     pub can_install: bool,
     pub found: Option<Manifest>,
     pub promote_page: Option<String>,
+    /// A GitHub token is kept: "Release to everyone" runs the workflow itself.
+    pub release_connected: bool,
+    pub token_page: String,
 }
 
 pub fn setup(app: &AppHandle) {
@@ -223,6 +233,8 @@ fn info(app: &AppHandle) -> UpdateInfo {
         can_install: cfg!(windows),
         found: u.found.lock().unwrap().clone(),
         promote_page: (channel == Channel::Beta).then(|| PROMOTE_PAGE.to_string()),
+        release_connected: crate::secrets::get_internal(RELEASE_TOKEN).is_some(),
+        token_page: TOKEN_PAGE.to_string(),
     }
 }
 
@@ -361,6 +373,157 @@ async fn download_and_run(app: &AppHandle, m: &Manifest) -> Result<(), Refusal> 
     Ok(())
 }
 
+// ── Releasing to everyone from Coucou ─────────────────────────────────────────
+//
+// The same workflow as the button on GitHub, started with the owner's token:
+// only from beta, only the build running here (the one tested), and only with
+// the beta password typed again. GitHub still does the work: it checks the
+// file against the beta signature and signs it for stable.
+
+/// Why a release did not start; the page words it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ReleaseRefusal {
+    NotConnected,
+    /// GitHub refused the token (revoked, expired, or without Actions: write on this repository).
+    BadToken,
+    WrongPassword,
+    /// Only a beta tester releases, and only a numbered build.
+    NotBeta,
+    Network,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReleaseRun {
+    /// "queued", "in_progress", "completed".
+    pub status: String,
+    /// When completed: "success", "failure"…
+    pub conclusion: Option<String>,
+    pub url: String,
+}
+
+async fn github(method: reqwest::Method, path: &str, token: &str, body: Option<serde_json::Value>) -> Result<(u16, Vec<u8>), ReleaseRefusal> {
+    let url = reqwest::Url::parse(&format!("{API}{path}")).map_err(|_| ReleaseRefusal::Network)?;
+    let client = crate::net::client(&url, Duration::from_secs(20)).map_err(|_| ReleaseRefusal::Network)?;
+    let mut req = client
+        .request(method, url)
+        .header("User-Agent", "Coucou")
+        .header("Accept", "application/vnd.github+json")
+        .header("X-GitHub-Api-Version", "2022-11-28")
+        .bearer_auth(token);
+    if let Some(body) = body {
+        req = req.json(&body);
+    }
+    let response = req.send().await.map_err(|_| ReleaseRefusal::Network)?;
+    let status = response.status().as_u16();
+    let bytes = crate::net::read_capped(response, 256 * 1024).await.map_err(|_| ReleaseRefusal::Network)?;
+    if status == 401 || status == 403 || status == 404 {
+        return Err(ReleaseRefusal::BadToken);
+    }
+    Ok((status, bytes))
+}
+
+/// Keeps the token once GitHub says it can see the workflow. False: refused.
+#[tauri::command]
+pub async fn update_release_connect(token: String) -> Result<(), ReleaseRefusal> {
+    let token = token.trim().to_string();
+    if token.is_empty() || token.len() > 400 || token.chars().any(char::is_whitespace) {
+        return Err(ReleaseRefusal::BadToken);
+    }
+    let (status, _) = github(reqwest::Method::GET, &format!("/actions/workflows/{PROMOTE_WORKFLOW}"), &token, None).await?;
+    if status != 200 {
+        return Err(ReleaseRefusal::BadToken);
+    }
+    crate::secrets::set_internal(RELEASE_TOKEN, &token).map_err(|_| ReleaseRefusal::Network)?;
+    crate::log::line("update: GitHub connected for releases");
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_release_disconnect() {
+    let _ = crate::secrets::set_internal(RELEASE_TOKEN, "");
+}
+
+/// Sends the build running here to everybody. Returns when GitHub has the run.
+#[tauri::command]
+pub async fn update_release(app: AppHandle, password: String) -> Result<ReleaseRun, ReleaseRefusal> {
+    let channel = *state(&app).channel.lock().unwrap();
+    let build = build();
+    if channel != Channel::Beta || build == 0 {
+        return Err(ReleaseRefusal::NotBeta);
+    }
+    if !password_ok(&password, beta_hash()) {
+        return Err(ReleaseRefusal::WrongPassword);
+    }
+    let token = crate::secrets::get_internal(RELEASE_TOKEN).ok_or(ReleaseRefusal::NotConnected)?;
+    let started = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let body = serde_json::json!({ "ref": "all-in-one", "inputs": { "build": build.to_string() } });
+    let (status, _) = github(reqwest::Method::POST, &format!("/actions/workflows/{PROMOTE_WORKFLOW}/dispatches"), &token, Some(body)).await?;
+    if status != 204 {
+        return Err(ReleaseRefusal::Network);
+    }
+    crate::log::line(format!("update: build {build} sent to stable"));
+    // GitHub lists the run a few seconds later.
+    for _ in 0..10 {
+        tokio::time::sleep(Duration::from_secs(2)).await;
+        if let Some(run) = latest_run(&token, started).await? {
+            return Ok(run);
+        }
+    }
+    Ok(ReleaseRun { status: "queued".into(), conclusion: None, url: PROMOTE_PAGE.to_string() })
+}
+
+/// How the last release run started from here is going.
+#[tauri::command]
+pub async fn update_release_status() -> Result<Option<ReleaseRun>, ReleaseRefusal> {
+    let token = crate::secrets::get_internal(RELEASE_TOKEN).ok_or(ReleaseRefusal::NotConnected)?;
+    latest_run(&token, 0).await
+}
+
+async fn latest_run(token: &str, since: u64) -> Result<Option<ReleaseRun>, ReleaseRefusal> {
+    let (_, body) = github(
+        reqwest::Method::GET,
+        &format!("/actions/workflows/{PROMOTE_WORKFLOW}/runs?event=workflow_dispatch&per_page=1"),
+        token,
+        None,
+    )
+    .await?;
+    let v: serde_json::Value = serde_json::from_slice(&body).map_err(|_| ReleaseRefusal::Network)?;
+    let Some(run) = v["workflow_runs"].get(0) else { return Ok(None) };
+    let created = run["created_at"].as_str().and_then(unix_from_iso).unwrap_or(0);
+    // A run from before this click is not this release (a minute of clock skew allowed).
+    if since > 0 && created + 60 < since {
+        return Ok(None);
+    }
+    Ok(Some(ReleaseRun {
+        status: run["status"].as_str().unwrap_or("queued").to_string(),
+        conclusion: run["conclusion"].as_str().map(str::to_string),
+        url: run["html_url"].as_str().filter(|u| u.starts_with("https://github.com/Disa153/coucou/")).unwrap_or(PROMOTE_PAGE).to_string(),
+    }))
+}
+
+/// "2026-10-16T13:04:05Z" → seconds since 1970 (GitHub's timestamps are always UTC like this).
+pub fn unix_from_iso(s: &str) -> Option<u64> {
+    let b = s.as_bytes();
+    if b.len() < 20 || b[4] != b'-' || b[7] != b'-' || b[10] != b'T' || b[13] != b':' || b[16] != b':' {
+        return None;
+    }
+    let n = |r: std::ops::Range<usize>| s.get(r)?.parse::<i64>().ok();
+    let (y, mo, d, h, mi, se) = (n(0..4)?, n(5..7)?, n(8..10)?, n(11..13)?, n(14..16)?, n(17..19)?);
+    // Days from 1970-01-01 to y-mo-d (proleptic Gregorian).
+    let (y2, m2) = if mo <= 2 { (y - 1, mo + 9) } else { (y, mo - 3) };
+    let era = y2.div_euclid(400);
+    let yoe = y2 - era * 400;
+    let doy = (153 * m2 + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    let days = era * 146_097 + doe - 719_468;
+    u64::try_from(days * 86_400 + h * 3600 + mi * 60 + se).ok()
+}
+
 #[cfg(windows)]
 fn run_installer(installer: &std::path::Path) -> Result<(), Refusal> {
     use std::os::windows::process::CommandExt;
@@ -485,6 +648,14 @@ mod tests {
         let key = public_key().expect("the shipped key decodes to 32 bytes");
         assert_eq!(verify(&m, Channel::Beta, &key), Ok(()));
         assert_eq!(verify(&m, Channel::Stable, &key), Err(Refusal::BadSignature));
+    }
+
+    #[test]
+    fn githubs_timestamps_are_read() {
+        assert_eq!(unix_from_iso("1970-01-01T00:00:00Z"), Some(0));
+        assert_eq!(unix_from_iso("2026-10-16T13:04:05Z"), Some(1_792_155_845));
+        assert_eq!(unix_from_iso("2000-03-01T00:00:00Z"), Some(951_868_800));
+        assert_eq!(unix_from_iso("yesterday"), None);
     }
 
     #[test]

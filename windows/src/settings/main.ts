@@ -4,7 +4,7 @@
 // island's settings are drawn here, one Notch page at a time.
 
 import "./settings.css";
-import { Bridge, onEvent, type HookPreview, type HookStatus, type ShortcutsReport, type UpdateInfo, type UpdateRefusal } from "../core/bridge";
+import { Bridge, onEvent, type HookPreview, type HookStatus, type ShortcutsReport, type UpdateInfo, type UpdateRefusal, type ReleaseRefusal, type ReleaseRun } from "../core/bridge";
 import { CUSTOM_SERVER_KEY, providerDef, urlExposure } from "../core/providers";
 import {
   ISLAND_SHORTCUTS, SHORTCUTS, SHORTCUT_TEXT, activeKeys, displayKeys, duplicates, effective,
@@ -716,7 +716,7 @@ function updatesSection(): HTMLElement {
   const promoteBtn = h("button", { text: t("Release to everyone…") });
   const promoteHint = h("div", {
     class: "hint",
-    text: t("Opens the workflow on GitHub that sends the beta build you tested to everyone. Nothing goes out until you run it."),
+    text: t("Sends the beta build running here, the one you tested, to everyone, through GitHub. Nothing goes out until you confirm."),
   });
   const password = h("input", { type: "password", autocomplete: "off", style: "flex:1 1 auto;min-width:0" }) as HTMLInputElement;
   password.placeholder = t("Beta password");
@@ -790,8 +790,146 @@ function updatesSection(): HTMLElement {
       status.textContent = refusalText(code) ?? refusalText("network");
     });
   });
+  // ── Releasing to everyone ─────────────────────────────────────────────────
+  // Connected (a GitHub token kept by Rust): a confirmation here, then GitHub
+  // runs the release. Not connected: GitHub's own page, as before.
+  const releaseBox = h("div", { class: "stack" });
+  releaseBox.style.display = "none";
+  const releaseText = (r: ReleaseRefusal): string =>
+    ({
+      notConnected: t("Connect GitHub first."),
+      badToken: t("GitHub refused the token. Connect GitHub again."),
+      wrongPassword: t("Wrong password."),
+      notBeta: t("Only a numbered beta build can be released."),
+      network: t("GitHub could not be reached. Try again later."),
+    })[r] ?? t("GitHub could not be reached. Try again later.");
+  const refusalOf = (e: unknown): ReleaseRefusal => (typeof e === "string" ? (e as ReleaseRefusal) : "network");
+
+  function showConnect() {
+    clear(releaseBox);
+    releaseBox.style.display = "";
+    const token = h("input", { type: "password", autocomplete: "off", style: "flex:1 1 auto;min-width:0" }) as HTMLInputElement;
+    token.placeholder = t("Paste the token");
+    const open = h("button", { text: t("Open on GitHub") });
+    open.addEventListener("click", () => {
+      if (info) void Bridge.openUrl(info.tokenPage);
+    });
+    const saveBtn = h("button", { class: "primary", text: t("Save") });
+    const cancel = h("button", { text: t("Cancel") });
+    cancel.addEventListener("click", () => {
+      releaseBox.style.display = "none";
+    });
+    saveBtn.addEventListener("click", () => {
+      saveBtn.setAttribute("disabled", "");
+      Bridge.updateReleaseConnect(token.value)
+        .then(() => {
+          status.textContent = t("GitHub is connected.");
+          releaseBox.style.display = "none";
+          void Bridge.updateInfo().then((i) => draw(i, t("GitHub is connected.")));
+        })
+        .catch((e: unknown) => {
+          status.textContent = releaseText(refusalOf(e));
+        })
+        .finally(() => saveBtn.removeAttribute("disabled"));
+    });
+    releaseBox.append(
+      h("div", {
+        class: "hint",
+        text: t("Create a token on GitHub for the coucou repository only (Repository access → Only select repositories), copy it and paste it here. Coucou keeps it in the system's credential store; it can only run this repository's workflows."),
+      }),
+      h("div", { class: "row" }, open),
+      h("div", { class: "row" }, token, saveBtn, cancel),
+    );
+    token.focus();
+  }
+
+  function showConfirm() {
+    if (!info) return;
+    const build = info.build;
+    clear(releaseBox);
+    releaseBox.style.display = "";
+    const pw = h("input", { type: "password", autocomplete: "off", style: "flex:1 1 auto;min-width:0" }) as HTMLInputElement;
+    pw.placeholder = t("Beta password");
+    const go = h("button", { class: "primary", text: t("Release") });
+    const cancel = h("button", { text: t("Cancel") });
+    const disconnect = h("button", { text: t("Disconnect GitHub") });
+    cancel.addEventListener("click", () => {
+      releaseBox.style.display = "none";
+    });
+    disconnect.addEventListener("click", () => {
+      void Bridge.updateReleaseDisconnect().then(() => {
+        releaseBox.style.display = "none";
+        void Bridge.updateInfo().then((i) => draw(i));
+      });
+    });
+    const start = () => {
+      go.setAttribute("disabled", "");
+      status.textContent = t("Releasing build {0}…", { 0: build });
+      Bridge.updateRelease(pw.value)
+        .then((run) => {
+          releaseBox.style.display = "none";
+          follow(build, run);
+        })
+        .catch((e: unknown) => {
+          go.removeAttribute("disabled");
+          status.textContent = releaseText(refusalOf(e));
+          if (refusalOf(e) === "wrongPassword") pw.select();
+        });
+    };
+    go.addEventListener("click", start);
+    pw.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") start();
+    });
+    releaseBox.append(
+      h("b", { text: t("Release build {0} to everyone?", { 0: build }) }),
+      h("div", {
+        class: "hint",
+        text: t("Everyone on the stable channel will be offered it. A release cannot be taken back: only replaced by a newer build."),
+      }),
+      h("div", { class: "row" }, pw, go, cancel),
+      h("div", { class: "row" }, disconnect),
+    );
+    pw.focus();
+  }
+
+  /** Follows the run on GitHub until it ends. */
+  function follow(build: number, run: ReleaseRun) {
+    const link = h("button", { text: t("Open on GitHub") });
+    link.addEventListener("click", () => void Bridge.openUrl(run.url));
+    const show = (r: ReleaseRun) => {
+      clear(status);
+      const done = r.status === "completed";
+      const text = !done
+        ? t("Releasing build {0}…", { 0: build })
+        : r.conclusion === "success"
+          ? t("Build {0} is out for everyone.", { 0: build })
+          : t("The release failed on GitHub.");
+      status.append(document.createTextNode(`${text} `), link);
+      run = r;
+      return done;
+    };
+    if (show(run)) return;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      tries += 1;
+      void Bridge.updateReleaseStatus()
+        .then((r) => {
+          if ((r && show(r)) || tries > 60) window.clearInterval(timer);
+        })
+        .catch(() => {
+          if (tries > 60) window.clearInterval(timer);
+        });
+    }, 5000);
+  }
+
   promoteBtn.addEventListener("click", () => {
-    if (info?.promotePage) void Bridge.openUrl(info.promotePage);
+    if (!info) return;
+    if (releaseBox.style.display !== "none") {
+      releaseBox.style.display = "none";
+      return;
+    }
+    if (info.releaseConnected) showConfirm();
+    else showConnect();
   });
   const unlock = () => {
     void Bridge.updateSetChannel("beta", password.value).then((ok) => {
@@ -823,6 +961,7 @@ function updatesSection(): HTMLElement {
     betaRow,
     passwordRow,
     actions,
+    releaseBox,
     status,
     promoteHint,
   );

@@ -4626,17 +4626,6 @@
    "ru": "Выпустить для всех…",
    "id": "Rilis untuk semua…"
   },
-  "Opens the workflow on GitHub that sends the beta build you tested to everyone. Nothing goes out until you run it.": {
-   "zh-Hans": "在 GitHub 上打开把你测试过的 Beta 版本发给所有人的工作流。你运行它之前，什么都不会发出。",
-   "hi": "GitHub पर वह वर्कफ़्लो खोलता है जो आपके परखे गए बीटा बिल्ड को सभी तक भेजता है। जब तक आप इसे नहीं चलाते, कुछ नहीं जाता।",
-   "es": "Abre en GitHub el flujo que envía a todos la versión beta que probaste. No sale nada hasta que lo ejecutes.",
-   "ar": "يفتح على GitHub سير العمل الذي يرسل إصدار بيتا الذي اختبرته إلى الجميع. لا يخرج شيء حتى تشغّله.",
-   "fr": "Ouvre sur GitHub le workflow qui envoie à tout le monde la version bêta que vous avez testée. Rien ne part tant que vous ne le lancez pas.",
-   "bn": "GitHub-এ সেই ওয়ার্কফ্লো খোলে যা আপনার পরীক্ষিত বিটা বিল্ড সবার কাছে পাঠায়। আপনি না চালানো পর্যন্ত কিছুই যায় না।",
-   "pt-BR": "Abre no GitHub o fluxo que envia a todos a versão beta que você testou. Nada sai até você executá-lo.",
-   "ru": "Открывает на GitHub действие, которое отправляет проверенную вами бета-сборку всем. Пока вы его не запустите, ничего не уходит.",
-   "id": "Membuka alur kerja di GitHub yang mengirim build beta yang Anda uji ke semua orang. Tidak ada yang keluar sampai Anda menjalankannya."
-  },
   "Beta password": {
    "zh-Hans": "Beta 密码",
    "hi": "बीटा पासवर्ड",
@@ -4823,6 +4812,171 @@
    "pt-BR": "Senha incorreta.",
    "ru": "Неверный пароль.",
    "id": "Kata sandi salah."
+  },
+  "Open on GitHub": {
+   "zh-Hans": "在 GitHub 上打开",
+   "hi": "GitHub पर खोलें",
+   "es": "Abrir en GitHub",
+   "ar": "فتح على GitHub",
+   "fr": "Ouvrir sur GitHub",
+   "bn": "GitHub-এ খুলুন",
+   "pt-BR": "Abrir no GitHub",
+   "ru": "Открыть на GitHub",
+   "id": "Buka di GitHub"
+  },
+  "Release": {
+   "zh-Hans": "发布",
+   "hi": "जारी करें",
+   "es": "Publicar",
+   "ar": "نشر",
+   "fr": "Publier",
+   "bn": "প্রকাশ করুন",
+   "pt-BR": "Publicar",
+   "ru": "Выпустить",
+   "id": "Rilis"
+  },
+  "Disconnect GitHub": {
+   "zh-Hans": "断开 GitHub",
+   "hi": "GitHub डिस्कनेक्ट करें",
+   "es": "Desconectar GitHub",
+   "ar": "فصل GitHub",
+   "fr": "Déconnecter GitHub",
+   "bn": "GitHub সংযোগ বিচ্ছিন্ন করুন",
+   "pt-BR": "Desconectar o GitHub",
+   "ru": "Отключить GitHub",
+   "id": "Putuskan GitHub"
+  },
+  "Paste the token": {
+   "zh-Hans": "粘贴令牌",
+   "hi": "टोकन चिपकाएँ",
+   "es": "Pega el token",
+   "ar": "الصق الرمز",
+   "fr": "Collez le jeton",
+   "bn": "টোকেন পেস্ট করুন",
+   "pt-BR": "Cole o token",
+   "ru": "Вставьте токен",
+   "id": "Tempel token"
+  },
+  "Release build {0} to everyone?": {
+   "zh-Hans": "将构建 {0} 发布给所有人？",
+   "hi": "बिल्ड {0} सभी के लिए जारी करें?",
+   "es": "¿Publicar la compilación {0} para todos?",
+   "ar": "نشر البناء {0} للجميع؟",
+   "fr": "Publier le build {0} pour tout le monde ?",
+   "bn": "বিল্ড {0} সবার জন্য প্রকাশ করবেন?",
+   "pt-BR": "Publicar o build {0} para todos?",
+   "ru": "Выпустить сборку {0} для всех?",
+   "id": "Rilis build {0} untuk semua?"
+  },
+  "Releasing build {0}…": {
+   "zh-Hans": "正在发布构建 {0}…",
+   "hi": "बिल्ड {0} जारी हो रहा है…",
+   "es": "Publicando la compilación {0}…",
+   "ar": "جارٍ نشر البناء {0}…",
+   "fr": "Publication du build {0}…",
+   "bn": "বিল্ড {0} প্রকাশ হচ্ছে…",
+   "pt-BR": "Publicando o build {0}…",
+   "ru": "Выпускаем сборку {0}…",
+   "id": "Merilis build {0}…"
+  },
+  "Build {0} is out for everyone.": {
+   "zh-Hans": "构建 {0} 已发布给所有人。",
+   "hi": "बिल्ड {0} सभी के लिए जारी हो गया।",
+   "es": "La compilación {0} ya está disponible para todos.",
+   "ar": "البناء {0} متاح الآن للجميع.",
+   "fr": "Le build {0} est disponible pour tout le monde.",
+   "bn": "বিল্ড {0} সবার জন্য প্রকাশিত হয়েছে।",
+   "pt-BR": "O build {0} já está disponível para todos.",
+   "ru": "Сборка {0} выпущена для всех.",
+   "id": "Build {0} sudah dirilis untuk semua."
+  },
+  "The release failed on GitHub.": {
+   "zh-Hans": "GitHub 上的发布失败了。",
+   "hi": "GitHub पर रिलीज़ विफल हुई।",
+   "es": "La publicación falló en GitHub.",
+   "ar": "فشل النشر على GitHub.",
+   "fr": "La publication a échoué sur GitHub.",
+   "bn": "GitHub-এ প্রকাশ ব্যর্থ হয়েছে।",
+   "pt-BR": "A publicação falhou no GitHub.",
+   "ru": "Выпуск на GitHub не удался.",
+   "id": "Rilis gagal di GitHub."
+  },
+  "GitHub is connected.": {
+   "zh-Hans": "GitHub 已连接。",
+   "hi": "GitHub कनेक्ट हो गया।",
+   "es": "GitHub está conectado.",
+   "ar": "تم الاتصال بـ GitHub.",
+   "fr": "GitHub est connecté.",
+   "bn": "GitHub সংযুক্ত হয়েছে।",
+   "pt-BR": "O GitHub está conectado.",
+   "ru": "GitHub подключён.",
+   "id": "GitHub terhubung."
+  },
+  "Connect GitHub first.": {
+   "zh-Hans": "请先连接 GitHub。",
+   "hi": "पहले GitHub कनेक्ट करें।",
+   "es": "Conecta GitHub primero.",
+   "ar": "اتصل بـ GitHub أولًا.",
+   "fr": "Connectez d'abord GitHub.",
+   "bn": "আগে GitHub সংযুক্ত করুন।",
+   "pt-BR": "Conecte o GitHub primeiro.",
+   "ru": "Сначала подключите GitHub.",
+   "id": "Hubungkan GitHub dulu."
+  },
+  "GitHub refused the token. Connect GitHub again.": {
+   "zh-Hans": "GitHub 拒绝了该令牌。请重新连接 GitHub。",
+   "hi": "GitHub ने टोकन अस्वीकार किया। GitHub फिर से कनेक्ट करें।",
+   "es": "GitHub rechazó el token. Vuelve a conectar GitHub.",
+   "ar": "رفض GitHub الرمز. اتصل بـ GitHub مجددًا.",
+   "fr": "GitHub a refusé le jeton. Reconnectez GitHub.",
+   "bn": "GitHub টোকেনটি প্রত্যাখ্যান করেছে। আবার GitHub সংযুক্ত করুন।",
+   "pt-BR": "O GitHub recusou o token. Conecte o GitHub novamente.",
+   "ru": "GitHub отклонил токен. Подключите GitHub заново.",
+   "id": "GitHub menolak token. Hubungkan GitHub lagi."
+  },
+  "Only a numbered beta build can be released.": {
+   "zh-Hans": "只能发布有编号的 Beta 构建。",
+   "hi": "केवल क्रमांकित बीटा बिल्ड ही जारी किया जा सकता है।",
+   "es": "Solo se puede publicar una compilación beta numerada.",
+   "ar": "لا يمكن نشر سوى بناء بيتا مرقَّم.",
+   "fr": "Seul un build bêta numéroté peut être publié.",
+   "bn": "শুধু নম্বরযুক্ত বিটা বিল্ডই প্রকাশ করা যায়।",
+   "pt-BR": "Só um build beta numerado pode ser publicado.",
+   "ru": "Выпустить можно только пронумерованную бета-сборку.",
+   "id": "Hanya build beta bernomor yang bisa dirilis."
+  },
+  "Create a token on GitHub for the coucou repository only (Repository access → Only select repositories), copy it and paste it here. Coucou keeps it in the system's credential store; it can only run this repository's workflows.": {
+   "zh-Hans": "在 GitHub 上只为 coucou 仓库创建一个令牌（Repository access → Only select repositories），复制后粘贴到这里。Coucou 把它保存在系统的凭据存储中；它只能运行这个仓库的工作流。",
+   "hi": "GitHub पर केवल coucou रिपॉज़िटरी के लिए टोकन बनाएँ (Repository access → Only select repositories), उसे कॉपी करके यहाँ चिपकाएँ। Coucou इसे सिस्टम के क्रेडेंशियल स्टोर में रखता है; यह केवल इस रिपॉज़िटरी के वर्कफ़्लो चला सकता है।",
+   "es": "Crea en GitHub un token solo para el repositorio coucou (Repository access → Only select repositories), cópialo y pégalo aquí. Coucou lo guarda en el almacén de credenciales del sistema; solo puede ejecutar los flujos de este repositorio.",
+   "ar": "أنشئ على GitHub رمزًا لمستودع coucou فقط (Repository access → Only select repositories)، وانسخه والصقه هنا. يحفظه Coucou في مخزن بيانات الاعتماد في النظام؛ ولا يمكنه سوى تشغيل سير عمل هذا المستودع.",
+   "fr": "Créez sur GitHub un jeton pour le seul dépôt coucou (Repository access → Only select repositories), copiez-le et collez-le ici. Coucou le garde dans le gestionnaire d'identifiants du système ; il ne peut que lancer les workflows de ce dépôt.",
+   "bn": "GitHub-এ শুধু coucou রিপোজিটরির জন্য একটি টোকেন তৈরি করুন (Repository access → Only select repositories), কপি করে এখানে পেস্ট করুন। Coucou এটি সিস্টেমের ক্রেডেনশিয়াল স্টোরে রাখে; এটি শুধু এই রিপোজিটরির ওয়ার্কফ্লো চালাতে পারে।",
+   "pt-BR": "Crie no GitHub um token só para o repositório coucou (Repository access → Only select repositories), copie e cole aqui. O Coucou o guarda no cofre de credenciais do sistema; ele só pode executar os fluxos deste repositório.",
+   "ru": "Создайте на GitHub токен только для репозитория coucou (Repository access → Only select repositories), скопируйте и вставьте сюда. Coucou хранит его в хранилище учётных данных системы; токен может только запускать действия этого репозитория.",
+   "id": "Buat token di GitHub hanya untuk repositori coucou (Repository access → Only select repositories), salin dan tempel di sini. Coucou menyimpannya di penyimpanan kredensial sistem; token itu hanya bisa menjalankan alur kerja repositori ini."
+  },
+  "Everyone on the stable channel will be offered it. A release cannot be taken back: only replaced by a newer build.": {
+   "zh-Hans": "稳定版渠道的所有人都会收到它。发布无法撤回：只能用更新的构建替换。",
+   "hi": "स्थिर चैनल पर सभी को यह मिलेगा। रिलीज़ वापस नहीं ली जा सकती: केवल नए बिल्ड से बदली जा सकती है।",
+   "es": "Se ofrecerá a todos en el canal estable. Una publicación no se puede deshacer: solo reemplazarla con una compilación más nueva.",
+   "ar": "سيُعرض على كل من في القناة المستقرة. لا يمكن التراجع عن النشر: يمكن فقط استبداله ببناء أحدث.",
+   "fr": "Elle sera proposée à tous ceux du canal stable. Une publication ne se retire pas : on ne peut que la remplacer par un build plus récent.",
+   "bn": "স্থিতিশীল চ্যানেলের সবাইকে এটি দেওয়া হবে। প্রকাশ ফিরিয়ে নেওয়া যায় না: শুধু নতুন বিল্ড দিয়ে বদলানো যায়।",
+   "pt-BR": "Será oferecido a todos no canal estável. Uma publicação não pode ser desfeita: só substituída por um build mais novo.",
+   "ru": "Её получат все на стабильном канале. Выпуск нельзя отозвать — только заменить более новой сборкой.",
+   "id": "Semua di kanal stabil akan ditawari build ini. Rilis tidak bisa ditarik: hanya diganti dengan build yang lebih baru."
+  },
+  "Sends the beta build running here, the one you tested, to everyone, through GitHub. Nothing goes out until you confirm.": {
+   "zh-Hans": "通过 GitHub 把这里正在运行的、你测试过的 Beta 构建发给所有人。你确认之前，什么都不会发出。",
+   "hi": "यहाँ चल रहा, आपका परखा हुआ बीटा बिल्ड GitHub के ज़रिए सभी को भेजता है। आपकी पुष्टि से पहले कुछ नहीं जाता।",
+   "es": "Envía a todos, a través de GitHub, la compilación beta que se ejecuta aquí, la que probaste. No sale nada hasta que confirmes.",
+   "ar": "يرسل إصدار بيتا الذي يعمل هنا، الذي اختبرته، إلى الجميع عبر GitHub. لا يخرج شيء حتى تؤكد.",
+   "fr": "Envoie à tout le monde, via GitHub, le build bêta qui tourne ici, celui que vous avez testé. Rien ne part avant votre confirmation.",
+   "bn": "এখানে চলমান, আপনার পরীক্ষিত বিটা বিল্ডটি GitHub-এর মাধ্যমে সবার কাছে পাঠায়। আপনি নিশ্চিত না করা পর্যন্ত কিছুই যায় না।",
+   "pt-BR": "Envia a todos, pelo GitHub, o build beta que está rodando aqui, o que você testou. Nada sai até você confirmar.",
+   "ru": "Отправляет всем через GitHub бета-сборку, которая сейчас запущена, — ту, что вы проверили. Пока вы не подтвердите, ничего не уходит.",
+   "id": "Mengirim build beta yang berjalan di sini, yang Anda uji, ke semua orang melalui GitHub. Tidak ada yang keluar sampai Anda konfirmasi."
   }
  }
 }

@@ -41,6 +41,17 @@ export interface UpdateInfo {
   canInstall: boolean;
   found: UpdateManifest | null;
   promotePage: string | null;
+  /** A GitHub token is kept: "Release to everyone" runs the workflow from here. */
+  releaseConnected: boolean;
+  tokenPage: string;
+}
+
+export type ReleaseRefusal = "notConnected" | "badToken" | "wrongPassword" | "notBeta" | "network";
+
+export interface ReleaseRun {
+  status: string;
+  conclusion: string | null;
+  url: string;
 }
 
 export interface BootInfo {
@@ -236,6 +247,11 @@ export const Bridge = {
   updateSetChannel: (channel: UpdateChannel, password?: string) =>
     call<boolean>("update_set_channel", { channel, password: password ?? null }),
   updateInstall: (build: number) => callOrThrow<void>("update_install", { build }),
+  /** Rejects with a ReleaseRefusal. */
+  updateReleaseConnect: (token: string) => callOrThrow<void>("update_release_connect", { token }),
+  updateReleaseDisconnect: () => call<void>("update_release_disconnect"),
+  updateRelease: (password: string) => callOrThrow<ReleaseRun>("update_release", { password }),
+  updateReleaseStatus: () => callOrThrow<ReleaseRun | null>("update_release_status"),
 
   /** Which of these sounds have a file of the user's own in the sounds folder. */
   customSounds: (names: readonly string[]) => call<string[]>("custom_sounds", { names }),

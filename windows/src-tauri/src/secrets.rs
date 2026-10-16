@@ -71,6 +71,8 @@ pub const INTERNAL_KEYS: &[&str] = &[
     "phone-relay-room",
     "phone-relay-key",
     "phone-relay-access",
+    // The owner's GitHub token that runs "Promote beta to stable" (updater.rs).
+    "release-token",
 ];
 
 /// Whether the keystore would accept this key through `get_internal` / `set_internal`.
