@@ -1,0 +1,73 @@
+name: Promote beta to stable
+
+# Sends a beta build you tested to everybody: Coucou on the stable channel
+# offers it from then on. Only someone with write access to this repository
+# (you) can run it: Actions → "Promote beta to stable" → Run workflow. Leave the
+# build empty for the latest beta. The installer is the very file the beta
+# testers got (its SHA-256 is checked), signed again for the stable channel.
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: "Beta build number (empty: the latest beta)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-stable
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Promote
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COUCOU_UPDATE_KEY: ${{ secrets.COUCOU_UPDATE_KEY }}
+          BUILD: ${{ inputs.build }}
+        run: |
+          set -euo pipefail
+          if [ -z "$COUCOU_UPDATE_KEY" ]; then
+            echo "::error::COUCOU_UPDATE_KEY is not set (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          mkdir -p work && cd work
+          if [ -z "$BUILD" ]; then
+            gh release download channel-beta --pattern update.json --output beta.json
+            BUILD=$(node -p "require('./beta.json').build")
+          fi
+          case "$BUILD" in (*[!0-9]*|'') echo "::error::bad build '$BUILD'"; exit 1;; esac
+          tag="beta-$BUILD"
+          exe="Coucou-Windows-setup-$BUILD.exe"
+          gh release download "$tag" --pattern update.json --output beta.json --clobber
+          gh release download "$tag" --pattern "$exe"
+          want=$(node -p "require('./beta.json').sha256")
+          got=$(sha256sum "$exe" | cut -d' ' -f1)
+          if [ "$want" != "$got" ]; then
+            echo "::error::$exe is not the file beta $BUILD was signed for."
+            exit 1
+          fi
+          version=$(node -p "require('./beta.json').version")
+          notes=$(node -p "require('./beta.json').notes")
+          gh release view channel-stable >/dev/null 2>&1 || gh release create channel-stable --latest \
+            --title "Coucou" --notes "The stable Coucou for Windows. Install Coucou-Windows-setup.exe; Coucou then updates itself from here."
+          cp "$exe" Coucou-Windows-setup.exe
+          gh release upload channel-stable "$exe" Coucou-Windows-setup.exe --clobber
+          url="https://github.com/Disa153/coucou/releases/download/channel-stable/$exe"
+          node ../.github/scripts/sign-update.mjs --channel stable --build "$BUILD" --version "$version" \
+            --url "$url" --sha256 "$got" --notes "$notes" --out update.json
+          # The manifest last: until it is up, nobody is offered the new file.
+          gh release upload channel-stable update.json --clobber
+          gh release edit channel-stable --notes "Coucou $version, build $BUILD (tested in beta). Install Coucou-Windows-setup.exe; Coucou then updates itself from here.
+
+          $notes"
+          echo "### Build $BUILD is now stable" >> "$GITHUB_STEP_SUMMARY"
