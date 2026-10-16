@@ -4,8 +4,9 @@
 // (BotCanvasView, DesktopMochi.swift).
 //
 // On Windows the same state comes from the system media session, whatever
-// player it is (Spotify, a browser tab, Яндекс Музыка…): `source` names it and
-// there is no volume to show.
+// player it is (Spotify, a browser tab, Яндекс Музыка…): `source` names it, and
+// the volume is that player's own level in the Windows mixer (volumeSupported
+// once it has sound there).
 
 import type { BotStateName, IslandMode, IslandViewName } from "./layout";
 

@@ -1387,6 +1387,34 @@ pub fn player_name(aumid: &str) -> String {
     }
 }
 
+/// Whether a process (`exe`, a path or a file name) is the player whose system
+/// media session is `aumid`: its sound is that process's in the mixer. Browsers
+/// play from many processes; every one of them has the same file name.
+pub fn exe_plays_for(aumid: &str, exe: &str) -> bool {
+    let file = exe.rsplit(['\\', '/']).next().unwrap_or(exe).to_lowercase();
+    let stem = file.strip_suffix(".exe").unwrap_or(&file);
+    if stem.is_empty() {
+        return false;
+    }
+    let a = aumid.to_lowercase();
+    // Session names that are not the program's: Firefox signs with a hash,
+    // Yandex Browser runs as browser.exe, Media Player as a packaged app.
+    const KNOWN: [(&str, &str); 6] = [
+        ("308046b0af4a39cb", "firefox"),
+        ("firefox", "firefox"),
+        ("yandex.browser", "browser"),
+        ("yandexbrowser", "browser"),
+        ("zunemusic", "microsoft.media.player"),
+        ("applemusic", "applemusic"),
+    ];
+    if let Some((_, want)) = KNOWN.iter().find(|(k, _)| a.contains(k)) {
+        return stem == *want;
+    }
+    // Otherwise the program's own name is in the session's: "Chrome",
+    // "MSEdge", "Spotify.exe", "C:\\…\\vlc.exe", "Opera".
+    stem.len() >= 3 && a.contains(stem)
+}
+
 /// Windows FILETIME ticks (100 ns since 1601) → Unix milliseconds.
 #[cfg(any(windows, test))]
 pub fn filetime_ms(ticks: i64) -> f64 {
@@ -1425,6 +1453,19 @@ mod win {
     };
     use windows::Media::MediaPlaybackAutoRepeatMode;
     use windows::Storage::Streams::DataReader;
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::Media::Audio::{
+        eMultimedia, eRender, IAudioSessionControl2, IAudioSessionManager2, IMMDeviceEnumerator, ISimpleAudioVolume,
+        MMDeviceEnumerator,
+    };
+    use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CLSCTX_ALL, COINIT_MULTITHREADED};
+    use windows::Win32::System::Threading::{
+        OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+    };
+
+    /// While something plays, how often the player's level is read again, so a
+    /// change made in the player (or the mixer) shows on the card.
+    const VOLUME_POLL: Duration = Duration::from_millis(800);
 
     /// A call into the media session never holds anything up for longer.
     const CALL: Duration = Duration::from_secs(3);
@@ -1495,6 +1536,11 @@ mod win {
         let title = text(props.Title());
         if title.is_empty() {
             return (st, Some(props));
+        }
+        // The player's level in the Windows mixer, when it has sound there.
+        if let Some(v) = player_volume(&aumid) {
+            st.volume = v;
+            st.volume_supported = true;
         }
         let mut artist = text(props.Artist());
         if artist.is_empty() {
@@ -1638,6 +1684,85 @@ mod win {
         }
     }
 
+    // ── Volume: the player in the Windows mixer ───────────────────────────────
+
+    /// Core Audio needs COM on the calling thread; one that has it already keeps it.
+    fn com() {
+        unsafe {
+            let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
+        }
+    }
+
+    fn exe_of(pid: u32) -> Option<String> {
+        unsafe {
+            let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
+            let mut buf = [0u16; 1024];
+            let mut len = buf.len() as u32;
+            let named = QueryFullProcessImageNameW(process, PROCESS_NAME_WIN32, windows::core::PWSTR(buf.as_mut_ptr()), &mut len);
+            let _ = CloseHandle(process);
+            named.ok()?;
+            Some(String::from_utf16_lossy(&buf[..len as usize]))
+        }
+    }
+
+    /// The player's audio sessions on the default output (a browser has one per tab process).
+    fn player_audio(aumid: &str) -> Vec<ISimpleAudioVolume> {
+        com();
+        let mut out = Vec::new();
+        if aumid.is_empty() {
+            return out;
+        }
+        unsafe {
+            let Ok(devices) = CoCreateInstance::<_, IMMDeviceEnumerator>(&MMDeviceEnumerator, None, CLSCTX_ALL) else {
+                return out;
+            };
+            let Ok(device) = devices.GetDefaultAudioEndpoint(eRender, eMultimedia) else { return out };
+            let Ok(manager) = device.Activate::<IAudioSessionManager2>(CLSCTX_ALL, None) else { return out };
+            let Ok(sessions) = manager.GetSessionEnumerator() else { return out };
+            for i in 0..sessions.GetCount().unwrap_or(0) {
+                let Ok(control) = sessions.GetSession(i) else { continue };
+                let Ok(control) = control.cast::<IAudioSessionControl2>() else { continue };
+                let pid = control.GetProcessId().unwrap_or(0);
+                if pid == 0 {
+                    continue;
+                }
+                if exe_of(pid).is_some_and(|exe| exe_plays_for(aumid, &exe)) {
+                    if let Ok(volume) = control.cast::<ISimpleAudioVolume>() {
+                        out.push(volume);
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    /// 0…100 (0 while muted), or None when the player has no sound in the mixer.
+    fn player_volume(aumid: &str) -> Option<i32> {
+        let sessions = player_audio(aumid);
+        // The loudest of its sessions is what you hear.
+        let level = sessions
+            .iter()
+            .filter_map(|v| unsafe {
+                let muted = v.GetMute().map(|m| m.as_bool()).unwrap_or(false);
+                v.GetMasterVolume().ok().map(|l| if muted { 0.0 } else { l })
+            })
+            .fold(None::<f32>, |acc, l| Some(acc.map_or(l, |a| a.max(l))))?;
+        Some((level * 100.0).round().clamp(0.0, 100.0) as i32)
+    }
+
+    fn set_player_volume(aumid: &str, percent: f64) -> bool {
+        let level = (percent / 100.0).clamp(0.0, 1.0) as f32;
+        let mut done = false;
+        for volume in &player_audio(aumid) {
+            unsafe {
+                // A level set by hand unmutes, as the mixer does.
+                let _ = volume.SetMute(false, std::ptr::null());
+                done |= volume.SetMasterVolume(level, std::ptr::null()).is_ok();
+            }
+        }
+        done
+    }
+
     /// The listener: sleeps until the system says something changed.
     fn listen(app: AppHandle, generation: u64, tx: mpsc::Sender<Msg>, rx: mpsc::Receiver<Msg>) {
         let Ok(mgr) = manager() else {
@@ -1682,10 +1807,30 @@ mod win {
                 unwatch(&mut watched);
                 watched = watch(&mgr, &tx);
             }
-            publish(&app, watched.as_ref().map(|w| &w.session), Some(generation));
-            next = match rx.recv() {
-                Ok(m) => m,
-                Err(_) => break,
+            let mut shown = publish(&app, watched.as_ref().map(|w| &w.session), Some(generation));
+            // Nothing signals a volume changed in the player or the mixer: while
+            // something plays with a level, it is read again now and then.
+            let received = loop {
+                if !(shown.playing && shown.volume_supported) {
+                    break rx.recv().ok();
+                }
+                match rx.recv_timeout(VOLUME_POLL) {
+                    Ok(m) => break Some(m),
+                    Err(mpsc::RecvTimeoutError::Disconnected) => break None,
+                    Err(mpsc::RecvTimeoutError::Timeout) => {
+                        let aumid = watched.as_ref().map(|w| text(w.session.SourceAppUserModelId())).unwrap_or_default();
+                        if let Some(v) = player_volume(&aumid) {
+                            if v != shown.volume && shared().generation == generation {
+                                shown.volume = v;
+                                emit_state(&app, &shown);
+                            }
+                        }
+                    }
+                }
+            };
+            next = match received {
+                Some(m) => m,
+                None => break,
             };
         }
         unwatch(&mut watched);
@@ -1753,7 +1898,13 @@ mod win {
             } else {
                 MediaPlaybackAutoRepeatMode::None
             }),
-            // The system session has no volume.
+            // The session has no volume: the player's level in the mixer.
+            "volume" => {
+                let aumid = text(s.SourceAppUserModelId());
+                let ok = set_player_volume(&aumid, value.unwrap_or(0.0));
+                nudge();
+                return ok;
+            }
             _ => return false,
         };
         let ok = op.and_then(wait).unwrap_or(false);
@@ -1782,6 +1933,21 @@ mod win {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_players_sound_is_found_by_its_program() {
+        assert!(exe_plays_for("Chrome", "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"));
+        assert!(exe_plays_for("MSEdge", "msedge.exe"));
+        assert!(exe_plays_for("Spotify.exe", "C:\\Users\\me\\AppData\\Roaming\\Spotify\\Spotify.exe"));
+        assert!(exe_plays_for("308046B0AF4A39CB", "firefox.exe"));
+        assert!(exe_plays_for("Yandex.Browser", "browser.exe"));
+        assert!(exe_plays_for("Microsoft.ZuneMusic_8wekyb3d8bbwe!Microsoft.ZuneMusic", "Microsoft.Media.Player.exe"));
+        // another program, or one with too short a name to tell
+        assert!(!exe_plays_for("Chrome", "msedge.exe"));
+        assert!(!exe_plays_for("308046B0AF4A39CB", "chrome.exe"));
+        assert!(!exe_plays_for("Chrome", "c.exe"));
+        assert!(!exe_plays_for("Chrome", ""));
+    }
 
     #[test]
     fn windows_players_get_a_friendly_name() {

@@ -300,6 +300,30 @@ export function buildSpotifyCard(): SpotifyCardHost {
     (f) => setVolume(f * 100),
   );
   const volumeBox = h("div", { class: "np-volume" }, volIcon, volume.el);
+  // The speaker mutes and brings the sound back; the wheel steps it by 5.
+  // On Windows this is the player's own level in the mixer (a browser's too),
+  // so a change made there shows here and the other way round.
+  let unmutedVolume = 50;
+  volIcon.style.cursor = "pointer";
+  volIcon.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const v = Spotify.state.volume;
+    if (v > 0) {
+      unmutedVolume = v;
+      setVolume(0);
+    } else {
+      setVolume(unmutedVolume > 0 ? unmutedVolume : 50);
+    }
+  });
+  volumeBox.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      const step = e.deltaY < 0 ? 5 : -5;
+      setVolume(Math.max(0, Math.min(100, Spotify.state.volume + step)));
+    },
+    { passive: false },
+  );
   const controls = h("div", { class: "np-controls" },
     h("div", { class: "np-buttons" }, shuffle, prev, play, next, repeat),
     h("div", { class: "grow" }),
