@@ -28,13 +28,15 @@ struct DenyApprovalIntent: LiveActivityIntent {
     }
 }
 
-/// Allow on the Live Activity, right where you are: iOS asks to unlock the
-/// iPhone (Face ID) if it is locked, then the OK goes to the Mac without
-/// opening Coucou. The Mac applies it only to this exact command.
+/// Allow on the Live Activity or the Dynamic Island: Coucou comes forward and
+/// asks for Face ID every time, unlocked or not, as Allow does in the app;
+/// only then the OK goes out. The computer applies it only to this exact command.
 struct AllowApprovalIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Allow the command"
     static var isDiscoverable: Bool { false }
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresAuthentication }
+    /// Face ID needs Coucou on screen: from the background it cannot ask.
+    static var openAppWhenRun: Bool { true }
 
     @Parameter(title: "Request") var fingerprint: String
     @Parameter(title: "Agent") var pillId: String
@@ -48,6 +50,10 @@ struct AllowApprovalIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         #if !WIDGET_EXTENSION
+        guard await OwnerCheck.confirm(reason: "Allow this command") else {
+            await MainActor.run { Haptics.warning() }
+            return .result()
+        }
         let link = await PhoneLink.shared
         _ = await link.allowFromOutside(fingerprint: fingerprint, pillId: pillId, from: "the Lock Screen")
         #endif

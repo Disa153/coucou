@@ -241,9 +241,19 @@ struct LANChatView: View {
                 }
             } else {
                 messages(chat)
-                composer(chat)
+                    // The field rides on the keyboard: a bottom inset, as in a session.
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        VStack(spacing: 0) {
+                            pendingApprovals
+                            composer(chat)
+                        }
+                    }
             }
         }
+        // With the tab bar there, iOS lifts the field by the bar, not by the
+        // keyboard, and the keyboard covers it: the bar goes while typing.
+        .toolbarVisibility(focused || dictation.isRecording ? .hidden : .automatic, for: .tabBar)
+        .animation(.easeOut(duration: 0.2), value: focused)
         .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -269,16 +279,6 @@ struct LANChatView: View {
                     .accessibilityLabel("New chat")
                     .disabled(chat.messages.isEmpty)
                 }
-            }
-            // Above the keyboard: put it away.
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button {
-                    focused = false
-                } label: {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                }
-                .accessibilityLabel("Hide keyboard")
             }
         }
         .onAppear { if chat.offered { chat.requestModels() } }
@@ -364,11 +364,54 @@ struct LANChatView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .glassCard(cornerRadius: 20)
-                sendButton(chat)
+                // Put the keyboard away, right above Send.
+                VStack(spacing: 8) {
+                    if focused {
+                        Button {
+                            focused = false
+                        } label: {
+                            Image(systemName: "keyboard.chevron.compact.down")
+                                .font(.system(size: 15, weight: .semibold))
+                                .frame(width: 32, height: 32)
+                                .glassCard(cornerRadius: 16)
+                        }
+                        .accessibilityLabel("Hide keyboard")
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                    sendButton(chat)
+                }
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+    }
+
+    /// A command an agent waits on, the same one as on the Lock Screen and in
+    /// the Dynamic Island: answered here or there, it goes away from both.
+    /// Allow asks for Face ID (ApprovalCard).
+    @ViewBuilder private var pendingApprovals: some View {
+        let waiting = PhoneLink.shared.sessions
+            .filter { $0.needsApproval && !$0.approvalFingerprint.isEmpty }
+            .sorted { $0.updatedAt > $1.updatedAt }
+        if let session = waiting.first {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text(session.pillName).font(.caption.weight(.semibold))
+                    if !session.title.isEmpty, session.title != session.pillName {
+                        Text("· \(session.title)").font(.caption).foregroundStyle(.secondary)
+                    }
+                    if waiting.count > 1 {
+                        Spacer()
+                        Text("+\(waiting.count - 1)").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    }
+                }
+                ApprovalCard(link: PhoneLink.shared, session: session)
+                    .id(session.approvalFingerprint)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
     }
 
     /// Photo library or camera; photos only for a model that reads them.

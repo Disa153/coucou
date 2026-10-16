@@ -6,6 +6,13 @@ struct ApprovalCard: View {
     let link: PhoneLink
     let session: SessionItem
 
+    /// Where the command runs: the Mac, or the PC of the LAN build.
+    #if LAN_LINK
+    private static let computer = "your computer"
+    #else
+    private static let computer = "your Mac"
+    #endif
+
     @State private var sending: Decision?
     @State private var sent: Decision?
     @State private var error: String?
@@ -28,13 +35,13 @@ struct ApprovalCard: View {
                         Image(systemName: "xmark.circle.fill").font(.title).foregroundStyle(.red)
                             .symbolEffect(.bounce, value: sent)
                     }
-                    Text(sent == .allow ? "Allowed, sent to your Mac" : "Denied, sent to your Mac")
+                    Text(sent == .allow ? "Allowed, sent to \(Self.computer)" : "Denied, sent to \(Self.computer)")
                         .font(.callout.weight(.semibold))
                         .foregroundStyle(sent == .allow ? .green : .red)
                 }
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             } else if session.approvalFingerprint.isEmpty {
-                Text("Answer on your Mac. This request can't be answered from the iPhone.")
+                Text("Answer on \(Self.computer). This request can't be answered from the iPhone.")
                     .font(.caption).foregroundStyle(.secondary)
             } else {
                 ApprovalChoiceButtons(disabled: sending != nil) {
@@ -61,7 +68,7 @@ struct ApprovalCard: View {
         defer { sending = nil }
         error = nil
         if decision == .allow {
-            guard await OwnerCheck.confirm(reason: "Allow this command on your Mac") else {
+            guard await OwnerCheck.confirm(reason: "Allow this command on \(Self.computer)") else {
                 error = "Face ID didn't confirm. Nothing was sent."
                 Haptics.warning()
                 return
