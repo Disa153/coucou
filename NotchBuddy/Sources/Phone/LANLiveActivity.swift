@@ -152,7 +152,15 @@ final class LANLiveActivity {
             }
             if let q = queued {
                 queued = nil
-                await Self.send(id: id, state: q.state, alert: q.alert)
+                // From the background iOS drops an update that carries an alert,
+                // state and all: the Allow / Deny never showed until Coucou was
+                // opened. In the background the state goes alone; the approval's
+                // notification already lights the screen and plays the sound.
+                let foreground = UIApplication.shared.applicationState == .active
+                await Self.send(id: id, state: q.state, alert: q.alert && foreground)
+                if q.alert && !foreground {
+                    BackgroundLog.add("Mochi: waiting for your OK, sent without the alert (background)")
+                }
                 lastSent = .now
                 lastTone = q.state.tone
                 let time = Date.now.formatted(date: .omitted, time: .standard)

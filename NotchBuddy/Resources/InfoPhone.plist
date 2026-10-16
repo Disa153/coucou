@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>11</string>
+	<string>12</string>
 	<key>CoucouAPNsEnvironment</key>
 	<string>$(COUCOU_APNS_ENV)</string>
 	<key>INAlternativeAppNames</key>
