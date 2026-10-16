@@ -66,9 +66,11 @@ fn full_prompt(resuming: bool, body: String) -> String {
     }
 }
 
+const NOT_INSTALLED: &str = "Gemini CLI is not installed on this computer. Install Node.js (nodejs.org), then run `npm install -g @google/gemini-cli` in a terminal, run `gemini` once to sign in with Google, and restart Coucou.";
+
 /// Where `gemini` is. npm installs a `gemini.cmd` shim in %APPDATA%\npm, which a
 /// GUI app launched at login may not have on its PATH.
-fn command() -> Command {
+fn command() -> Result<Command, String> {
     #[cfg(windows)]
     {
         let npm = std::env::var_os("APPDATA")
@@ -79,20 +81,13 @@ fn command() -> Command {
             .or_else(|| on_path("gemini.exe"));
         // Rust runs a .cmd through cmd.exe with its arguments escaped; the arguments
         // below are fixed strings, a checked model alias and a checked UUID anyway.
-        let mut cmd = match found {
-            Some(path) => Command::new(path),
-            None => {
-                let mut c = Command::new("cmd.exe");
-                c.args(["/D", "/C", "gemini.cmd"]);
-                c
-            }
-        };
+        let mut cmd = Command::new(found.ok_or_else(|| NOT_INSTALLED.to_string())?);
         crate::platform::no_console(&mut cmd);
-        cmd
+        Ok(cmd)
     }
     #[cfg(not(windows))]
     {
-        Command::new("gemini")
+        Ok(Command::new("gemini"))
     }
 }
 
@@ -224,7 +219,7 @@ fn run(
     let spool = Spool::new().map_err(|e| format!("Coucou could not make a temporary file for Gemini CLI ({e})."))?;
     let out_file = std::fs::OpenOptions::new().append(true).open(&spool.out).map_err(|e| e.to_string())?;
     let err_file = std::fs::OpenOptions::new().append(true).open(&spool.err).map_err(|e| e.to_string())?;
-    let mut child = command()
+    let mut child = command()?
         .args(args(model, session))
         .current_dir(dir)
         .env_remove("GEMINI_API_KEY")
@@ -233,7 +228,13 @@ fn run(
         .stdout(Stdio::from(out_file))
         .stderr(Stdio::from(err_file))
         .spawn()
-        .map_err(|e| format!("Gemini CLI is not installed or not on PATH ({e}). Install it with `npm install -g @google/gemini-cli` and run `gemini` once to sign in with Google."))?;
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                NOT_INSTALLED.to_string()
+            } else {
+                format!("Gemini CLI could not start ({e}).")
+            }
+        })?;
 
     let mut stdin = child.stdin.take().expect("piped stdin");
     std::thread::spawn(move || {
