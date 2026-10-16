@@ -63,6 +63,8 @@ export class Island {
   /** A press on the island's body that may become a drag of the island. */
   private islandPress: { x: number; y: number } | null = null;
   private islandDragged = false;
+  /** The edge the island was last shaped for. */
+  private shownEdge: string | null = null;
 
   private header!: ViewHost;
   private views!: Map<IslandViewName, ViewHost>;
@@ -659,11 +661,23 @@ export class Island {
 
   // ── Geometry ────────────────────────────────────────────────────────────────
 
+  /**
+   * On the left or right edge the folded island stands upright along it (a
+   * tab: Mochi on top, the mini Mochis under him) and hides into the edge; it
+   * opens out sideways into the usual island, its text and widgets in rows.
+   */
+  private upright(): boolean {
+    const edge = State.settings.islandEdge;
+    return (edge === "left" || edge === "right") && State.mode !== "expanded";
+  }
+
   private targetSize(): { w: number; h: number; r: number } {
     let { w, h } = islandSize(State.mode, State.view, State.chatHistory.length);
     if (State.mode === "expanded" && State.view === "question" && State.pendingApproval?.questions) {
       h = QUESTION_PICKER_H;
     }
+    // Upright: the folded sizes turned a quarter, so hidden is zero wide, into the edge.
+    if (this.upright()) [w, h] = [h, w];
     const r = State.mode === "expanded" ? EXPANDED_CORNER : ROUNDED_CORNER;
     return { w, h, r };
   }
@@ -696,8 +710,13 @@ export class Island {
     this.islandEl.style.transform = "none";
     // These follow the island as it resizes, so they belong here rather than in
     // the state-driven DOM sync.
-    this.miniGrid.style.left = `${w - 40 - 14.5}px`;
-    this.miniGrid.style.top = `${hh / 2 - 14.5}px`;
+    if (this.upright()) {
+      this.miniGrid.style.left = `${w / 2 - 14.5}px`;
+      this.miniGrid.style.top = `${hh - 40 - 14.5}px`;
+    } else {
+      this.miniGrid.style.left = `${w - 40 - 14.5}px`;
+      this.miniGrid.style.top = `${hh / 2 - 14.5}px`;
+    }
     this.greetingCanvas.style.left = `${(w - EXPANDED_W) / 2}px`;
     this.uploadCanvas.el.style.left = `${(w - EXPANDED_W) / 2}px`;
 
@@ -1100,6 +1119,8 @@ export class Island {
 
   private updateBotTargets() {
     const p = botPosition(State.mode, State.view, this.height.value, State.uploadProgress);
+    // Upright tab: Mochi at its top instead of its left.
+    if (this.upright()) [p.cx, p.cy] = [p.cy, p.cx];
     this.botCx.target = p.cx;
     this.botCy.target = p.cy;
     this.botSize.target = p.diameter / 0.6;
@@ -1283,6 +1304,13 @@ export class Island {
   /** Applies settings coming from Rust at boot. */
   applySettings() {
     this.applyEdge();
+    // Dropped on another edge: the island takes that edge's shape (upright on a side).
+    const edge = State.settings.islandEdge ?? "top";
+    if (edge !== this.shownEdge) {
+      this.shownEdge = edge;
+      this.animateGeometry(false);
+      this.updateBotTargets();
+    }
     this.applyGeometry();
     Sound.setEnabled(State.settings.soundEnabled);
     Sound.setVolume(State.settings.soundVolume);
