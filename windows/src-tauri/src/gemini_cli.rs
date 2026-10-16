@@ -1,4 +1,9 @@
-// The chat through the user's own Gemini CLI: each turn runs the installed
+// The chat through Google's own command line, on the Google account it is signed in
+// with: Antigravity CLI (`agy`) when it is installed, else the older Gemini CLI.
+// Since June 2026 Gemini CLI no longer signs in personal Google accounts ("migrate
+// to the Antigravity suite"), so `agy` is the way for most people; both run headless.
+//
+// Gemini CLI: each turn runs the installed
 // `gemini` CLI headless, so it answers on the Google account the CLI is signed
 // in with ("Login with Google", free tier or a Google AI plan) and no API key
 // is needed. The twin of claude_code.rs.
@@ -19,7 +24,7 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
 
 use crate::chat::{self, Chat, ChatContext, ChatReply, ModelInfo};
-use crate::claude_code::{last_session, prompt_text, valid_session, work_dir};
+use crate::claude_code::{prompt_text, work_dir};
 use crate::island::WINDOW_LABEL;
 use crate::settings::Settings;
 
@@ -37,6 +42,10 @@ const TIMEOUT: Duration = Duration::from_secs(600);
 const MAX_ERROR: usize = 400;
 
 pub fn models() -> Vec<ModelInfo> {
+    // Antigravity's model slugs change with its releases: it picks its own.
+    if matches!(find_cli(), Some(Cli::Agy(_))) {
+        return vec![ModelInfo { id: DEFAULT_MODEL.into(), label: "Antigravity (default)".into() }];
+    }
     MODELS
         .iter()
         .map(|(id, label)| ModelInfo {
@@ -66,7 +75,209 @@ fn full_prompt(resuming: bool, body: String) -> String {
     }
 }
 
-const NOT_INSTALLED: &str = "Gemini CLI is not installed on this computer. Install Node.js (nodejs.org), then run `npm install -g @google/gemini-cli` in a terminal, run `gemini` once to sign in with Google, and restart Coucou.";
+/// Which command line answers.
+#[derive(Debug, Clone)]
+enum Cli {
+    /// Antigravity CLI, a native executable.
+    Agy(PathBuf),
+    /// The older Gemini CLI (Node, npm's gemini.cmd on Windows).
+    Gemini,
+}
+
+fn find_cli() -> Option<Cli> {
+    if let Some(agy) = find_agy() {
+        return Some(Cli::Agy(agy));
+    }
+    command().ok().map(|_| Cli::Gemini)
+}
+
+/// Where `agy` is: on PATH, or where its installers put it (a GUI app started at
+/// login may not have the updated PATH yet).
+fn find_agy() -> Option<PathBuf> {
+    #[cfg(windows)]
+    let name = "agy.exe";
+    #[cfg(not(windows))]
+    let name = "agy";
+    let home = crate::platform::home_dir();
+    let mut places = vec![home.join(".local").join("bin").join(name)];
+    #[cfg(windows)]
+    if let Some(local) = std::env::var_os("LOCALAPPDATA") {
+        let local = PathBuf::from(local);
+        places.push(local.join("Programs").join("agy").join(name));
+        places.push(local.join("Programs").join("antigravity-cli").join(name));
+        places.push(local.join("agy").join(name));
+    }
+    places.into_iter().find(|p| p.is_file()).or_else(|| {
+        std::env::split_paths(&std::env::var_os("PATH")?)
+            .map(|d| d.join(name))
+            .find(|p| p.is_file())
+    })
+}
+
+/// The longest prompt put on agy's command line (Windows caps a command line at 32 767).
+const MAX_AGY_PROMPT: usize = 24_000;
+
+fn agy_args(prompt: &str, conversation: Option<&str>) -> Vec<String> {
+    let mut a: Vec<String> = vec!["-p".into(), prompt.to_string(), "--output-format".into(), "stream-json".into()];
+    if let Some(id) = conversation {
+        a.push("--conversation".into());
+        a.push(id.to_string());
+    }
+    a
+}
+
+/// A session or conversation id passed back on the command line: a plain token.
+fn valid_id(id: &str) -> bool {
+    (1..=128).contains(&id.len()) && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+}
+
+/// The id to continue from: the last answer's, if the same command line gave it.
+fn last_session(history: &[Value], cli: &str) -> Option<String> {
+    let last = history.iter().rev().find(|m| m["role"] == "assistant")?;
+    let from = last.get("session_cli").and_then(Value::as_str).unwrap_or("gemini");
+    if from != cli {
+        return None;
+    }
+    last.get("session_id").and_then(Value::as_str).filter(|s| valid_id(s)).map(str::to_string)
+}
+
+/// What one line of `agy --output-format stream-json` says. The events are read
+/// leniently (the payload under its event name, or at the top level).
+#[derive(Debug, Default, PartialEq)]
+struct AgyLine {
+    conversation: Option<String>,
+    delta: Option<String>,
+    tool: bool,
+    /// The result: Ok(response) or Err(message).
+    result: Option<Result<String, String>>,
+}
+
+fn find_str<'a>(v: &'a Value, key: &str) -> Option<&'a str> {
+    v.get(key).and_then(Value::as_str).or_else(|| {
+        ["init", "step_update", "result"].iter().find_map(|k| v.get(*k)?.get(key)?.as_str())
+    })
+}
+
+fn parse_agy(line: &str) -> AgyLine {
+    let Ok(v) = serde_json::from_str::<Value>(line) else { return AgyLine::default() };
+    let mut out = AgyLine { conversation: find_str(&v, "conversation_id").map(str::to_string), ..Default::default() };
+    let kind = v.get("type").or_else(|| v.get("event")).and_then(Value::as_str).unwrap_or("");
+    let step = v.get("step_update").filter(|s| s.is_object()).or((kind == "step_update").then_some(&v));
+    if let Some(step) = step {
+        match step.get("step_type").and_then(Value::as_str) {
+            Some("agent_response") => out.delta = step.get("text_delta").and_then(Value::as_str).map(str::to_string),
+            Some("tool") => out.tool = true,
+            _ => {}
+        }
+    }
+    let result = v.get("result").filter(|r| r.is_object()).or(
+        (kind == "result" || (v.get("status").is_some() && v.get("response").is_some())).then_some(&v),
+    );
+    if let Some(r) = result {
+        let status = r.get("status").and_then(Value::as_str).unwrap_or("");
+        out.result = Some(if status.eq_ignore_ascii_case("success") {
+            Ok(r.get("response").and_then(Value::as_str).unwrap_or_default().trim().to_string())
+        } else {
+            let e = &r["error"];
+            Err(e.get("message").and_then(Value::as_str).or(e.as_str()).map(str::to_string)
+                .unwrap_or_else(|| format!("Antigravity CLI stopped ({}).", if status.is_empty() { "no status" } else { status })))
+        });
+    }
+    out
+}
+
+/// Runs one turn with agy, blocking. `on_delta` gets the text so far as it streams.
+fn run_agy(
+    agy: &Path,
+    dir: &Path,
+    conversation: Option<&str>,
+    prompt: String,
+    mut on_delta: impl FnMut(String),
+) -> Result<(String, Option<String>), String> {
+    if prompt.chars().count() > MAX_AGY_PROMPT {
+        return Err("This message is too long for Antigravity CLI. Start a new chat, or send a shorter one.".into());
+    }
+    let spool = Spool::new().map_err(|e| format!("Coucou could not make a temporary file ({e})."))?;
+    let out_file = std::fs::OpenOptions::new().append(true).open(&spool.out).map_err(|e| e.to_string())?;
+    let err_file = std::fs::OpenOptions::new().append(true).open(&spool.err).map_err(|e| e.to_string())?;
+    let mut cmd = Command::new(agy);
+    #[cfg(windows)]
+    crate::platform::no_console(&mut cmd);
+    let mut child = cmd
+        .args(agy_args(&prompt, conversation))
+        .current_dir(dir)
+        .env_remove("GEMINI_API_KEY")
+        .env_remove("GOOGLE_API_KEY")
+        .stdin(Stdio::null())
+        .stdout(Stdio::from(out_file))
+        .stderr(Stdio::from(err_file))
+        .spawn()
+        .map_err(|e| format!("Antigravity CLI could not start ({e})."))?;
+    let mut tail = Tail::open(&spool.out).map_err(|e| e.to_string())?;
+
+    let started = Instant::now();
+    let mut visible = String::new();
+    let mut conv: Option<String> = None;
+    let mut after_tool = false;
+    let mut result: Option<Result<String, String>> = None;
+    let status = loop {
+        let exited = child.try_wait().map_err(|e| e.to_string())?;
+        for line in tail.lines(exited.is_some()) {
+            let l = parse_agy(&line);
+            if l.conversation.is_some() {
+                conv = l.conversation;
+            }
+            if l.tool {
+                after_tool = true;
+            }
+            if let Some(d) = l.delta.filter(|d| !d.is_empty()) {
+                if after_tool && !visible.trim().is_empty() {
+                    visible.push_str("\n\n");
+                }
+                after_tool = false;
+                // Whether the deltas are pieces or the text so far, show the text so far.
+                let tail_start = visible.rfind("\n\n").map(|i| i + 2).unwrap_or(0);
+                if d.starts_with(&visible[tail_start..]) && visible.len() > tail_start {
+                    visible.truncate(tail_start);
+                }
+                visible.push_str(&d);
+                on_delta(visible.clone());
+            }
+            if l.result.is_some() {
+                result = l.result;
+            }
+        }
+        if let Some(status) = exited {
+            break status;
+        }
+        if started.elapsed() > TIMEOUT {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err("Antigravity CLI took more than 10 minutes and was stopped.".into());
+        }
+        std::thread::sleep(Duration::from_millis(150));
+    };
+    let stderr = std::fs::read_to_string(&spool.err).unwrap_or_default();
+    match result {
+        Some(Ok(text)) if !text.is_empty() => Ok((text, conv)),
+        Some(Ok(_)) if !visible.trim().is_empty() => Ok((visible.trim().to_string(), conv)),
+        Some(Err(e)) => Err(e.chars().take(MAX_ERROR).collect()),
+        _ if !visible.trim().is_empty() && status.success() => Ok((visible.trim().to_string(), conv)),
+        _ => {
+            let e = stderr.trim();
+            Err(if e.is_empty() {
+                format!(
+                    "Antigravity CLI gave no answer (exit code {}). Run `agy` in a terminal once to sign in with Google.",
+                    status.code().map(|c| c.to_string()).unwrap_or_else(|| "none".into())
+                )
+            } else {
+                e.chars().take(MAX_ERROR).collect()
+            })
+        }
+    }
+}
+
+const NOT_INSTALLED: &str = "Antigravity CLI is not installed on this computer. Install it from antigravity.google/download, run `agy` once in a terminal to sign in with Google, and restart Coucou. (Gemini CLI no longer signs in personal Google accounts.)";
 
 /// Where `gemini` is. npm installs a `gemini.cmd` shim in %APPDATA%\npm, which a
 /// GUI app launched at login may not have on its PATH.
@@ -318,8 +529,10 @@ async fn turn(
     context: Option<ChatContext>,
     on_delta: impl FnMut(String) + Send + 'static,
 ) -> Result<ChatReply, String> {
+    let cli = find_cli().ok_or_else(|| NOT_INSTALLED.to_string())?;
+    let cli_name = if matches!(cli, Cli::Agy(_)) { "agy" } else { "gemini" };
     let turn = chat.begin(PROVIDER);
-    let session = last_session(&turn.history);
+    let session = last_session(&turn.history, cli_name);
     let prompt = full_prompt(
         session.is_some(),
         prompt_text(
@@ -332,16 +545,18 @@ async fn turn(
     );
     let dir: PathBuf = work_dir(settings);
     let model = checked_model(model).to_string();
-    let (answer, new_session) = tokio::task::spawn_blocking(move || {
-        run(&dir, &model, session.as_deref(), prompt, on_delta)
+    let (answer, new_session) = tokio::task::spawn_blocking(move || match cli {
+        Cli::Agy(agy) => run_agy(&agy, &dir, session.as_deref(), prompt, on_delta),
+        Cli::Gemini => run(&dir, &model, session.as_deref(), prompt, on_delta),
     })
     .await
     .map_err(|e| e.to_string())??;
 
     let plain = chat::plain_question(turn.first, context.as_ref(), &query);
     let mut assistant = json!({ "role": "assistant", "content": answer });
-    if let Some(id) = new_session.filter(|s| valid_session(s)) {
+    if let Some(id) = new_session.filter(|s| valid_id(s)) {
         assistant["session_id"] = json!(id);
+        assistant["session_cli"] = json!(cli_name);
     }
     chat.commit(
         &turn,
@@ -414,6 +629,35 @@ mod tests {
         let bad = r#"{"type":"result","timestamp":"t","status":"error","error":{"type":"x","message":"Quota exceeded"}}"#;
         assert_eq!(parse_line(bad), Line::Done { error: Some("Quota exceeded".into()) });
         assert_eq!(parse_line("not json"), Line::Other);
+    }
+
+    #[test]
+    fn agy_stream_lines_are_read_whatever_their_nesting() {
+        let init = r#"{"type":"init","init":{"conversation_id":"conv-1"}}"#;
+        assert_eq!(parse_agy(init).conversation.as_deref(), Some("conv-1"));
+        let step = r#"{"type":"step_update","step_update":{"conversation_id":"conv-1","step_index":2,"state":"ACTIVE","step_type":"agent_response","text_delta":"Hel"}}"#;
+        assert_eq!(parse_agy(step).delta.as_deref(), Some("Hel"));
+        let flat = r#"{"type":"step_update","step_type":"tool","state":"DONE","tool_info":{"name":"read_file"}}"#;
+        assert!(parse_agy(flat).tool);
+        let ok = r#"{"type":"result","result":{"conversation_id":"conv-1","status":"SUCCESS","response":" Hello "}}"#;
+        assert_eq!(parse_agy(ok).result, Some(Ok("Hello".into())));
+        let bad = r#"{"result":{"status":"ERROR","error":{"message":"authentication required"}}}"#;
+        assert_eq!(parse_agy(bad).result, Some(Err("authentication required".into())));
+        let envelope = r#"{"conversation_id":"c","status":"SUCCESS","response":"Hi"}"#;
+        assert_eq!(parse_agy(envelope).result, Some(Ok("Hi".into())));
+        assert_eq!(parse_agy("Signing in…"), AgyLine::default());
+    }
+
+    #[test]
+    fn a_conversation_resumes_only_with_the_cli_that_started_it() {
+        let h = vec![json!({"role":"assistant","content":"yo","session_id":"conv-1","session_cli":"agy"})];
+        assert_eq!(last_session(&h, "agy").as_deref(), Some("conv-1"));
+        assert_eq!(last_session(&h, "gemini"), None);
+        let old = vec![json!({"role":"assistant","content":"yo","session_id":"0b6f1f5e-2c1d-4a7b-9b3e-1f2a3b4c5d6e"})];
+        assert!(last_session(&old, "gemini").is_some());
+        assert!(!valid_id("x & del *"));
+        let a = agy_args("hi", Some("conv-1"));
+        assert_eq!(a, ["-p", "hi", "--output-format", "stream-json", "--conversation", "conv-1"]);
     }
 
     #[test]

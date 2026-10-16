@@ -4549,27 +4549,19 @@
    "ru": "Овчарка (реалистичная)",
    "id": "Gembala Jerman (realistis)"
   },
-  "Gemini CLI (Google account)": {
-   "zh-Hans": "Gemini CLI（Google 账号）",
-   "hi": "Gemini CLI (Google खाता)",
-   "es": "Gemini CLI (cuenta de Google)",
-   "ar": "Gemini CLI (حساب Google)",
-   "fr": "Gemini CLI (compte Google)",
-   "bn": "Gemini CLI (Google অ্যাকাউন্ট)",
-   "pt-BR": "Gemini CLI (conta do Google)",
-   "ru": "Gemini CLI (аккаунт Google)",
-   "id": "Gemini CLI (akun Google)"
+  "Gemini (Google account)": {
+   "zh-Hans": "Gemini（Google 账号）",
+   "hi": "Gemini (Google खाता)",
+   "es": "Gemini (cuenta de Google)",
+   "ar": "Gemini (حساب Google)",
+   "fr": "Gemini (compte Google)",
+   "bn": "Gemini (Google অ্যাকাউন্ট)",
+   "pt-BR": "Gemini (conta do Google)",
+   "ru": "Gemini (аккаунт Google)",
+   "id": "Gemini (akun Google)"
   },
-  "Chat through the Gemini CLI installed on this computer, on the Google account it is signed in with: no API key needed. It works in the same folder as Claude Code above and can read the files there. Install it with npm install -g @google/gemini-cli, then run gemini once in a terminal and choose Login with Google.": {
-   "zh-Hans": "通过本机安装的 Gemini CLI 聊天，使用其登录的 Google 账号：无需 API 密钥。它与上方的 Claude Code 在同一文件夹中工作，并可读取其中的文件。使用 npm install -g @google/gemini-cli 安装，然后在终端运行一次 gemini 并选择 Login with Google。",
-   "hi": "इस कंप्यूटर पर इंस्टॉल Gemini CLI से चैट करें, उस Google खाते पर जिससे वह साइन इन है: कोई API कुंजी नहीं चाहिए। यह ऊपर वाले Claude Code के उसी फ़ोल्डर में काम करता है और वहाँ की फ़ाइलें पढ़ सकता है। npm install -g @google/gemini-cli से इंस्टॉल करें, फिर टर्मिनल में एक बार gemini चलाएँ और Login with Google चुनें।",
-   "es": "Chatea a través del Gemini CLI instalado en este ordenador, con la cuenta de Google con la que ha iniciado sesión: no hace falta clave de API. Trabaja en la misma carpeta que Claude Code (arriba) y puede leer sus archivos. Instálalo con npm install -g @google/gemini-cli, ejecuta gemini una vez en un terminal y elige Login with Google.",
-   "ar": "تحدّث عبر Gemini CLI المثبّت على هذا الكمبيوتر، بحساب Google المسجَّل الدخول به: لا حاجة إلى مفتاح API. يعمل في نفس مجلد Claude Code أعلاه ويمكنه قراءة الملفات فيه. ثبّته بالأمر npm install -g @google/gemini-cli، ثم شغّل gemini مرة واحدة في الطرفية واختر Login with Google.",
-   "fr": "Discutez via le Gemini CLI installé sur cet ordinateur, avec le compte Google auquel il est connecté : aucune clé API nécessaire. Il travaille dans le même dossier que Claude Code ci-dessus et peut y lire les fichiers. Installez-le avec npm install -g @google/gemini-cli, puis lancez gemini une fois dans un terminal et choisissez Login with Google.",
-   "bn": "এই কম্পিউটারে ইনস্টল করা Gemini CLI দিয়ে চ্যাট করুন, যে Google অ্যাকাউন্টে সাইন ইন করা আছে তাতে: কোনো API কী লাগবে না। এটি উপরের Claude Code-এর একই ফোল্ডারে কাজ করে এবং সেখানকার ফাইল পড়তে পারে। npm install -g @google/gemini-cli দিয়ে ইনস্টল করুন, তারপর টার্মিনালে একবার gemini চালিয়ে Login with Google বেছে নিন।",
-   "pt-BR": "Converse pelo Gemini CLI instalado neste computador, com a conta do Google em que ele está conectado: sem chave de API. Ele trabalha na mesma pasta do Claude Code acima e pode ler os arquivos dela. Instale com npm install -g @google/gemini-cli, depois execute gemini uma vez no terminal e escolha Login with Google.",
-   "ru": "Чат через Gemini CLI, установленный на этом компьютере, на том аккаунте Google, под которым он вошёл: API-ключ не нужен. Работает в той же папке, что и Claude Code выше, и может читать файлы в ней. Установите командой npm install -g @google/gemini-cli, затем один раз запустите gemini в терминале и выберите Login with Google.",
-   "id": "Chat lewat Gemini CLI yang terpasang di komputer ini, dengan akun Google yang dipakai untuk masuk: tanpa kunci API. Ia bekerja di folder yang sama dengan Claude Code di atas dan dapat membaca file di sana. Pasang dengan npm install -g @google/gemini-cli, lalu jalankan gemini sekali di terminal dan pilih Login with Google."
+  "Chat through Google's Antigravity CLI (agy) installed on this computer, on the Google account it is signed in with: no API key needed. It works in the same folder as Claude Code above and can read the files there. Install it from antigravity.google/download, then run agy once in a terminal to sign in with Google. (Gemini CLI no longer signs in personal Google accounts; it is still used if agy is not installed.)": {
+   "ru": "Чат через установленный на этом компьютере Antigravity CLI (agy) от Google, на том аккаунте Google, под которым он вошёл: API-ключ не нужен. Работает в той же папке, что и Claude Code выше, и может читать файлы в ней. Установите его с antigravity.google/download, затем один раз запустите agy в терминале и войдите в Google. (Gemini CLI больше не пускает личные аккаунты Google; он используется, только если agy не установлен.)"
   }
  }
 }

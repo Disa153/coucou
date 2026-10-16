@@ -640,7 +640,7 @@ function claudeCodeSection(): HTMLElement {
   );
 }
 
-// ── Gemini CLI (Google account) section ──────────────────────────────────────
+// ── Gemini (Google account) section ──────────────────────────────────────
 
 /** The chat through the user's own Gemini CLI, on its Google sign-in (gemini_cli.rs). */
 function geminiCliSection(): HTMLElement {
@@ -660,8 +660,8 @@ function geminiCliSection(): HTMLElement {
   return h(
     "section",
     {},
-    h("h2", {}, h("span", { text: t("Gemini CLI (Google account)") })),
-    h("div", { class: "hint", text: t("Chat through the Gemini CLI installed on this computer, on the Google account it is signed in with: no API key needed. It works in the same folder as Claude Code above and can read the files there. Install it with npm install -g @google/gemini-cli, then run gemini once in a terminal and choose Login with Google.") }),
+    h("h2", {}, h("span", { text: t("Gemini (Google account)") })),
+    h("div", { class: "hint", text: t("Chat through Google's Antigravity CLI (agy) installed on this computer, on the Google account it is signed in with: no API key needed. It works in the same folder as Claude Code above and can read the files there. Install it from antigravity.google/download, then run agy once in a terminal to sign in with Google. (Gemini CLI no longer signs in personal Google accounts; it is still used if agy is not installed.)") }),
     h("div", { class: "row" },
       h("label", { style: "flex:1 1 auto" }, h("i", { class: "dot", style: `background:${p.accent};margin-right:8px` }), h("span", { text: p.name })),
       use,
