@@ -10,10 +10,9 @@
 // Google sign-in rather than billing a key. A conversation continues with
 // `--resume <session id>`, the id kept next to the answer in the chat history.
 
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
@@ -157,6 +156,63 @@ fn parse_line(line: &str) -> Line {
     }
 }
 
+/// Where one turn's output goes. Gemini CLI is a Node program, and on Windows Node
+/// writes to a pipe asynchronously: when the CLI ends with process.exit, what it had
+/// not flushed yet is lost, and Coucou got no answer at all. Writes to a file are
+/// synchronous, so the CLI writes to files here and Coucou reads them as they grow.
+struct Spool {
+    out: PathBuf,
+    err: PathBuf,
+}
+
+impl Spool {
+    fn new() -> std::io::Result<Self> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let n = NEXT.fetch_add(1, Ordering::Relaxed);
+        let base = std::env::temp_dir().join(format!("coucou-gemini-{}-{n}", std::process::id()));
+        let spool = Spool { out: base.with_extension("out"), err: base.with_extension("err") };
+        std::fs::File::create(&spool.out)?;
+        std::fs::File::create(&spool.err)?;
+        Ok(spool)
+    }
+}
+
+impl Drop for Spool {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.out);
+        let _ = std::fs::remove_file(&self.err);
+    }
+}
+
+/// The complete lines added to a growing file since the last call.
+struct Tail {
+    file: std::fs::File,
+    carry: Vec<u8>,
+}
+
+impl Tail {
+    fn open(path: &Path) -> std::io::Result<Self> {
+        Ok(Tail { file: std::fs::File::open(path)?, carry: Vec::new() })
+    }
+
+    fn lines(&mut self, flush: bool) -> Vec<String> {
+        let mut buf = Vec::new();
+        let _ = self.file.read_to_end(&mut buf);
+        self.carry.extend_from_slice(&buf);
+        let mut out = Vec::new();
+        while let Some(i) = self.carry.iter().position(|b| *b == b'\n') {
+            let line: Vec<u8> = self.carry.drain(..=i).collect();
+            out.push(String::from_utf8_lossy(&line).trim_end().to_string());
+        }
+        if flush && !self.carry.is_empty() {
+            out.push(String::from_utf8_lossy(&self.carry).trim_end().to_string());
+            self.carry.clear();
+        }
+        out
+    }
+}
+
 /// Runs one turn, blocking. `on_delta` gets the text so far as it streams.
 fn run(
     dir: &Path,
@@ -165,14 +221,17 @@ fn run(
     prompt: String,
     mut on_delta: impl FnMut(String),
 ) -> Result<(String, Option<String>), String> {
+    let spool = Spool::new().map_err(|e| format!("Coucou could not make a temporary file for Gemini CLI ({e})."))?;
+    let out_file = std::fs::OpenOptions::new().append(true).open(&spool.out).map_err(|e| e.to_string())?;
+    let err_file = std::fs::OpenOptions::new().append(true).open(&spool.err).map_err(|e| e.to_string())?;
     let mut child = command()
         .args(args(model, session))
         .current_dir(dir)
         .env_remove("GEMINI_API_KEY")
         .env_remove("GOOGLE_API_KEY")
         .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::from(out_file))
+        .stderr(Stdio::from(err_file))
         .spawn()
         .map_err(|e| format!("Gemini CLI is not installed or not on PATH ({e}). Install it with `npm install -g @google/gemini-cli` and run `gemini` once to sign in with Google."))?;
 
@@ -181,31 +240,19 @@ fn run(
         let _ = stdin.write_all(prompt.as_bytes());
         // Dropping stdin closes it: the CLI reads it to the end before it starts.
     });
-    let mut stderr = child.stderr.take().expect("piped stderr");
-    let err_reader = std::thread::spawn(move || {
-        let mut s = String::new();
-        let _ = stderr.read_to_string(&mut s);
-        s
-    });
-    let stdout = child.stdout.take().expect("piped stdout");
-    let (tx, rx) = mpsc::channel::<String>();
-    std::thread::spawn(move || {
-        for line in BufReader::new(stdout).lines().map_while(Result::ok) {
-            if tx.send(line).is_err() {
-                break;
-            }
-        }
-    });
+    let mut tail = Tail::open(&spool.out).map_err(|e| e.to_string())?;
 
     let started = Instant::now();
     let mut visible = String::new();
     let mut new_session: Option<String> = None;
     let mut after_tool = false;
     let mut errors: Vec<String> = Vec::new();
+    let mut other: Vec<String> = Vec::new();
     let mut done: Option<Option<String>> = None;
-    loop {
-        match rx.recv_timeout(Duration::from_millis(200)) {
-            Ok(line) => match parse_line(&line) {
+    let status = loop {
+        let exited = child.try_wait().map_err(|e| e.to_string())?;
+        for line in tail.lines(exited.is_some()) {
+            match parse_line(&line) {
                 Line::Session(id) => new_session = Some(id),
                 Line::Delta(t) => {
                     if after_tool && !visible.trim().is_empty() {
@@ -218,20 +265,24 @@ fn run(
                 Line::Tool => after_tool = true,
                 Line::Error(m) if !m.is_empty() => errors.push(m),
                 Line::Done { error } => done = Some(error),
-                _ => {}
-            },
-            Err(mpsc::RecvTimeoutError::Disconnected) => break,
-            Err(mpsc::RecvTimeoutError::Timeout) => {
-                if started.elapsed() > TIMEOUT {
-                    let _ = child.kill();
-                    let _ = child.wait();
-                    return Err("Gemini CLI took more than 10 minutes and was stopped.".into());
+                // Not an event: the CLI printed something else (a warning, an error).
+                Line::Other if !line.trim().is_empty() && !line.trim_start().starts_with('{') => {
+                    other.push(line.trim().to_string())
                 }
+                _ => {}
             }
         }
-    }
-    let status = child.wait().map_err(|e| e.to_string())?;
-    let stderr = err_reader.join().unwrap_or_default();
+        if let Some(status) = exited {
+            break status;
+        }
+        if started.elapsed() > TIMEOUT {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err("Gemini CLI took more than 10 minutes and was stopped.".into());
+        }
+        std::thread::sleep(Duration::from_millis(150));
+    };
+    let stderr = std::fs::read_to_string(&spool.err).unwrap_or_default();
     let answer = visible.trim().to_string();
 
     match done {
@@ -239,17 +290,20 @@ fn run(
         Some(Some(err)) => Err(err.chars().take(MAX_ERROR).collect()),
         None if !answer.is_empty() && status.success() => Ok((answer, new_session)),
         _ => {
-            let msg: String = errors
+            let said = errors
                 .last()
-                .map(String::as_str)
-                .unwrap_or(stderr.trim())
-                .chars()
-                .take(MAX_ERROR)
-                .collect();
-            Err(if msg.is_empty() {
-                "Gemini CLI gave no answer. Run `gemini` in a terminal once to check it is signed in with Google.".into()
-            } else {
-                msg
+                .cloned()
+                .or_else(|| {
+                    let e = stderr.trim();
+                    (!e.is_empty()).then(|| e.to_string())
+                })
+                .or_else(|| (!other.is_empty()).then(|| other.join("\n")));
+            Err(match said {
+                Some(msg) => msg.chars().take(MAX_ERROR).collect(),
+                None => format!(
+                    "Gemini CLI gave no answer (exit code {}). Run `gemini` in a terminal once to check it is signed in with Google.",
+                    status.code().map(|c| c.to_string()).unwrap_or_else(|| "none".into())
+                ),
             })
         }
     }
@@ -359,6 +413,21 @@ mod tests {
         let bad = r#"{"type":"result","timestamp":"t","status":"error","error":{"type":"x","message":"Quota exceeded"}}"#;
         assert_eq!(parse_line(bad), Line::Done { error: Some("Quota exceeded".into()) });
         assert_eq!(parse_line("not json"), Line::Other);
+    }
+
+    #[test]
+    fn a_growing_file_is_read_line_by_line() {
+        let spool = Spool::new().unwrap();
+        let mut tail = Tail::open(&spool.out).unwrap();
+        let mut w = std::fs::OpenOptions::new().append(true).open(&spool.out).unwrap();
+        w.write_all(b"{\"a\":1}\n{\"b\"").unwrap();
+        assert_eq!(tail.lines(false), vec!["{\"a\":1}".to_string()]);
+        w.write_all(b":2}\r\nlast").unwrap();
+        assert_eq!(tail.lines(false), vec!["{\"b\":2}".to_string()]);
+        assert_eq!(tail.lines(true), vec!["last".to_string()]);
+        let path = spool.out.clone();
+        drop(spool);
+        assert!(!path.exists());
     }
 
     #[test]
