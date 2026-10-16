@@ -273,46 +273,33 @@ so there it runs through XWayland as a dock window at the top of the screen. See
 
 ### Build from source
 
-**macOS** — requirements: macOS 15+, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
-
-```bash
-brew install xcodegen
-git clone https://github.com/Louis-CFM/coucou.git
-cd coucou/NotchBuddy
-xcodegen
-open NotchBuddy.xcodeproj   # then ⌘R
-```
+This fork's code lives on the **`all-in-one`** branch: clone it from here, not from the original repository.
 
 **Windows** — requirements: [Rust](https://rustup.rs), Node 20+, MSVC build tools.
 
 ```powershell
-git clone https://github.com/Louis-CFM/coucou.git
+git clone -b all-in-one https://github.com/Disa153/coucou.git
 cd coucou/windows
 npm install
-npm run pack                # installer lands in windows/release/
+npm run tauri dev           # run it right away
+npm run pack                # or build the installer: it lands in windows/release/
 ```
 
-**Linux** — requirements: [Rust](https://rustup.rs), Node 20+, and the WebKitGTK,
-gtk-layer-shell and appindicator development packages (Debian/Ubuntu names below).
+**iPhone app for Coucou on Windows** — requirements: a Mac with Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen). This builds the same app as the `.ipa` above: it pairs with the Windows app over Wi-Fi (`COUCOU_PHONE_LINK=LAN_LINK`).
 
 ```bash
-sudo apt install build-essential pkg-config \
-  libwebkit2gtk-4.1-dev libgtk-layer-shell-dev libayatana-appindicator3-dev \
-  librsvg2-dev libssl-dev libdbus-1-dev patchelf \
-  gstreamer1.0-plugins-base gstreamer1.0-plugins-good
-git clone https://github.com/Louis-CFM/coucou.git
-cd coucou/windows
-npm install
-npm run pack                # AppImage, .deb and .rpm land in windows/release/
+brew install xcodegen
+git clone -b all-in-one https://github.com/Disa153/coucou.git
+cd coucou/NotchBuddy
+xcodegen
+xcodebuild -project NotchBuddy.xcodeproj -scheme CoucouPhone \
+  -configuration Release -destination 'generic/platform=iOS' \
+  -derivedDataPath build COUCOU_PHONE_LINK=LAN_LINK CODE_SIGNING_ALLOWED=NO build
 ```
 
-**Android** — requirements: JDK 17 and the Android SDK (platform 35).
+Put the `.app` from `build/Build/Products/Release-iphoneos/` in a `Payload` folder, zip it as `Coucou.ipa` and install it with AltStore. Or skip all this: every push to `all-in-one` builds the `.ipa` on GitHub Actions and publishes it in [all-in-one-latest](https://github.com/Disa153/coucou/releases/tag/all-in-one-latest).
 
-```bash
-git clone https://github.com/Louis-CFM/coucou.git
-cd coucou/android
-./gradlew assembleDebug      # the APK lands in app/build/outputs/apk/debug/
-```
+**macOS, Linux and Android** are built the same way as in the original project, from the same branch: see [Build from source](https://github.com/Louis-CFM/coucou#build-from-source) there, with `git clone -b all-in-one https://github.com/Disa153/coucou.git` as the first step.
 
 ## Setup
 
