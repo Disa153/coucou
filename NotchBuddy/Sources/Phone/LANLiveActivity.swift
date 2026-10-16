@@ -97,25 +97,7 @@ final class LANLiveActivity {
             // A new command waiting for your OK lights the screen and opens the Dynamic Island.
             let alert = state.tone == "waiting" && state.approval != nil && state.approval != shown?.approval
             shown = state
-            let id = current.id
-            // In the background iOS may suspend the app before an update lands: hold it until done.
-            let hold = UIApplication.shared.beginBackgroundTask(withName: "Mochi update")
-            Task.detached {
-                let config = alert
-                    ? AlertConfiguration(title: "\(state.agent)", body: "waiting for your OK", sound: .default)
-                    : nil
-                for a in Activity<MochiActivityAttributes>.activities where a.id == id {
-                    await a.update(ActivityContent(state: state, staleDate: Self.staleDate()), alertConfiguration: config)
-                }
-                await MainActor.run {
-                    let time = Date.now.formatted(date: .omitted, time: .standard)
-                    LANLiveActivity.shared.diagnosis = "Shown · updated \(time): \(state.agent), \(state.statusText)"
-                    if UIApplication.shared.applicationState != .active {
-                        BackgroundLog.add("Mochi: \(state.agent), \(state.statusText)")
-                    }
-                    if hold != .invalid { UIApplication.shared.endBackgroundTask(hold) }
-                }
-            }
+            enqueue(state, alert: alert)
             return
         }
         activity = nil
@@ -135,6 +117,63 @@ final class LANLiveActivity {
         } catch {
             activity = nil
             diagnosis = "iOS refused to show it: \(error.localizedDescription)"
+        }
+    }
+
+    // ── One update at a time, the latest one ────────────────────────────────────
+    //
+    // Each change used to be its own task, and nothing kept them in order: with
+    // an agent's every step on the activity, a "working" update that started
+    // first could land after the "waiting for your OK" one and hide its Allow /
+    // Deny. Now one update is in flight at most, and the next one sent is
+    // always the latest state. Steps of a working agent go out at most every
+    // 1.5 s (a burst is one update, and iOS does not throttle us); a new phase
+    // or a command waiting for your OK goes at once, its alert never dropped.
+
+    @ObservationIgnored private var queued: (state: MochiActivityState, alert: Bool)?
+    @ObservationIgnored private var sending = false
+    @ObservationIgnored private var lastSent = Date.distantPast
+    @ObservationIgnored private var lastTone = ""
+
+    private func enqueue(_ state: MochiActivityState, alert: Bool) {
+        queued = (state, alert || (queued?.alert ?? false))
+        pump()
+    }
+
+    private func pump() {
+        guard !sending, queued != nil, let id = activity?.id else { return }
+        sending = true
+        // In the background iOS may suspend the app before an update lands: hold it until done.
+        let hold = UIApplication.shared.beginBackgroundTask(withName: "Mochi update")
+        Task { @MainActor in
+            if let q = queued, !q.alert, q.state.tone == lastTone {
+                let wait = 1.5 - Date().timeIntervalSince(lastSent)
+                if wait > 0 { try? await Task.sleep(for: .seconds(wait)) }
+            }
+            if let q = queued {
+                queued = nil
+                await Self.send(id: id, state: q.state, alert: q.alert)
+                lastSent = .now
+                lastTone = q.state.tone
+                let time = Date.now.formatted(date: .omitted, time: .standard)
+                diagnosis = "Shown · updated \(time): \(q.state.agent), \(q.state.statusText)"
+                if UIApplication.shared.applicationState != .active {
+                    BackgroundLog.add("Mochi: \(q.state.agent), \(q.state.statusText)")
+                }
+            }
+            sending = false
+            if hold != .invalid { UIApplication.shared.endBackgroundTask(hold) }
+            // Something newer came while this one was on its way.
+            if queued != nil { pump() }
+        }
+    }
+
+    nonisolated private static func send(id: String, state: MochiActivityState, alert: Bool) async {
+        let config = alert
+            ? AlertConfiguration(title: "\(state.agent)", body: "waiting for your OK", sound: .default)
+            : nil
+        for a in Activity<MochiActivityAttributes>.activities where a.id == id {
+            await a.update(ActivityContent(state: state, staleDate: staleDate()), alertConfiguration: config)
         }
     }
 
@@ -159,12 +198,9 @@ final class LANLiveActivity {
             beat = nil
             return
         }
-        let id = current.id
-        Task.detached {
-            for a in Activity<MochiActivityAttributes>.activities where a.id == id {
-                await a.update(ActivityContent(state: state, staleDate: Self.staleDate()))
-            }
-        }
+        // Through the same queue: a re-confirmation never lands over something newer.
+        if queued == nil { queued = (state, false) }
+        pump()
     }
 
     private static func isLive(_ a: Activity<MochiActivityAttributes>) -> Bool {
