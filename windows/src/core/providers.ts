@@ -26,7 +26,7 @@ export interface ProviderDef {
 export const PROVIDERS: readonly ProviderDef[] = [
   { id: "anthropic", name: "Anthropic", accent: "#E07950", key: "anthropic-api-key", urlField: null, defaultModel: "claude-opus-5", prefer: "opus" },
   // The user's own Claude Code CLI, on its subscription (Pro, Max): no key, no address.
-  { id: "claude-code", name: "Claude Code", accent: "#D97757", key: null, urlField: null, defaultModel: "sonnet", prefer: "sonnet" },
+  { id: "claude-code", name: "Claude Code", accent: "#D97757", key: null, urlField: null, defaultModel: "default", prefer: "default" },
   // The user's own Gemini CLI, on the Google account it is signed in with: no key, no address.
   { id: "gemini-cli", name: "Gemini CLI", accent: "#8E75F2", key: null, urlField: null, defaultModel: "auto", prefer: "auto" },
   { id: "google", name: "Google", accent: "#4285F4", key: "google-api-key", urlField: null, defaultModel: "gemini-2.0-flash", prefer: "flash" },

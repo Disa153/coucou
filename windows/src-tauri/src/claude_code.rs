@@ -22,9 +22,11 @@ use crate::island::WINDOW_LABEL;
 use crate::settings::Settings;
 
 pub const PROVIDER: &str = "claude-code";
-pub const DEFAULT_MODEL: &str = "sonnet";
+/// "default": no --model, so the chat uses the model Claude Code itself is set to
+/// (the one `claude` shows in the terminal, e.g. Opus on Pro).
+pub const DEFAULT_MODEL: &str = "default";
 /// The model aliases Claude Code takes on `--model`; only these are ever passed.
-const MODELS: [(&str, &str); 3] = [("sonnet", "Sonnet"), ("opus", "Opus"), ("haiku", "Haiku")];
+const MODELS: [(&str, &str); 4] = [("default", "Claude Code default"), ("opus", "Opus"), ("sonnet", "Sonnet"), ("haiku", "Haiku")];
 /// A turn may read files and run tools: it gets longer than a plain chat answer.
 const TIMEOUT: Duration = Duration::from_secs(600);
 const MAX_ERROR: usize = 400;
@@ -171,14 +173,16 @@ fn args(model: &str, session: Option<&str>) -> Vec<String> {
         "stream-json",
         "--verbose",
         "--include-partial-messages",
-        "--model",
-        model,
         "--append-system-prompt",
         STYLE,
     ]
     .iter()
     .map(|s| s.to_string())
     .collect();
+    if model != DEFAULT_MODEL {
+        a.push("--model".into());
+        a.push(model.to_string());
+    }
     if let Some(id) = session {
         a.push("--resume".into());
         a.push(id.to_string());
@@ -382,6 +386,8 @@ mod tests {
     fn only_known_models_and_uuids_reach_the_command_line() {
         assert_eq!(checked_model("opus"), "opus");
         assert_eq!(checked_model("x & del *"), DEFAULT_MODEL);
+        assert!(!args(DEFAULT_MODEL, None).contains(&"--model".to_string()));
+        assert!(args("opus", None).windows(2).any(|w| w == ["--model", "opus"]));
         assert!(valid_session("0b6f1f5e-2c1d-4a7b-9b3e-1f2a3b4c5d6e"));
         assert!(!valid_session("0b6f1f5e-2c1d-4a7b-9b3e-1f2a3b4c5d6e & x"));
         assert!(!valid_session(""));
