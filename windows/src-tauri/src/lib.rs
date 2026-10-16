@@ -101,6 +101,7 @@ fn save_settings(app: AppHandle, shared: State<Shared>, settings: Settings) {
         // Where Mochi sits on the desktop is desktop.rs's to say, not a webview's.
         let mut settings = settings.clone();
         settings.desktop_mochi = current.desktop_mochi.clone();
+        settings.island_edge = current.island_edge.clone();
         // Same for the phone link: only its own commands turn it on or off.
         settings.phone_link = current.phone_link;
         settings.phone_chat = current.phone_chat;
@@ -172,6 +173,13 @@ fn set_collapsed(app: AppHandle, shared: State<Shared>, collapsed: bool) {
     island::refresh_click_through(&app, &shared.gate);
     shared.gate.set_active(!collapsed);
     platform::set_pointer_watch(!collapsed);
+}
+
+/// The page saw a drag start on the island's body. Windows only (the cursor
+/// poll carries the window); false elsewhere.
+#[tauri::command]
+fn island_drag_begin(app: AppHandle, shared: State<Shared>) -> bool {
+    island::drag_begin(&app, &shared.gate)
 }
 
 /// The front end pushes the island shape; Rust decides click-through from it.
@@ -856,6 +864,7 @@ pub fn run() {
             flow::pill_hot,
             flow::pill_hover,
             flow::pill_drag_begin,
+            island_drag_begin,
             updater::update_info,
             updater::update_check,
             updater::update_set_channel,

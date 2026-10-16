@@ -213,6 +213,8 @@ export const Bridge = {
    * Pushes the island shape in window coordinates. Rust flips click-through from
    * its own cursor poll, so the flag is never a frame behind a click.
    */
+  /** Windows: the cursor poll carries the island until the button goes up (false elsewhere). */
+  islandDragBegin: () => call<boolean>("island_drag_begin"),
   setIslandRect: (x: number, y: number, width: number, height: number) =>
     call<void>("set_island_rect", { x, y, width, height }),
 

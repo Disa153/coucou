@@ -78,6 +78,10 @@ pub struct Settings {
     /// Mochi on the desktop: whether he lives there, and his spot. Owned by
     /// the Rust side (desktop.rs) — what a webview sends back is ignored.
     pub desktop_mochi: DesktopMochiPref,
+    /// The screen edge the island sits on: "top" (as shipped), "bottom",
+    /// "left" or "right". Set by dragging the island (island.rs); what a
+    /// webview sends back is ignored, like `desktop_mochi`.
+    pub island_edge: String,
     /// The phone link (phone_link/) is on: a TLS server for the Android app on
     /// the local network. Off until the user turns it on in Settings → Phone;
     /// owned by the Rust side, so what a webview sends back is ignored.
@@ -165,6 +169,7 @@ impl Default for Settings {
             pill_colors: BTreeMap::new(),
             language: String::new(),
             desktop_mochi: DesktopMochiPref::default(),
+            island_edge: "top".into(),
             phone_link: false,
             phone_chat: false,
             phone_chat_models: Vec::new(),

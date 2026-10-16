@@ -12,7 +12,7 @@ import {
   type BotEmoteName, type IslandMode, type IslandViewName,
 } from "../core/layout";
 import { Sound } from "../core/sound";
-import { State } from "../core/state";
+import { State, islandPlacement } from "../core/state";
 import { SPOTIFY_ID, islandDances } from "../core/spotify";
 import { BotEngine, hexToRGB } from "../mochi/engine";
 import { Greeting } from "../mochi/greeting";
@@ -60,6 +60,9 @@ export class Island {
   private miniGrid!: HTMLElement;
   private countdown!: HTMLElement;
   private wakeStrip!: HTMLElement;
+  /** A press on the island's body that may become a drag of the island. */
+  private islandPress: { x: number; y: number } | null = null;
+  private islandDragged = false;
 
   private header!: ViewHost;
   private views!: Map<IslandViewName, ViewHost>;
@@ -683,10 +686,14 @@ export class Island {
     const w = this.width.value;
     const hh = this.height.value;
     const r = this.radius.value;
+    const place = this.placement(w, hh, r);
     this.islandEl.style.width = `${w}px`;
     this.islandEl.style.height = `${hh}px`;
-    this.islandEl.style.borderRadius = `0 0 ${r}px ${r}px`;
-    this.islandEl.style.transform = `translateX(-50%)`;
+    this.islandEl.style.borderRadius = place.radius;
+    // Placed in pixels on every edge (no translate), so the rect below is exactly what is drawn.
+    this.islandEl.style.left = `${place.x}px`;
+    this.islandEl.style.top = `${place.y}px`;
+    this.islandEl.style.transform = "none";
     // These follow the island as it resizes, so they belong here rather than in
     // the state-driven DOM sync.
     this.miniGrid.style.left = `${w - 40 - 14.5}px`;
@@ -694,21 +701,53 @@ export class Island {
     this.greetingCanvas.style.left = `${(w - EXPANDED_W) / 2}px`;
     this.uploadCanvas.el.style.left = `${(w - EXPANDED_W) / 2}px`;
 
-    const viewportW = window.innerWidth > 0 ? window.innerWidth : PANEL_W;
-    const rect = { x: (viewportW - w) / 2, y: 0, w, h: hh };
+    const rect = { x: place.x, y: place.y, w, h: hh };
     const p = this.pushedRect;
-    if (Math.abs(p.x - rect.x) > 0.5 || Math.abs(p.w - rect.w) > 0.5 || Math.abs(p.h - rect.h) > 0.5) {
+    if (Math.abs(p.x - rect.x) > 0.5 || Math.abs(p.y - rect.y) > 0.5 || Math.abs(p.w - rect.w) > 0.5 || Math.abs(p.h - rect.h) > 0.5) {
       this.pushedRect = rect;
       void Bridge.setIslandRect(rect.x, rect.y, rect.w, rect.h);
     }
+  }
+
+  /** Where the island goes in its window, on the edge it was dragged to. */
+  private placement(w: number, hh: number, r: number) {
+    const vw = window.innerWidth > 0 ? window.innerWidth : PANEL_W;
+    const vh = window.innerHeight > 0 ? window.innerHeight : PANEL_H;
+    return islandPlacement(State.settings.islandEdge, vw, vh, w, hh, r);
+  }
+
+  /** The wake strip lies along the island's edge (Rust sizes its window the same way). */
+  private applyEdge() {
+    const edge = State.settings.islandEdge ?? "top";
+    const s = this.wakeStrip.style;
+    const across = edge === "top" || edge === "bottom";
+    s.width = across ? "240px" : "6px";
+    s.height = across ? "6px" : "240px";
+    s.top = edge === "top" ? "0" : edge === "bottom" ? "auto" : "50%";
+    s.bottom = edge === "bottom" ? "0" : "auto";
+    s.left = edge === "left" ? "0" : edge === "right" ? "auto" : "50%";
+    s.right = edge === "right" ? "0" : "auto";
+    s.transform = across ? "translateX(-50%)" : "translateY(-50%)";
+    this.root.dataset.edge = edge;
   }
 
   /** Island rect in window coordinates (origin top-left of the 720×320 window). */
   private islandRect(): { x: number; y: number; w: number; h: number } {
     const w = this.width.value;
     const hh = this.height.value;
-    const viewportW = window.innerWidth > 0 ? window.innerWidth : PANEL_W;
-    return { x: (viewportW - w) / 2, y: 0, w, h: hh };
+    const { x, y } = this.placement(w, hh, this.radius.value);
+    return { x, y, w, h: hh };
+  }
+
+  /**
+   * A press here may move the island: anywhere on it except Mochi (he goes to
+   * the desktop), what you type or select in, and the lists that scroll.
+   */
+  private canGrabIsland(target: EventTarget | null): boolean {
+    const el = target instanceof Element ? target : null;
+    if (!el) return false;
+    if (el.closest("input, textarea, select, [contenteditable], .chat-body, .msg, pre, code, .diff, .ticker")) return false;
+    return true;
   }
 
   // ── Window collapse (hidden → tiny wake strip, zero polling) ────────────────
@@ -752,6 +791,11 @@ export class Island {
       if (e.button === 0 && this.isBotHit(e.clientX, e.clientY)) {
         this.botPress = { x: e.clientX, y: e.clientY };
       }
+      // Anywhere else on the island, it may become a drag of the island itself.
+      this.islandDragged = false;
+      this.islandPress = e.button === 0 && !this.botPress && this.canGrabIsland(e.target)
+        ? { x: e.screenX, y: e.screenY }
+        : null;
       // Right-click on Mochi opens the wardrobe, and closes it again.
       if (e.button === 2 && this.isBotHit(e.clientX, e.clientY)) {
         this.cancelBotHover();
@@ -774,6 +818,32 @@ export class Island {
       if (this.isBotHit(e.clientX, e.clientY)) e.preventDefault();
     });
 
+    // Dragging the island: once it has moved a little, Rust carries the window
+    // with the cursor and snaps it to the nearest screen edge when let go.
+    window.addEventListener("mousemove", (e) => {
+      const press = this.islandPress;
+      if (!press) return;
+      if (!(e.buttons & 1)) {
+        this.islandPress = null;
+        return;
+      }
+      if (Math.hypot(e.screenX - press.x, e.screenY - press.y) <= DRAG_THRESHOLD) return;
+      this.islandPress = null;
+      this.islandDragged = true;
+      void Bridge.islandDragBegin();
+    });
+    // The click that ends a drag presses nothing.
+    window.addEventListener(
+      "click",
+      (e) => {
+        if (!this.islandDragged) return;
+        this.islandDragged = false;
+        e.stopPropagation();
+        e.preventDefault();
+      },
+      true,
+    );
+
     // Dragging Mochi out of the island puts him on the desktop.
     window.addEventListener("mousemove", (e) => {
       if (this.desktop.carrying) {
@@ -794,6 +864,7 @@ export class Island {
     });
     window.addEventListener("mouseup", (e) => {
       this.botPress = null;
+      this.islandPress = null;
       if (this.desktop.carrying) this.desktop.carryEnd(e.clientX, e.clientY);
     });
 
@@ -1130,7 +1201,7 @@ export class Island {
   }
 
   private lookY(): number {
-    return -Math.tanh((State.mouse.y - this.botCy.value) / 200);
+    return -Math.tanh((State.mouse.y - (this.islandRect().y + this.botCy.value)) / 200);
   }
 
   private updateCountdown(nowMs: number) {
@@ -1211,6 +1282,8 @@ export class Island {
 
   /** Applies settings coming from Rust at boot. */
   applySettings() {
+    this.applyEdge();
+    this.applyGeometry();
     Sound.setEnabled(State.settings.soundEnabled);
     Sound.setVolume(State.settings.soundVolume);
     this.fsm.homeToPetitDelay = State.settings.autoCloseInterval;

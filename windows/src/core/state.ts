@@ -98,6 +98,26 @@ export interface IntegrationInfo {
   configured: boolean;
 }
 
+export type IslandEdge = "top" | "bottom" | "left" | "right";
+
+/**
+ * Where the island sits in its window on `edge`, as a rect of `w`×`h` in a
+ * window of `vw`×`vh`, and which corners are round: the side against the
+ * screen edge stays flat.
+ */
+export function islandPlacement(edge: IslandEdge | undefined, vw: number, vh: number, w: number, h: number, r: number) {
+  switch (edge) {
+    case "bottom":
+      return { x: (vw - w) / 2, y: vh - h, radius: `${r}px ${r}px 0 0` };
+    case "left":
+      return { x: 0, y: (vh - h) / 2, radius: `0 ${r}px ${r}px 0` };
+    case "right":
+      return { x: vw - w, y: (vh - h) / 2, radius: `${r}px 0 0 ${r}px` };
+    default:
+      return { x: (vw - w) / 2, y: 0, radius: `0 0 ${r}px ${r}px` };
+  }
+}
+
 export interface Settings {
   soundEnabled: boolean;
   soundVolume: number;
@@ -166,6 +186,8 @@ export interface Settings {
   phoneDetails?: boolean;
   /** Which models the phone may use, "provider/model". Rust owns it too. */
   phoneChatModels?: string[];
+  /** The screen edge the island sits on, set by dragging it. Rust owns it too. */
+  islandEdge?: IslandEdge;
   /** Mochi on the desktop. Rust owns it: whatever the page sends back is ignored. */
   desktopMochi?: {
     onDesktop: boolean;

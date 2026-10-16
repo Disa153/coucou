@@ -3,7 +3,9 @@
 //
 // There is no notch on a PC, so the island is a black shape drawn at the top
 // centre of the main display inside a borderless, transparent, always-on-top
-// window that never takes focus.
+// window that never takes focus. On Windows it can be dragged by its body to
+// the bottom, left or right edge instead (settings.island_edge): the window
+// follows the cursor, then snaps to the edge nearest to where it was let go.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
@@ -61,6 +63,118 @@ pub struct PollGate {
     pub rect: Mutex<IslandRect>,
     /// Mirrors the window flag so we only call into the OS when it changes.
     ignoring: AtomicBool,
+    /// Being dragged: held this far (physical) from the window's corner.
+    carry: Mutex<Option<(f64, f64)>>,
+}
+
+/// The screen edge the island sits on.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Edge {
+    Top,
+    Bottom,
+    Left,
+    Right,
+}
+
+impl Edge {
+    pub fn parse(s: &str) -> Edge {
+        match s {
+            "bottom" => Edge::Bottom,
+            "left" => Edge::Left,
+            "right" => Edge::Right,
+            _ => Edge::Top,
+        }
+    }
+
+    pub fn name(self) -> &'static str {
+        match self {
+            Edge::Top => "top",
+            Edge::Bottom => "bottom",
+            Edge::Left => "left",
+            Edge::Right => "right",
+        }
+    }
+}
+
+/// (x, y, width, height) in physical pixels.
+pub type Area = (i32, i32, i32, i32);
+
+/// The window's top-left corner on `edge`. The top edge keeps the monitor's own
+/// top, as it always did; the others stay inside the work area, off the taskbar.
+pub fn origin_for(edge: Edge, size: (i32, i32), full: Area, work: Area) -> (i32, i32) {
+    let (w, h) = size;
+    match edge {
+        Edge::Top => (full.0 + (full.2 - w) / 2, full.1),
+        Edge::Bottom => (work.0 + (work.2 - w) / 2, work.1 + work.3 - h),
+        Edge::Left => (work.0, work.1 + (work.3 - h) / 2),
+        Edge::Right => (work.0 + work.2 - w, work.1 + (work.3 - h) / 2),
+    }
+}
+
+/// The wake strip lies along its edge: across the top or bottom, upright on the sides.
+pub fn strip_size(edge: Edge) -> (f64, f64) {
+    match edge {
+        Edge::Top | Edge::Bottom => (STRIP_W, STRIP_H),
+        Edge::Left | Edge::Right => (STRIP_H, STRIP_W),
+    }
+}
+
+/// The edge of `area` nearest to the point it was let go at.
+pub fn nearest_edge(p: (f64, f64), area: Area) -> Edge {
+    let (x, y, w, h) = (area.0 as f64, area.1 as f64, area.2 as f64, area.3 as f64);
+    let d = [
+        (p.1 - y, Edge::Top),
+        (y + h - p.1, Edge::Bottom),
+        (p.0 - x, Edge::Left),
+        (x + w - p.0, Edge::Right),
+    ];
+    d.iter().min_by(|a, b| a.0.total_cmp(&b.0)).map_or(Edge::Top, |e| e.1)
+}
+
+fn edge_of(app: &AppHandle) -> Edge {
+    app.try_state::<crate::Shared>()
+        .map(|s| Edge::parse(&s.settings.lock().unwrap().island_edge))
+        .unwrap_or(Edge::Top)
+}
+
+/// The page saw a drag start on the island: from now on the cursor poll carries it.
+pub fn drag_begin(app: &AppHandle, gate: &PollGate) -> bool {
+    if !platform::CURSOR_POLL || gate.collapsed.load(Ordering::Relaxed) {
+        return false;
+    }
+    let Some(win) = window(app) else { return false };
+    let (Ok(origin), Some((cx, cy))) = (win.outer_position(), cursor_physical()) else { return false };
+    *gate.carry.lock().unwrap() = Some((cx - origin.x as f64, cy - origin.y as f64));
+    let _ = win.set_ignore_cursor_events(false);
+    gate.ignoring.store(false, Ordering::Relaxed);
+    true
+}
+
+/// Let go at (`cx`, `cy`): the island takes the nearest edge of that display,
+/// which becomes its display, and the choice is saved.
+fn drop_at(app: &AppHandle, gate: &PollGate, cx: f64, cy: f64) {
+    let Some(shared) = app.try_state::<crate::Shared>() else { return };
+    let monitors = app.available_monitors().unwrap_or_default();
+    let Some(m) = monitors.iter().find(|m| monitor_contains(m, cx, cy)).or(monitors.first()) else { return };
+    let wa = m.work_area();
+    let edge = nearest_edge((cx, cy), (wa.position.x, wa.position.y, wa.size.width as i32, wa.size.height as i32));
+    let settings = {
+        let mut s = shared.settings.lock().unwrap();
+        s.island_edge = edge.name().to_string();
+        // Dropped on another display: the island lives there now.
+        let current = target_monitor(app, &s.screen).map(|t| *t.position());
+        if s.screen != "cursor" && current != Some(*m.position()) {
+            s.screen = describe(m).key();
+        }
+        s.clone()
+    };
+    if let Err(err) = crate::settings::save(&settings) {
+        crate::log::line(format!("could not save settings: {err}"));
+    }
+    crate::log::line(format!("island moved to the {} edge", edge.name()));
+    apply_geometry(app, &settings.screen, false);
+    gate.forget_ignore_state();
+    let _ = app.emit("settings-changed", settings);
 }
 
 impl PollGate {
@@ -71,6 +185,7 @@ impl PollGate {
             collapsed: AtomicBool::new(true),
             rect: Mutex::new(IslandRect::default()),
             ignoring: AtomicBool::new(false),
+            carry: Mutex::new(None),
         }
     }
 
@@ -300,6 +415,42 @@ mod zoom_tests {
     use super::*;
 
     #[test]
+    fn each_edge_puts_the_window_against_it() {
+        let full = (0, 0, 1920, 1080);
+        let work = (0, 0, 1920, 1040); // a taskbar along the bottom
+        let size = (720, 320);
+        assert_eq!(origin_for(Edge::Top, size, full, work), (600, 0));
+        assert_eq!(origin_for(Edge::Bottom, size, full, work), (600, 720));
+        assert_eq!(origin_for(Edge::Left, size, full, work), (0, 360));
+        assert_eq!(origin_for(Edge::Right, size, full, work), (1200, 360));
+        // a second display to the right
+        let full2 = (1920, 0, 2560, 1440);
+        assert_eq!(origin_for(Edge::Right, size, full2, full2), (3760, 560));
+    }
+
+    #[test]
+    fn the_island_snaps_to_the_nearest_edge() {
+        let area = (0, 0, 1920, 1040);
+        assert_eq!(nearest_edge((960.0, 30.0), area), Edge::Top);
+        assert_eq!(nearest_edge((960.0, 1000.0), area), Edge::Bottom);
+        assert_eq!(nearest_edge((40.0, 500.0), area), Edge::Left);
+        assert_eq!(nearest_edge((1880.0, 500.0), area), Edge::Right);
+        // past the edge counts too
+        assert_eq!(nearest_edge((2000.0, 500.0), area), Edge::Right);
+    }
+
+    #[test]
+    fn edges_are_read_back_and_unknown_ones_are_the_top() {
+        for e in [Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
+            assert_eq!(Edge::parse(e.name()), e);
+        }
+        assert_eq!(Edge::parse(""), Edge::Top);
+        assert_eq!(Edge::parse("diagonal"), Edge::Top);
+        assert_eq!(strip_size(Edge::Left), (STRIP_H, STRIP_W));
+        assert_eq!(strip_size(Edge::Bottom), (STRIP_W, STRIP_H));
+    }
+
+    #[test]
     fn zoom_correction_is_none_when_dpr_matches_window_scale() {
         assert_eq!(calculate_zoom_correction(1.0, 1.0, 1.0), None);
         assert_eq!(calculate_zoom_correction(1.0, 1.25, 1.25), None);
@@ -359,11 +510,17 @@ pub fn apply_geometry(app: &AppHandle, pref: &str, collapsed: bool) {
     let mp = *m.position();
     let ms = *m.size();
 
-    let (lw, lh) = if collapsed { (STRIP_W, STRIP_H) } else { (PANEL_W, PANEL_H) };
+    let edge = edge_of(app);
+    let (lw, lh) = if collapsed { strip_size(edge) } else { (PANEL_W, PANEL_H) };
     let pw = (lw * scale).round().max(1.0) as u32;
     let ph = (lh * scale).round().max(1.0) as u32;
-    let x = mp.x + (ms.width as i32 - pw as i32) / 2;
-    let y = mp.y;
+    let wa = m.work_area();
+    let (x, y) = origin_for(
+        edge,
+        (pw as i32, ph as i32),
+        (mp.x, mp.y, ms.width as i32, ms.height as i32),
+        (wa.position.x, wa.position.y, wa.size.width as i32, wa.size.height as i32),
+    );
 
     // GTK never sizes a non-resizable window below its natural size (200 px
     // here), so on Linux the 6 px wake strip would stay a 200 px block. tao
@@ -444,6 +601,22 @@ pub fn spawn_cursor_poll(app: AppHandle, gate: Arc<PollGate>) {
                 }
 
                 let Some(win) = window(&app) else { continue };
+                // Being dragged: the window follows the cursor until the button goes up.
+                let carry = *gate.carry.lock().unwrap();
+                if let Some(grab) = carry {
+                    let Some((cx, cy)) = cursor_physical() else { continue };
+                    if left_button_down() {
+                        let to = PhysicalPosition::new((cx - grab.0).round() as i32, (cy - grab.1).round() as i32);
+                        if win.outer_position().ok() != Some(to) {
+                            let _ = win.set_position(to);
+                        }
+                    } else {
+                        *gate.carry.lock().unwrap() = None;
+                        drop_at(&app, &gate, cx, cy);
+                        last = (f64::MIN, f64::MIN);
+                    }
+                    continue;
+                }
                 let Ok(origin) = win.outer_position() else { continue };
                 let scale = win.scale_factor().unwrap_or(1.0);
                 let Some((cx, cy)) = cursor_physical() else { continue };
@@ -518,7 +691,8 @@ pub fn refresh_click_through(app: &AppHandle, gate: &PollGate) {
         // The wake strip itself, never "the whole window": if the window ever
         // fails to shrink to the strip, the rest of it must not swallow clicks
         // meant for whatever sits under the top of the screen.
-        Some((0.0, 0.0, STRIP_W, STRIP_H))
+        let (w, h) = strip_size(edge_of(app));
+        Some((0.0, 0.0, w, h))
     } else {
         let r = *gate.rect.lock().unwrap();
         if r.w <= 0.0 {

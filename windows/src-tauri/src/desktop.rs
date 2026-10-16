@@ -371,6 +371,8 @@ fn displays(app: &AppHandle, d: &Desktop) -> Vec<Display> {
 }
 
 /// The island's top-centre point and the scale there, in the mode's space.
+/// The island itself, not its window: on the bottom or a side edge it does not
+/// sit at the window's top centre.
 fn island_anchor(app: &AppHandle, d: &Desktop) -> Option<(f64, f64, f64)> {
     if d.mode == DesktopMode::Layer {
         let (w, _) = d.inner.lock().unwrap().display?;
@@ -380,7 +382,11 @@ fn island_anchor(app: &AppHandle, d: &Desktop) -> Option<(f64, f64, f64)> {
     let pos = win.outer_position().ok()?;
     let size = win.outer_size().ok()?;
     let scale = win.scale_factor().unwrap_or(1.0);
-    Some((pos.x as f64 + size.width as f64 / 2.0, pos.y as f64, scale))
+    let rect = app.try_state::<crate::Shared>().map(|s| *s.gate.rect.lock().unwrap()).filter(|r| r.w > 0.0);
+    Some(match rect {
+        Some(r) => (pos.x as f64 + (r.x + r.w / 2.0) * scale, pos.y as f64 + r.y * scale, scale),
+        None => (pos.x as f64 + size.width as f64 / 2.0, pos.y as f64, scale),
+    })
 }
 
 /// The window side in the mode's space.
