@@ -665,6 +665,11 @@ pub fn pill_hot(app: AppHandle, rects: Vec<(f64, f64, f64, f64)>) {
 }
 
 #[tauri::command]
+pub fn pill_drag_begin(app: AppHandle) -> bool {
+    pill::drag_begin(&app)
+}
+
+#[tauri::command]
 pub fn pill_hover(app: AppHandle, inside: bool) {
     if let Some(p) = pill::get(&app) {
         p.hovered.store(inside, Ordering::Relaxed);

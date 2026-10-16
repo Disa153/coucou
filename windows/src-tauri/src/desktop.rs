@@ -632,6 +632,12 @@ fn spawn_poll(app: AppHandle, d: Arc<Desktop>) {
         let mut last = (f64::MIN, f64::MIN);
         while d.gate.is_active() {
             std::thread::sleep(Duration::from_millis(TICK_MS));
+            // Stopped while this thread slept (he fell asleep, flew home…): refresh
+            // has already decided who takes the mouse; one more turn here would
+            // undo it and leave a sleeping Mochi that no pointer can reach.
+            if !d.gate.is_active() {
+                break;
+            }
             let Some(win) = window(&app) else { continue };
             let Some((cx, cy)) = platform::cursor_physical() else { continue };
             let carry = d.inner.lock().unwrap().carry;
@@ -663,6 +669,9 @@ fn spawn_poll(app: AppHandle, d: Arc<Desktop>) {
             let accept = logic::is_over_body(local, SIZE);
             {
                 let mut i = d.inner.lock().unwrap();
+                if i.asleep || i.carry.is_some() || !d.gate.is_active() {
+                    continue;
+                }
                 if i.ignoring != Some(!accept) {
                     i.ignoring = Some(!accept);
                     let _ = win.set_ignore_cursor_events(!accept);

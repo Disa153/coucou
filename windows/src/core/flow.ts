@@ -216,6 +216,8 @@ export const FlowBridge = {
   pillState: () => call<PillState>("pill_state"),
   pillHot: (rects: [number, number, number, number][]) => call<void>("pill_hot", { rects }),
   pillHover: (inside: boolean) => call<void>("pill_hover", { inside }),
+  /** Windows: the pill follows the cursor until the button goes up (false elsewhere). */
+  pillDragBegin: () => call<boolean>("pill_drag_begin"),
   pillAction: (action: string, id?: number) => call<void>("pill_action", { action, id: id ?? null }),
   /** The pill has said what « OK Coucou » answered. */
   voiceDone: (id: number) => call<void>("voice_done", { id, text: null }),

@@ -331,6 +331,44 @@ document.addEventListener("pointermove", (e) => {
 });
 document.addEventListener("pointerleave", () => setHovered(false));
 
+// ── Drag (Windows) ────────────────────────────────────────────────────────────
+// Pressed on the pill and moved a little: Rust carries the window with the
+// cursor until the button goes up, and keeps the spot. The click that ends a
+// drag does not press the button under it.
+
+const DRAG_THRESHOLD = 5;
+let press: { x: number; y: number } | null = null;
+let dragged = false;
+
+document.addEventListener("pointerdown", (e) => {
+  dragged = false;
+  press = e.button === 0 && capsule?.contains(e.target as Node) ? { x: e.screenX, y: e.screenY } : null;
+});
+document.addEventListener("pointermove", (e) => {
+  if (!press || dragged) return;
+  if (Math.hypot(e.screenX - press.x, e.screenY - press.y) < DRAG_THRESHOLD) return;
+  dragged = true;
+  press = null;
+  if (tooltip !== null) {
+    tooltip = null;
+    render();
+  }
+  void FlowBridge.pillDragBegin();
+});
+document.addEventListener("pointerup", () => {
+  press = null;
+});
+document.addEventListener(
+  "click",
+  (e) => {
+    if (!dragged) return;
+    dragged = false;
+    e.stopPropagation();
+    e.preventDefault();
+  },
+  true,
+);
+
 function distanceTo(elm: HTMLElement, x: number, y: number): number {
   const r = elm.getBoundingClientRect();
   const dx = Math.max(r.left - x, 0, x - r.right);

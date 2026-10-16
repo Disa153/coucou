@@ -116,8 +116,8 @@ runs in to the front.
 When Mochi lives on the desktop, he flies back to the island with a permission
 request or a question and returns to his spot once you have answered; he does a
 little jump when a task finishes, and dozes off when nothing has happened for
-two minutes and your cursor is elsewhere — asleep, he costs nothing: no cursor
-polling, a few frames a second. He remembers his spot between launches; if it
+two minutes and your cursor is elsewhere — asleep, he costs next to nothing: no
+cursor polling, 20 frames a second. He remembers his spot between launches; if it
 was on a display that is no longer connected, he stays in the island.
 
 **Live diff.** Every file Claude edits (Edit, MultiEdit, Write) shows up in the

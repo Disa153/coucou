@@ -4,8 +4,8 @@
 //
 // What he shows comes from the island (DESKTOP_EVENTS.state), where he is from
 // Rust. The page draws only while the window is on screen, at 30 fps awake
-// like the Mac, and a few frames a second asleep — with no cursor polling at
-// all while he sleeps.
+// like the Mac, and 20 fps asleep (his breathing stays smooth; a 120 px canvas
+// costs next to nothing) — with no cursor polling at all while he sleeps.
 
 import { Bridge, emitToWindow, onEvent, type DesktopMode } from "../core/bridge";
 import type { BotEmoteName } from "../core/layout";
@@ -26,9 +26,9 @@ const ISLAND = "island";
  */
 const DRAW_W = PANEL_SIZE * 0.8;
 const SIDE = (PANEL_SIZE - DRAW_W) / 2;
-/** Frame pacing: TimelineView(minimumInterval: 1/30) awake; asleep, barely. */
+/** Frame pacing: TimelineView(minimumInterval: 1/30) awake; asleep, a little less. */
 const AWAKE_FRAME_MS = 1000 / 30;
-const ASLEEP_FRAME_MS = 250;
+const ASLEEP_FRAME_MS = 1000 / 20;
 
 class DesktopMochi {
   private engine = new BotEngine();
