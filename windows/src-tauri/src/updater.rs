@@ -243,22 +243,134 @@ fn manifest_url(channel: Channel) -> String {
 }
 
 /// Ok(None): the file is not there (a channel nothing was published to yet).
+/// The proxy to reach the web through, from what Windows' Internet Settings
+/// say ("host:port", or "http=h:p;https=h:p"), as a URL. A VPN in proxy mode
+/// sets it; the browsers follow it, so Coucou does too. SOCKS-only: none.
+pub fn proxy_url(server: &str) -> Option<String> {
+    let server = server.trim();
+    if server.is_empty() {
+        return None;
+    }
+    let addr = if server.contains('=') {
+        let entries: Vec<(&str, &str)> = server
+            .split(';')
+            .filter_map(|e| e.split_once('='))
+            .map(|(k, v)| (k.trim(), v.trim()))
+            .filter(|(_, v)| !v.is_empty())
+            .collect();
+        let pick = |want: &str| entries.iter().find(|(k, _)| k.eq_ignore_ascii_case(want)).map(|(_, v)| *v);
+        pick("https").or_else(|| pick("http"))?
+    } else {
+        server.split(';').next()?.trim()
+    };
+    if addr.is_empty() || addr.contains(char::is_whitespace) {
+        return None;
+    }
+    if addr.starts_with("http://") || addr.starts_with("https://") {
+        Some(addr.to_string())
+    } else if addr.contains("://") {
+        None
+    } else {
+        Some(format!("http://{addr}"))
+    }
+}
+
+#[cfg(windows)]
+fn system_proxy() -> Option<String> {
+    use windows::core::w;
+    use windows::Win32::Foundation::ERROR_SUCCESS;
+    use windows::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD, RRF_RT_REG_SZ};
+    let key = w!("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+    unsafe {
+        let mut enabled: u32 = 0;
+        let mut size = std::mem::size_of::<u32>() as u32;
+        let r = RegGetValueW(
+            HKEY_CURRENT_USER,
+            key,
+            w!("ProxyEnable"),
+            RRF_RT_REG_DWORD,
+            None,
+            Some(&mut enabled as *mut u32 as *mut core::ffi::c_void),
+            Some(&mut size),
+        );
+        if r != ERROR_SUCCESS || enabled == 0 {
+            return None;
+        }
+        let mut buf = vec![0u16; 1024];
+        let mut size = (buf.len() * 2) as u32;
+        let r = RegGetValueW(
+            HKEY_CURRENT_USER,
+            key,
+            w!("ProxyServer"),
+            RRF_RT_REG_SZ,
+            None,
+            Some(buf.as_mut_ptr() as *mut core::ffi::c_void),
+            Some(&mut size),
+        );
+        if r != ERROR_SUCCESS {
+            return None;
+        }
+        let len = (size as usize / 2).saturating_sub(1).min(buf.len());
+        proxy_url(&String::from_utf16_lossy(&buf[..len]))
+    }
+}
+
+#[cfg(not(windows))]
+fn system_proxy() -> Option<String> {
+    None
+}
+
+/// A client for GitHub, through the system proxy when there is one.
+fn client(timeout: Duration) -> Result<reqwest::Client, String> {
+    let mut builder = reqwest::Client::builder().connect_timeout(Duration::from_secs(20)).timeout(timeout);
+    if let Some(proxy) = system_proxy() {
+        if let Ok(p) = reqwest::Proxy::all(&proxy) {
+            builder = builder.proxy(p);
+        }
+    }
+    builder.build().map_err(|e| e.to_string())
+}
+
+/// Ok(None): the file is not there (a channel nothing was published to yet).
+/// Tried three times: a connection that drops once does not cost the update.
 async fn fetch(url: &str, limit: usize, timeout: Duration) -> Result<Option<Vec<u8>>, Refusal> {
-    let parsed = reqwest::Url::parse(url).map_err(|_| Refusal::Network)?;
-    let client = crate::net::client(&parsed, timeout).map_err(|_| Refusal::Network)?;
-    let response = client
+    let mut last = String::new();
+    for attempt in 1..=3u64 {
+        match fetch_once(url, limit, timeout).await {
+            Ok(r) => return Ok(r),
+            Err(why) => {
+                // The address is a public release file: nothing secret in the line.
+                let name = url.rsplit('/').next().unwrap_or(url);
+                crate::log::line(format!(
+                    "update: {name} could not be downloaded ({why}), attempt {attempt}/3{}",
+                    if system_proxy().is_some() { ", through the system proxy" } else { "" }
+                ));
+                last = why;
+                if attempt < 3 {
+                    tokio::time::sleep(Duration::from_secs(2 * attempt)).await;
+                }
+            }
+        }
+    }
+    let _ = last;
+    Err(Refusal::Network)
+}
+
+async fn fetch_once(url: &str, limit: usize, timeout: Duration) -> Result<Option<Vec<u8>>, String> {
+    let parsed = reqwest::Url::parse(url).map_err(|e| e.to_string())?;
+    let response = client(timeout)?
         .get(parsed)
         .header("User-Agent", "Coucou")
         .send()
         .await
-        .map_err(|_| Refusal::Network)?;
+        .map_err(|e| e.to_string())?;
     if response.status() == reqwest::StatusCode::NOT_FOUND {
         return Ok(None);
     }
     if !response.status().is_success() {
-        return Err(Refusal::Network);
+        return Err(format!("HTTP {}", response.status().as_u16()));
     }
-    crate::net::read_capped(response, limit).await.map(Some).map_err(|_| Refusal::Network)
+    crate::net::read_capped(response, limit).await.map(Some)
 }
 
 /// Asks the chosen channel for a newer build. Ok(None): up to date (or nothing published yet).
@@ -365,7 +477,10 @@ async fn download_and_run(app: &AppHandle, m: &Manifest) -> Result<(), Refusal> 
         return Err(Refusal::BadHash);
     }
     let path = std::env::temp_dir().join(format!("Coucou-update-{}.exe", m.build));
-    std::fs::write(&path, &bytes).map_err(|_| Refusal::Network)?;
+    if let Err(e) = std::fs::write(&path, &bytes) {
+        crate::log::line(format!("update: the installer could not be saved in the temp folder ({e})"));
+        return Err(Refusal::Network);
+    }
     crate::log::line(format!("update: installing build {}", m.build));
     run_installer(&path)?;
     // Let the installer replace this exe; it starts Coucou again when done.
@@ -405,7 +520,7 @@ pub struct ReleaseRun {
 
 async fn github(method: reqwest::Method, path: &str, token: &str, body: Option<serde_json::Value>) -> Result<(u16, Vec<u8>), ReleaseRefusal> {
     let url = reqwest::Url::parse(&format!("{API}{path}")).map_err(|_| ReleaseRefusal::Network)?;
-    let client = crate::net::client(&url, Duration::from_secs(20)).map_err(|_| ReleaseRefusal::Network)?;
+    let client = client(Duration::from_secs(30)).map_err(|_| ReleaseRefusal::Network)?;
     let mut req = client
         .request(method, url)
         .header("User-Agent", "Coucou")
@@ -648,6 +763,18 @@ mod tests {
         let key = public_key().expect("the shipped key decodes to 32 bytes");
         assert_eq!(verify(&m, Channel::Beta, &key), Ok(()));
         assert_eq!(verify(&m, Channel::Stable, &key), Err(Refusal::BadSignature));
+    }
+
+    #[test]
+    fn the_system_proxy_is_read_as_windows_writes_it() {
+        assert_eq!(proxy_url("127.0.0.1:10809").as_deref(), Some("http://127.0.0.1:10809"));
+        assert_eq!(proxy_url("http=127.0.0.1:8080;https=127.0.0.1:8443").as_deref(), Some("http://127.0.0.1:8443"));
+        assert_eq!(proxy_url("http=proxy.lan:3128").as_deref(), Some("http://proxy.lan:3128"));
+        assert_eq!(proxy_url("http://127.0.0.1:2080").as_deref(), Some("http://127.0.0.1:2080"));
+        // only SOCKS, which this client does not speak; or nothing
+        assert_eq!(proxy_url("socks=127.0.0.1:1080"), None);
+        assert_eq!(proxy_url("socks5://127.0.0.1:1080"), None);
+        assert_eq!(proxy_url(""), None);
     }
 
     #[test]
