@@ -104,6 +104,20 @@ jobs:
           restore-keys: aio-cargo-
       - name: Install dependencies
         run: npm ci
+      # In-app updates (src-tauri/src/updater.rs): this build's number, and the
+      # SHA-256 of the beta password (no secret: no beta switch in this build).
+      - name: Build number and beta password
+        shell: bash
+        env:
+          BETA_PASSWORD: ${{ secrets.COUCOU_BETA_PASSWORD }}
+        run: |
+          echo "COUCOU_BUILD=${{ github.run_number }}" >> "$GITHUB_ENV"
+          if [ -n "$BETA_PASSWORD" ]; then
+            hash=$(printf 'coucou-beta:%s' "$BETA_PASSWORD" | sha256sum | cut -d' ' -f1)
+            echo "COUCOU_BETA_HASH=$hash" >> "$GITHUB_ENV"
+          else
+            echo "::warning::COUCOU_BETA_PASSWORD is not set: this build has no beta channel."
+          fi
       - name: Build and pack the installer
         shell: pwsh
         run: |
@@ -128,6 +142,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload $env:TAG release/Coucou-Windows-setup.exe release/Coucou-Windows-portable.zip --clobber
+      # Every build goes to the beta channel; only promote-stable.yml, run by
+      # hand, sends one to everybody.
+      - name: Publish to the beta channel
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COUCOU_UPDATE_KEY: ${{ secrets.COUCOU_UPDATE_KEY }}
+        run: |
+          if [ -z "$COUCOU_UPDATE_KEY" ]; then
+            echo "::warning::COUCOU_UPDATE_KEY is not set: this build is not offered as an update."
+            exit 0
+          fi
+          n=${{ github.run_number }}
+          tag="beta-$n"
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          cp release/Coucou-Windows-setup.exe "release/Coucou-Windows-setup-$n.exe"
+          gh release create "$tag" "release/Coucou-Windows-setup-$n.exe" --prerelease \
+            --target "${{ github.sha }}" --title "Coucou beta $n" \
+            --notes "Beta build $n of the all-in-one branch (${{ github.sha }}). Offered in Coucou to beta testers; promote-stable.yml sends it to everybody."
+          url="https://github.com/Disa153/coucou/releases/download/$tag/Coucou-Windows-setup-$n.exe"
+          notes=$(git log -1 --format=%s)
+          node ../.github/scripts/sign-update.mjs --channel beta --build "$n" --version "$version" \
+            --url "$url" --file "release/Coucou-Windows-setup-$n.exe" --notes "$notes" --out update.json
+          gh release upload "$tag" update.json --clobber
+          gh release view channel-beta >/dev/null 2>&1 || gh release create channel-beta --prerelease \
+            --title "Coucou beta channel" --notes "What Coucou's beta testers are offered: update.json names the latest beta build."
+          gh release upload channel-beta update.json --clobber
 
   iphone:
     needs: release

@@ -22,6 +22,27 @@ async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T |
   }
 }
 
+export type UpdateChannel = "stable" | "beta";
+export type UpdateRefusal = "badSignature" | "badHash" | "network" | "unsupported" | "localBuild";
+
+/** A newer build a channel offers (its signature already checked by Rust). */
+export interface UpdateManifest {
+  channel: UpdateChannel;
+  build: number;
+  version: string;
+  notes: string;
+}
+
+export interface UpdateInfo {
+  version: string;
+  build: number;
+  channel: UpdateChannel;
+  betaAvailable: boolean;
+  canInstall: boolean;
+  found: UpdateManifest | null;
+  promotePage: string | null;
+}
+
 export interface BootInfo {
   settings: Settings;
   /** Logical screen rect of the monitor the island lives on. */
@@ -205,6 +226,14 @@ export const Bridge = {
   listMonitors: () => call<{ key: string; label: string }[]>("list_monitors"),
 
   openUrl: (url: string) => call<void>("open_url", { url }),
+
+  /** In-app updates (src-tauri/src/updater.rs). */
+  updateInfo: () => call<UpdateInfo>("update_info"),
+  updateCheck: () => call<{ info: UpdateInfo; refusal: UpdateRefusal | null }>("update_check"),
+  /** False when the beta password is wrong. */
+  updateSetChannel: (channel: UpdateChannel, password?: string) =>
+    call<boolean>("update_set_channel", { channel, password: password ?? null }),
+  updateInstall: (build: number) => callOrThrow<void>("update_install", { build }),
 
   /** Which of these sounds have a file of the user's own in the sounds folder. */
   customSounds: (names: readonly string[]) => call<string[]>("custom_sounds", { names }),

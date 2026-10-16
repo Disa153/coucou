@@ -37,6 +37,7 @@ mod sounds;
 mod speech;
 mod spotify;
 mod tray;
+mod updater;
 mod voice;
 #[cfg(windows)]
 mod webview_drop;
@@ -855,6 +856,10 @@ pub fn run() {
             flow::pill_hot,
             flow::pill_hover,
             flow::pill_drag_begin,
+            updater::update_info,
+            updater::update_check,
+            updater::update_set_channel,
+            updater::update_install,
             flow::pill_action,
             notes::notes_state,
             notes::notes_start,
@@ -911,6 +916,7 @@ pub fn run() {
             integrations::start(handle.clone());
             spotify::sync(&handle, &loaded.active_integrations);
             transcripts::configure(&loaded);
+            updater::setup(&handle);
             shortcuts::apply(&handle, &loaded.shortcuts);
             if loaded.autostart {
                 // Login items written before 0.5 start Coucou without --autostart:

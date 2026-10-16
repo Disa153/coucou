@@ -4,7 +4,7 @@
 // island's settings are drawn here, one Notch page at a time.
 
 import "./settings.css";
-import { Bridge, onEvent, type HookPreview, type HookStatus, type ShortcutsReport } from "../core/bridge";
+import { Bridge, onEvent, type HookPreview, type HookStatus, type ShortcutsReport, type UpdateInfo, type UpdateRefusal } from "../core/bridge";
 import { CUSTOM_SERVER_KEY, providerDef, urlExposure } from "../core/providers";
 import {
   ISLAND_SHORTCUTS, SHORTCUTS, SHORTCUT_TEXT, activeKeys, displayKeys, duplicates, effective,
@@ -701,6 +701,130 @@ function savedChatsSection(): HTMLElement {
     h("div", { class: "hint", text: t("Every chat, from the island or the phone, is saved as a Markdown file in this folder (empty: Documents › Coucou › sessions), one file per conversation. Share the folder with Claude to let it read past chats. Answers from Claude Code name their session, which claude --resume opens again.") }),
     h("div", { class: "row" }, h("label", { text: t("Save chats") }), sw),
     h("div", { class: "row" }, input, saveBtn, open),
+  );
+}
+
+// ── Updates section ───────────────────────────────────────────────────────────
+// src-tauri/src/updater.rs: the stable channel for everybody, the beta channel
+// behind a password for the owner, who alone sends a tested beta to stable.
+
+function updatesSection(): HTMLElement {
+  const version = h("div", { class: "hint" });
+  const status = h("div", { class: "hint" });
+  const checkBtn = h("button", { text: t("Check for updates") });
+  const installBtn = h("button", { class: "primary", text: t("Install and restart") });
+  const promoteBtn = h("button", { text: t("Release to everyone…") });
+  const promoteHint = h("div", {
+    class: "hint",
+    text: t("Opens the workflow on GitHub that sends the beta build you tested to everyone. Nothing goes out until you run it."),
+  });
+  const password = h("input", { type: "password", autocomplete: "off", style: "flex:1 1 auto;min-width:0" }) as HTMLInputElement;
+  password.placeholder = t("Beta password");
+  const unlockBtn = h("button", { text: t("Unlock") });
+  const passwordRow = h("div", { class: "row" }, password, unlockBtn);
+  const betaRow = h("div", { class: "row" });
+  const actions = h("div", { class: "row" }, checkBtn, installBtn, promoteBtn);
+  let info: UpdateInfo | null = null;
+
+  const refusalText = (r: UpdateRefusal): string =>
+    ({
+      badSignature: t("This update is not signed with Coucou's key: it was refused."),
+      badHash: t("The downloaded file is not the signed update: it was refused."),
+      network: t("GitHub could not be reached. Try again later."),
+      unsupported: t("Updates install themselves on Windows only."),
+      localBuild: t("A build made on this computer does not update itself."),
+    })[r];
+
+  function draw(next: UpdateInfo | null, note?: string) {
+    info = next;
+    if (!info) {
+      version.textContent = "";
+      status.textContent = t("Updates install themselves on Windows only.");
+      for (const b of [checkBtn, installBtn, promoteBtn]) b.style.display = "none";
+      return;
+    }
+    version.textContent = info.build > 0
+      ? t("Version {0} · build {1} · {2}", { 0: info.version, 1: info.build, 2: info.channel === "beta" ? t("Beta") : t("Stable") })
+      : t("Version {0} · local build", { 0: info.version });
+    const found = info.found;
+    status.textContent = note ?? (found ? t("Build {0} is ready to install.", { 0: found.build }) : "");
+    installBtn.style.display = found && info.canInstall ? "" : "none";
+    checkBtn.style.display = info.build > 0 ? "" : "none";
+    const beta = info.channel === "beta";
+    promoteBtn.style.display = beta && info.promotePage ? "" : "none";
+    promoteHint.style.display = promoteBtn.style.display;
+    clear(betaRow);
+    if (info.betaAvailable) {
+      betaRow.append(
+        h("label", { text: t("Beta tester") }),
+        toggle(beta, (on) => {
+          if (on) {
+            passwordRow.style.display = "";
+            password.focus();
+          } else {
+            passwordRow.style.display = "none";
+            void Bridge.updateSetChannel("stable").then(() => void Bridge.updateInfo().then((i) => draw(i)));
+          }
+        }),
+      );
+    }
+    if (beta || !info.betaAvailable) passwordRow.style.display = "none";
+  }
+
+  checkBtn.addEventListener("click", () => {
+    status.textContent = t("Checking…");
+    void Bridge.updateCheck().then((r) => {
+      if (!r) return draw(null);
+      const note = r.refusal ? refusalText(r.refusal) : r.info.found ? undefined : t("Coucou is up to date.");
+      draw(r.info, note);
+    });
+  });
+  installBtn.addEventListener("click", () => {
+    const build = info?.found?.build;
+    if (build == null) return;
+    installBtn.setAttribute("disabled", "");
+    status.textContent = t("Downloading the update… Coucou restarts by itself once it is installed.");
+    Bridge.updateInstall(build).catch((e: unknown) => {
+      installBtn.removeAttribute("disabled");
+      const code = typeof e === "string" ? (e as UpdateRefusal) : "network";
+      status.textContent = refusalText(code) ?? refusalText("network");
+    });
+  });
+  promoteBtn.addEventListener("click", () => {
+    if (info?.promotePage) void Bridge.openUrl(info.promotePage);
+  });
+  const unlock = () => {
+    void Bridge.updateSetChannel("beta", password.value).then((ok) => {
+      if (!ok) {
+        status.textContent = t("Wrong password.");
+        password.select();
+        return;
+      }
+      password.value = "";
+      void Bridge.updateInfo().then((i) => draw(i));
+    });
+  };
+  unlockBtn.addEventListener("click", unlock);
+  password.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") unlock();
+  });
+  passwordRow.style.display = "none";
+  void Bridge.updateInfo().then((i) => draw(i));
+
+  return h(
+    "section",
+    {},
+    h("h2", {}, h("span", { text: t("Updates") })),
+    h("div", {
+      class: "hint",
+      text: t("Coucou looks for a new build every few hours and installs it only when you click. Every update is signed; anything else is refused."),
+    }),
+    version,
+    betaRow,
+    passwordRow,
+    actions,
+    status,
+    promoteHint,
   );
 }
 
@@ -1469,7 +1593,7 @@ async function render() {
   shortcutsListener = null;
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
-    general: () => [generalSection()],
+    general: () => [generalSection(), updatesSection()],
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [
