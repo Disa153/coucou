@@ -72,6 +72,44 @@ impl ChatBackend for AppChat {
     fn reset(&self) {
         self.chat.reset();
     }
+
+    /// Into `.coucou-phone` in the folder Claude Code and Gemini CLI work in, so they can read the
+    /// photo without asking; the paths are relative to that folder. Photos older than a day go.
+    fn save_images(&self, images: Vec<Vec<u8>>) -> Result<Vec<String>, ChatFail> {
+        let dir = crate::claude_code::work_dir(&self.settings()).join(PHOTO_DIR);
+        save_photos(&dir, &images, std::time::SystemTime::now()).map_err(|e| {
+            log::line(format!("phone link: could not save a photo ({e})"));
+            ChatFail::Internal
+        })
+    }
+}
+
+/// Where the phone's photos go, inside the CLI's working folder.
+pub const PHOTO_DIR: &str = ".coucou-phone";
+const PHOTO_KEEP: std::time::Duration = std::time::Duration::from_secs(24 * 60 * 60);
+
+/// Writes each photo as `photo-<time>-<n>.<ext>` in `dir` and returns `.coucou-phone/<name>` for each.
+pub fn save_photos(dir: &std::path::Path, images: &[Vec<u8>], now: std::time::SystemTime) -> std::io::Result<Vec<String>> {
+    std::fs::create_dir_all(dir)?;
+    // Yesterday's photos are not needed any more.
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for e in entries.flatten() {
+            let name = e.file_name().to_string_lossy().to_string();
+            let old = e.metadata().and_then(|m| m.modified()).ok().and_then(|t| now.duration_since(t).ok()).is_some_and(|age| age > PHOTO_KEEP);
+            if name.starts_with("photo-") && old {
+                let _ = std::fs::remove_file(e.path());
+            }
+        }
+    }
+    let stamp = now.duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
+    let mut paths = Vec::new();
+    for (n, bytes) in images.iter().enumerate() {
+        let ext = super::chat::image_ext(bytes).ok_or_else(|| std::io::Error::other("not a JPEG or PNG"))?;
+        let name = format!("photo-{stamp}-{n}.{ext}");
+        std::fs::write(dir.join(&name), bytes)?;
+        paths.push(format!("{PHOTO_DIR}/{name}"));
+    }
+    Ok(paths)
 }
 
 // ── Pure helpers (tested below) ───────────────────────────────────────────────
@@ -156,6 +194,28 @@ pub fn classify(local: bool, err: &str) -> ChatFail {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn photos_are_saved_with_their_type_and_old_ones_go() {
+        let dir = std::env::temp_dir().join(format!("coucou-photos-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("photo-old.jpg"), b"x").unwrap();
+        std::fs::write(dir.join("keep.txt"), b"x").unwrap();
+        // two days later, the old photo is gone; other files stay
+        let later = std::time::SystemTime::now() + std::time::Duration::from_secs(2 * 24 * 3600);
+        let png = b"\x89PNG\r\n\x1a\nrest".to_vec();
+        let paths = save_photos(&dir, &[vec![0xFF, 0xD8, 0xFF, 1], png.clone()], later).unwrap();
+        assert_eq!(paths.len(), 2);
+        assert!(paths[0].starts_with(".coucou-phone/photo-") && paths[0].ends_with("-0.jpg"), "{paths:?}");
+        assert!(paths[1].ends_with("-1.png"));
+        let name = paths[1].trim_start_matches(".coucou-phone/");
+        assert_eq!(std::fs::read(dir.join(name)).unwrap(), png);
+        assert!(!dir.join("photo-old.jpg").exists());
+        assert!(dir.join("keep.txt").exists());
+        assert!(save_photos(&dir, &[b"GIF89a".to_vec()], later).is_err());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     fn ids(v: &[&str]) -> Vec<String> {
         v.iter().map(|s| s.to_string()).collect()

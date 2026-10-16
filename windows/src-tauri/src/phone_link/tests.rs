@@ -590,7 +590,8 @@ fn a_flood_from_several_addresses_still_leaves_room_for_the_known_phone() {
 mod chat_tests {
     use super::*;
     use crate::phone_link::chat::{
-        reason, BoxFuture, ChatBackend, ChatConfig, ChatFail, ChatLink, ModelOption, DONE_TEXT_MAX, MAX_SENDS, MAX_TEXT_CHARS,
+        reason, BoxFuture, ChatBackend, ChatConfig, ChatFail, ChatLink, ModelOption, DONE_TEXT_MAX, MAX_IMAGES, MAX_IMAGE_BYTES, MAX_SENDS,
+        MAX_TEXT_CHARS,
     };
     use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
     use tokio::sync::mpsc::UnboundedSender;
@@ -612,6 +613,8 @@ mod chat_tests {
         calls: Mutex<Vec<(String, String)>>,
         resets: AtomicUsize,
         dropped: Arc<AtomicBool>,
+        /// The photos handed to save_images, by their bytes.
+        saved: Mutex<Vec<Vec<u8>>>,
     }
 
     impl Fake {
@@ -626,6 +629,7 @@ mod chat_tests {
                 calls: Mutex::new(Vec::new()),
                 resets: AtomicUsize::new(0),
                 dropped: Arc::new(AtomicBool::new(false)),
+                saved: Mutex::new(Vec::new()),
             })
         }
         fn script(&self, s: Script) {
@@ -633,6 +637,14 @@ mod chat_tests {
         }
         fn enable(&self, on: bool) {
             self.config.lock().unwrap().enabled = on;
+        }
+        /// Adds a Claude Code model, the kind that can look at photos.
+        fn allow_cli(&self) {
+            self.config.lock().unwrap().allowed.push(ModelOption {
+                id: "claude-code/sonnet".into(),
+                provider: "claude-code".into(),
+                label: "Claude Code Sonnet".into(),
+            });
         }
     }
 
@@ -675,6 +687,12 @@ mod chat_tests {
         }
         fn reset(&self) {
             self.resets.fetch_add(1, Ordering::SeqCst);
+        }
+        fn save_images(&self, images: Vec<Vec<u8>>) -> Result<Vec<String>, ChatFail> {
+            let mut saved = self.saved.lock().unwrap();
+            let paths = (0..images.len()).map(|n| format!(".coucou-phone/photo-{}.jpg", saved.len() + n)).collect();
+            saved.extend(images);
+            Ok(paths)
         }
     }
 
@@ -1007,6 +1025,117 @@ mod chat_tests {
                 assert!(!m.contains("sk-") && !m.to_lowercase().contains("bearer") && !m.contains("key:"), "{m}");
             }
             assert!(DONE_TEXT_MAX < 64 * 1024);
+        });
+    }
+
+    // ── Photos ────────────────────────────────────────────────────────────────
+
+    fn b64(bytes: &[u8]) -> String {
+        const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut out = String::new();
+        for c in bytes.chunks(3) {
+            let n = (c[0] as u32) << 16 | (*c.get(1).unwrap_or(&0) as u32) << 8 | *c.get(2).unwrap_or(&0) as u32;
+            for i in 0..4 {
+                out.push(if i <= c.len() { T[(n >> (18 - 6 * i) & 63) as usize] as char } else { '=' });
+            }
+        }
+        out
+    }
+
+    fn jpeg(len: usize) -> Vec<u8> {
+        let mut v = vec![0xFF, 0xD8, 0xFF, 0xE0];
+        v.extend((0..len.saturating_sub(4)).map(|i| (i % 251) as u8));
+        v
+    }
+
+    /// The photo in `parts` lines, as the phone sends it.
+    async fn send_photo(c: &mut Client, id: &str, bytes: &[u8], parts: usize) {
+        let size = bytes.len().div_ceil(parts);
+        for (part, piece) in bytes.chunks(size).enumerate() {
+            c.send(json!({ "type": "chatImage", "id": id, "part": part, "parts": parts, "data": b64(piece) })).await;
+        }
+    }
+
+    fn send_with(id: &str, model: &str, text: &str, images: &[&str]) -> Value {
+        json!({ "type": "chatSend", "id": id, "model": model, "text": text, "images": images })
+    }
+
+    #[test]
+    fn a_photo_in_parts_reaches_claude_code_as_a_file_to_read() {
+        block_on(async {
+            let fake = Fake::new(true);
+            fake.allow_cli();
+            let rig = rig(&fake).await;
+            let (mut c, _) = phone(&rig, Some(json!(["chat"]))).await;
+            let photo = jpeg(100_000);
+            send_photo(&mut c, "img1", &photo, 3).await;
+            c.send(send_with("a1", "claude-code/sonnet", "What is this?", &["img1"])).await;
+            let (_, end) = answer(&mut c, "a1").await;
+            assert_eq!(end["type"], "chatDone", "{end}");
+            assert_eq!(*fake.saved.lock().unwrap(), vec![photo]);
+            let calls = fake.calls.lock().unwrap();
+            let (model, text) = &calls[0];
+            assert_eq!(model, "claude-code/sonnet");
+            assert!(text.starts_with("What is this?"), "{text}");
+            assert!(text.contains(".coucou-phone/photo-0.jpg") && text.contains("Read tool"), "{text}");
+        });
+    }
+
+    #[test]
+    fn a_photo_alone_is_asked_about_and_used_only_once() {
+        block_on(async {
+            let fake = Fake::new(true);
+            fake.allow_cli();
+            let rig = rig(&fake).await;
+            let (mut c, _) = phone(&rig, Some(json!(["chat"]))).await;
+            send_photo(&mut c, "img1", &jpeg(5_000), 1).await;
+            c.send(send_with("a1", "claude-code/sonnet", "", &["img1"])).await;
+            assert_eq!(answer(&mut c, "a1").await.1["type"], "chatDone");
+            assert!(fake.calls.lock().unwrap()[0].1.starts_with("What is in this photo?"));
+            // the photo was taken: naming it again finds nothing
+            c.send(send_with("a2", "claude-code/sonnet", "again", &["img1"])).await;
+            assert_eq!(answer(&mut c, "a2").await.1["reason"], "image_missing");
+        });
+    }
+
+    #[test]
+    fn photos_are_refused_for_an_api_provider_a_missing_part_or_a_non_image() {
+        block_on(async {
+            let fake = Fake::new(true);
+            fake.allow_cli();
+            let rig = rig(&fake).await;
+            let (mut c, _) = phone(&rig, Some(json!(["chat"]))).await;
+            send_photo(&mut c, "img1", &jpeg(5_000), 1).await;
+            c.send(send_with("a1", "anthropic/claude-x", "hi", &["img1"])).await;
+            assert_eq!(answer(&mut c, "a1").await.1["reason"], "no_images");
+            // two parts announced, one sent
+            c.send(json!({ "type": "chatImage", "id": "img2", "part": 0, "parts": 2, "data": b64(&jpeg(100)) })).await;
+            c.send(send_with("a2", "claude-code/sonnet", "hi", &["img2"])).await;
+            assert_eq!(answer(&mut c, "a2").await.1["reason"], "image_missing");
+            // not a JPEG or a PNG
+            c.send(json!({ "type": "chatImage", "id": "img3", "part": 0, "parts": 1, "data": b64(b"GIF89a....") })).await;
+            c.send(send_with("a3", "claude-code/sonnet", "hi", &["img3"])).await;
+            assert_eq!(answer(&mut c, "a3").await.1["reason"], "image_bad");
+            let five: Vec<String> = (0..=MAX_IMAGES).map(|i| format!("i{i}")).collect();
+            let five: Vec<&str> = five.iter().map(String::as_str).collect();
+            c.send(send_with("a4", "claude-code/sonnet", "hi", &five)).await;
+            assert_eq!(answer(&mut c, "a4").await.1["reason"], "too_many_images");
+            assert!(fake.calls.lock().unwrap().is_empty());
+            assert!(fake.saved.lock().unwrap().is_empty());
+        });
+    }
+
+    #[test]
+    fn a_photo_too_large_is_dropped() {
+        block_on(async {
+            let fake = Fake::new(true);
+            fake.allow_cli();
+            let rig = rig(&fake).await;
+            let (mut c, _) = phone(&rig, Some(json!(["chat"]))).await;
+            // over MAX_IMAGE_BYTES in parts that each fit a line
+            send_photo(&mut c, "big", &jpeg(MAX_IMAGE_BYTES + 1), 120).await;
+            c.send(send_with("a1", "claude-code/sonnet", "hi", &["big"])).await;
+            assert_eq!(answer(&mut c, "a1").await.1["reason"], "image_missing");
         });
     }
 
