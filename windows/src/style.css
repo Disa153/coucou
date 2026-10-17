@@ -2848,3 +2848,65 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   color: var(--dim-3);
   padding: 4px 0;
 }
+
+/* ── Glowing strip along the island (island/glow.ts) ────────────────────── */
+
+.glow-strip {
+  position: absolute;
+  pointer-events: none;
+  opacity: var(--glow-bright, 0.8);
+  filter: drop-shadow(0 0 3px var(--glow-light)) drop-shadow(0 0 9px var(--glow-light));
+}
+
+.glow-bar {
+  position: absolute;
+  inset: 0;
+}
+
+/* The frame: only its padding is painted, so the island shows through it. */
+.glow-strip.around .glow-bar {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+.glow-strip.pulse {
+  animation: glow-pulse var(--glow-speed, 3s) ease-in-out infinite;
+}
+
+.glow-strip.beat {
+  animation: glow-beat 0.5s ease-out infinite;
+}
+
+.glow-strip.rainbow .glow-bar {
+  animation: glow-slide var(--glow-speed, 3s) linear infinite;
+}
+
+@keyframes glow-pulse {
+  50% {
+    opacity: calc(var(--glow-bright, 0.8) * 0.25);
+  }
+}
+
+@keyframes glow-beat {
+  0%,
+  100% {
+    opacity: var(--glow-bright, 0.8);
+  }
+  55% {
+    opacity: calc(var(--glow-bright, 0.8) * 0.4);
+  }
+}
+
+@keyframes glow-slide {
+  to {
+    background-position: 300% 300%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-strip,
+  .glow-strip .glow-bar {
+    animation: none !important;
+  }
+}

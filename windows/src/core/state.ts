@@ -1,5 +1,6 @@
 // App state — mirror of AppState.swift (the parts the island needs).
 
+import type { GlowPref } from "./glow";
 import type { Breed } from "../mochi/breeds";
 import type { BotEmoteName, BotStateName, IslandMode, IslandViewName } from "./layout";
 import type { EyeShape } from "../mochi/engine";
@@ -188,6 +189,8 @@ export interface Settings {
   phoneChatModels?: string[];
   /** The screen edge the island sits on, set by dragging it. Rust owns it too. */
   islandEdge?: IslandEdge;
+  /** The glowing strip along the island (core/glow.ts reads it); absent means off. */
+  glow?: Partial<GlowPref>;
   /** Mochi on the desktop. Rust owns it: whatever the page sends back is ignored. */
   desktopMochi?: {
     onDesktop: boolean;
