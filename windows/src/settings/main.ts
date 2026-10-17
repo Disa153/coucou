@@ -1733,7 +1733,7 @@ async function render() {
   shortcutsListener = null;
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
-    general: () => [generalSection(), glowSection(settings, toggle, () => void save()), updatesSection()],
+    general: () => [generalSection(), glowSection(() => settings, toggle, () => void save()), updatesSection()],
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [

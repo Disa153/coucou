@@ -11,15 +11,20 @@ type Toggle = (on: boolean, onChange: (v: boolean) => void) => HTMLElement;
 /** A slider's changes are saved this long after it stops moving. */
 const SAVE_AFTER_MS = 150;
 
-export function glowSection(settings: Settings, makeToggle: Toggle, save: () => void): HTMLElement {
-  let pref: GlowPref = readGlow(settings.glow);
+/**
+ * `current` gives the settings as they are now: the window replaces its copy
+ * whenever any setting is saved, so a copy kept from the first draw would
+ * miss every change after the first.
+ */
+export function glowSection(current: () => Settings, makeToggle: Toggle, save: () => void): HTMLElement {
+  let pref: GlowPref = readGlow(current().glow);
   let timer: number | null = null;
 
   const details = h("div", { style: "display:flex;flex-direction:column;gap:12px" });
 
   function store(change: Partial<GlowPref>, now = true) {
     pref = { ...pref, ...change };
-    settings.glow = { ...pref };
+    current().glow = { ...pref };
     if (timer != null) window.clearTimeout(timer);
     timer = null;
     if (now) save();
