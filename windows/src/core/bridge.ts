@@ -460,7 +460,44 @@ export const Bridge = {
   spotifyOpen: () => call<boolean>("spotify_open"),
   /** Whether there is a Spotify to launch (Settings). */
   spotifyInstalled: () => call<boolean>("spotify_installed"),
+
+  // ── Sound mixer (src-tauri/src/mixer.rs) ──────────────────────────────────
+  /** The outputs, the speakers' level and every program with sound. */
+  mixerState: () => call<MixerState>("mixer_state"),
+  /** Levels 0…100; null leaves that part as it is. */
+  mixerSetMaster: (volume: number | null, muted: boolean | null) =>
+    call<boolean>("mixer_set_master", { volume, muted }),
+  mixerSetApp: (key: string, volume: number | null, muted: boolean | null) =>
+    call<boolean>("mixer_set_app", { key, volume, muted }),
+  /** Makes this output Windows' default one. */
+  mixerSetDevice: (id: string) => call<boolean>("mixer_set_device", { id }),
+  /** Windows' own sound settings. */
+  mixerOpenSystem: () => call<boolean>("mixer_open_system"),
 };
+
+export interface MixerDevice {
+  id: string;
+  name: string;
+  current: boolean;
+}
+
+export interface MixerApp {
+  /** The executable's name, or "system" for the system sounds. */
+  key: string;
+  name: string;
+  volume: number;
+  muted: boolean;
+  /** Coucou itself (Mochi's sounds). */
+  own: boolean;
+}
+
+export interface MixerState {
+  /** False off Windows. */
+  supported: boolean;
+  devices: MixerDevice[];
+  master: { volume: number; muted: boolean } | null;
+  apps: MixerApp[];
+}
 
 export type SpotifyAction = "playPause" | "next" | "previous" | "seek" | "shuffle" | "repeat" | "volume";
 

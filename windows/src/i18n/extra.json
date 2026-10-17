@@ -4977,6 +4977,105 @@
    "pt-BR": "Envia a todos, pelo GitHub, o build beta que está rodando aqui, o que você testou. Nada sai até você confirmar.",
    "ru": "Отправляет всем через GitHub бета-сборку, которая сейчас запущена, — ту, что вы проверили. Пока вы не подтвердите, ничего не уходит.",
    "id": "Mengirim build beta yang berjalan di sini, yang Anda uji, ke semua orang melalui GitHub. Tidak ada yang keluar sampai Anda konfirmasi."
+  },
+  "Sound mixer": {
+   "zh-Hans": "混音器",
+   "hi": "साउंड मिक्सर",
+   "es": "Mezclador de sonido",
+   "ar": "خالط الصوت",
+   "fr": "Mélangeur de son",
+   "bn": "সাউন্ড মিক্সার",
+   "pt-BR": "Mixer de som",
+   "ru": "Микшер",
+   "id": "Mixer suara"
+  },
+  "Music": {
+   "zh-Hans": "音乐",
+   "hi": "संगीत",
+   "es": "Música",
+   "ar": "الموسيقى",
+   "fr": "Musique",
+   "bn": "সংগীত",
+   "pt-BR": "Música",
+   "ru": "Музыка",
+   "id": "Musik"
+  },
+  "Speakers": {
+   "zh-Hans": "扬声器",
+   "hi": "स्पीकर",
+   "es": "Altavoces",
+   "ar": "مكبرات الصوت",
+   "fr": "Haut-parleurs",
+   "bn": "স্পিকার",
+   "pt-BR": "Alto-falantes",
+   "ru": "Динамики",
+   "id": "Speaker"
+  },
+  "Apps": {
+   "zh-Hans": "应用",
+   "hi": "ऐप्स",
+   "es": "Apps",
+   "ar": "التطبيقات",
+   "fr": "Apps",
+   "bn": "অ্যাপ",
+   "pt-BR": "Apps",
+   "ru": "Приложения",
+   "id": "Aplikasi"
+  },
+  "System sounds": {
+   "zh-Hans": "系统声音",
+   "hi": "सिस्टम ध्वनियाँ",
+   "es": "Sonidos del sistema",
+   "ar": "أصوات النظام",
+   "fr": "Sons système",
+   "bn": "সিস্টেম সাউন্ড",
+   "pt-BR": "Sons do sistema",
+   "ru": "Системные звуки",
+   "id": "Suara sistem"
+  },
+  "Sound settings…": {
+   "zh-Hans": "声音设置…",
+   "hi": "ध्वनि सेटिंग…",
+   "es": "Configuración de sonido…",
+   "ar": "إعدادات الصوت…",
+   "fr": "Paramètres son…",
+   "bn": "সাউন্ড সেটিংস…",
+   "pt-BR": "Configurações de som…",
+   "ru": "Звук в Windows…",
+   "id": "Pengaturan suara…"
+  },
+  "Unmute": {
+   "zh-Hans": "取消静音",
+   "hi": "अनम्यूट करें",
+   "es": "Activar sonido",
+   "ar": "إلغاء الكتم",
+   "fr": "Réactiver le son",
+   "bn": "আনমিউট",
+   "pt-BR": "Ativar som",
+   "ru": "Включить звук",
+   "id": "Bunyikan"
+  },
+  "No app is making sound right now.": {
+   "zh-Hans": "目前没有应用在发声。",
+   "hi": "अभी कोई ऐप आवाज़ नहीं कर रहा है।",
+   "es": "Ninguna app está sonando ahora.",
+   "ar": "لا يوجد تطبيق يصدر صوتًا الآن.",
+   "fr": "Aucune app ne fait de son pour l'instant.",
+   "bn": "এখন কোনো অ্যাপ শব্দ করছে না।",
+   "pt-BR": "Nenhum app está tocando som agora.",
+   "ru": "Сейчас ни одна программа не издаёт звук.",
+   "id": "Tidak ada aplikasi yang bersuara saat ini."
+  },
+  "The mixer works on Windows.": {
+   "zh-Hans": "混音器仅在 Windows 上可用。",
+   "hi": "मिक्सर Windows पर काम करता है।",
+   "es": "El mezclador funciona en Windows.",
+   "ar": "يعمل الخالط على Windows.",
+   "fr": "Le mélangeur fonctionne sous Windows.",
+   "bn": "মিক্সার Windows-এ কাজ করে।",
+   "pt-BR": "O mixer funciona no Windows.",
+   "ru": "Микшер работает в Windows.",
+   "id": "Mixer berfungsi di Windows."
   }
  }
 }
