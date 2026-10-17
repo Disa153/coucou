@@ -214,6 +214,10 @@ pub fn is_local(ip: IpAddr) -> bool {
 }
 
 async fn one_connection(tcp: TcpStream, acceptor: TlsAcceptor, shared: &Arc<Shared>, ticket: Arc<Ticket>) {
+    // The address the phone reached: its card is the one to wake (wake.rs).
+    if let Ok(local) = tcp.local_addr() {
+        crate::phone_link::wake::seen_local(local.ip());
+    }
     let Ok(Ok(tls)) = tokio::time::timeout(ticket.wait(), acceptor.accept(tcp)).await else { return };
     run_with(tls, shared, Some(ticket)).await;
 }
@@ -319,7 +323,7 @@ where
     }
     // Wake-on-LAN: this computer's card and network, kept by the phone for when the computer is off.
     if asked("wake") {
-        if let Some(wake) = crate::phone_link::wake::known() {
+        if let Some(wake) = crate::phone_link::wake::for_welcome().await {
             welcome["wake"] = wake;
         }
     }

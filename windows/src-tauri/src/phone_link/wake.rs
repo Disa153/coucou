@@ -3,8 +3,10 @@
 //! broadcast address. Sent in the welcome to a phone that asks for "wake"
 //! (a paired phone only); the phone keeps it for when the computer is off.
 //!
-//! Read once in the background when the phone link starts: on Windows through
-//! PowerShell's Get-NetAdapter, on Linux through `ip` and /sys/class/net.
+//! The card is the one holding the address the phone reached (not the route to
+//! the internet, which a VPN's virtual adapter may own); failing that, on
+//! Windows, the wired card that is up. Read on Windows through PowerShell's
+//! Get-NetAdapter, on Linux through `ip` and /sys/class/net.
 
 use serde_json::{json, Value};
 use std::net::{IpAddr, Ipv4Addr, UdpSocket};
@@ -13,14 +15,31 @@ use std::sync::Mutex;
 
 static KNOWN: Mutex<Option<Value>> = Mutex::new(None);
 static LOOKING: AtomicBool = AtomicBool::new(false);
+/// The address on this computer a phone last reached over the local network.
+static LOCAL: Mutex<Option<Ipv4Addr>> = Mutex::new(None);
 
-/// What was found, if it has been yet.
-pub fn known() -> Option<Value> {
-    let known = KNOWN.lock().unwrap_or_else(|e| e.into_inner()).clone();
-    if known.is_none() {
-        refresh();
+/// A phone reached this computer at `ip` (the accepted connection's own address).
+pub fn seen_local(ip: IpAddr) {
+    let IpAddr::V4(v4) = ip else { return };
+    if v4.is_loopback() || v4.is_unspecified() || !v4.is_private() {
+        return;
     }
-    known
+    let changed = LOCAL.lock().unwrap_or_else(|e| e.into_inner()).replace(v4) != Some(v4);
+    let known_ip = KNOWN.lock().unwrap_or_else(|e| e.into_inner()).as_ref().and_then(|k| k["ip"].as_str().map(str::to_string));
+    if changed && known_ip.as_deref() != Some(v4.to_string().as_str()) {
+        *KNOWN.lock().unwrap_or_else(|e| e.into_inner()) = None;
+    }
+}
+
+/// For the welcome: what is known, else a look now (a few seconds at most, first time only).
+pub async fn for_welcome() -> Option<Value> {
+    if let Some(known) = KNOWN.lock().unwrap_or_else(|e| e.into_inner()).clone() {
+        return Some(known);
+    }
+    let look = tokio::task::spawn_blocking(lookup);
+    let found = tokio::time::timeout(std::time::Duration::from_secs(8), look).await.ok()?.ok()??;
+    *KNOWN.lock().unwrap_or_else(|e| e.into_inner()) = Some(found.clone());
+    Some(found)
 }
 
 /// Looks it up again in the background (one look at a time).
@@ -38,9 +57,18 @@ pub fn refresh() {
 }
 
 fn lookup() -> Option<Value> {
-    let ip = local_ipv4()?;
-    let (mac, prefix) = imp::mac_and_prefix(ip)?;
-    let mac = normalize_mac(&mac)?;
+    let seen = *LOCAL.lock().unwrap_or_else(|e| e.into_inner());
+    let ip = seen.or_else(local_ipv4)?;
+    let Some((mac, prefix, card_ip)) = imp::mac_and_prefix(ip) else {
+        crate::log::line(format!("phone link: no network card found for Wake-on-LAN (address {ip})"));
+        return None;
+    };
+    let Some(mac) = normalize_mac(&mac) else {
+        crate::log::line(format!("phone link: the card for {ip} has no usable MAC address for Wake-on-LAN"));
+        return None;
+    };
+    let ip = card_ip.unwrap_or(ip);
+    crate::log::line(format!("phone link: Wake-on-LAN card {mac} ({ip}/{prefix})"));
     Some(json!({ "mac": mac, "ip": ip.to_string(), "broadcast": broadcast(ip, prefix).to_string() }))
 }
 
@@ -72,14 +100,15 @@ pub fn broadcast(ip: Ipv4Addr, prefix: u8) -> Ipv4Addr {
     Ipv4Addr::from(u32::from(ip) | !mask)
 }
 
-/// PowerShell's answer: "AA-BB-CC-DD-EE-FF 24".
+/// PowerShell's answer: "AA-BB-CC-DD-EE-FF 24 192.168.1.5" (the address may be missing).
 #[cfg_attr(not(windows), allow(dead_code))]
-pub fn parse_powershell(out: &str) -> Option<(String, u8)> {
+pub fn parse_powershell(out: &str) -> Option<(String, u8, Option<Ipv4Addr>)> {
     let line = out.lines().map(str::trim).find(|l| !l.is_empty())?;
     let mut parts = line.split_whitespace();
     let mac = parts.next()?.to_string();
     let prefix = parts.next()?.parse().ok()?;
-    Some((mac, prefix))
+    let ip = parts.next().and_then(|p| p.parse().ok());
+    Some((mac, prefix, ip))
 }
 
 /// A line of `ip -o -4 addr show`: "2: enp3s0    inet 192.168.1.5/24 brd … " → ("enp3s0", 24) when it is `ip`'s.
@@ -101,11 +130,16 @@ mod imp {
     use std::net::Ipv4Addr;
     use std::process::Command;
 
-    pub fn mac_and_prefix(ip: Ipv4Addr) -> Option<(String, u8)> {
+    /// The card holding `ip`; if that one is virtual or has no MAC (a VPN's tunnel), the wired card that is up.
+    pub fn mac_and_prefix(ip: Ipv4Addr) -> Option<(String, u8, Option<Ipv4Addr>)> {
         let script = format!(
-            "$a = Get-NetIPAddress -AddressFamily IPv4 -IPAddress '{ip}' -ErrorAction Stop | Select-Object -First 1; \
-             $n = Get-NetAdapter -InterfaceIndex $a.InterfaceIndex -ErrorAction Stop; \
-             \"$($n.MacAddress) $($a.PrefixLength)\""
+            "$a = Get-NetIPAddress -AddressFamily IPv4 -IPAddress '{ip}' -ErrorAction SilentlyContinue | Select-Object -First 1; \
+             $n = $null; if ($a) {{ $n = Get-NetAdapter -InterfaceIndex $a.InterfaceIndex -ErrorAction SilentlyContinue }}; \
+             if (-not $n -or -not $n.MacAddress -or $n.Virtual) {{ \
+               $n = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object {{ $_.Status -eq 'Up' -and $_.MediaType -eq '802.3' }} | Select-Object -First 1; \
+               if ($n) {{ $a = Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $n.InterfaceIndex -ErrorAction SilentlyContinue | Select-Object -First 1 }} \
+             }}; \
+             if ($n -and $a) {{ \"$($n.MacAddress) $($a.PrefixLength) $($a.IPAddress)\" }}"
         );
         let mut cmd = Command::new("powershell.exe");
         cmd.args(["-NoProfile", "-NonInteractive", "-Command", &script]);
@@ -123,12 +157,12 @@ mod imp {
     use std::net::Ipv4Addr;
     use std::process::Command;
 
-    pub fn mac_and_prefix(ip: Ipv4Addr) -> Option<(String, u8)> {
+    pub fn mac_and_prefix(ip: Ipv4Addr) -> Option<(String, u8, Option<Ipv4Addr>)> {
         let out = Command::new("ip").args(["-o", "-4", "addr", "show"]).output().ok()?;
         let text = String::from_utf8_lossy(&out.stdout);
         let (name, prefix) = text.lines().find_map(|l| super::parse_ip_line(l, ip))?;
         let mac = std::fs::read_to_string(format!("/sys/class/net/{name}/address")).ok()?;
-        Some((mac.trim().to_string(), prefix))
+        Some((mac.trim().to_string(), prefix, Some(ip)))
     }
 }
 
@@ -157,7 +191,11 @@ mod tests {
 
     #[test]
     fn powershell_and_ip_answers() {
-        assert_eq!(parse_powershell("\r\nD8-BB-C1-11-22-33 24\r\n"), Some(("D8-BB-C1-11-22-33".into(), 24)));
+        assert_eq!(parse_powershell("\r\nD8-BB-C1-11-22-33 24\r\n"), Some(("D8-BB-C1-11-22-33".into(), 24, None)));
+        assert_eq!(
+            parse_powershell("D8-BB-C1-11-22-33 24 192.168.1.5\r\n"),
+            Some(("D8-BB-C1-11-22-33".into(), 24, Some(Ipv4Addr::new(192, 168, 1, 5))))
+        );
         assert_eq!(parse_powershell(""), None);
         let ip = Ipv4Addr::new(192, 168, 1, 5);
         let line = "2: enp3s0    inet 192.168.1.5/24 brd 192.168.1.255 scope global dynamic enp3s0\\       valid_lft 80000sec";

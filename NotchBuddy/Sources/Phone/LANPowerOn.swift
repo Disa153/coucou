@@ -210,6 +210,35 @@ enum Keenetic {
         }
     }
 
+    /// The computer's wired card, from the router's list of devices (`show ip hotspot`), found by its name.
+    static func findMac(_ login: RouterLogin, computer: String) async throws -> String? {
+        try await firstAnswering(login) { address in
+            let session = session()
+            try await signIn(login, at: address, session: session)
+            guard let url = URL(string: base(address) + "/rci/show/ip/hotspot") else { throw RouterError.notKeenetic }
+            let (data, status, _) = try await send(session, URLRequest(url: url))
+            guard status == 200 else { throw RouterError.refused("HTTP \(status)") }
+            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+            let hosts = object?["host"] as? [[String: Any]] ?? []
+            return pickMac(hosts, computer: computer)
+        }
+    }
+
+    /// The host named like the computer; its wired entry (no Wi-Fi network) first, then an active one.
+    static func pickMac(_ hosts: [[String: Any]], computer: String) -> String? {
+        let name = computer.lowercased()
+        guard !name.isEmpty else { return nil }
+        let named = hosts.filter { host in
+            [host["hostname"], host["name"]].contains { ($0 as? String)?.lowercased() == name }
+        }
+        let ranked = named.sorted { a, b in
+            let wiredA = a["ssid"] == nil, wiredB = b["ssid"] == nil
+            if wiredA != wiredB { return wiredA }
+            return (a["active"] as? Bool ?? false) && !(b["active"] as? Bool ?? false)
+        }
+        return ranked.compactMap { $0["mac"] as? String }.first { LANWakeTarget.bytes(of: $0) != nil }
+    }
+
     /// The router sends the magic packet itself (`ip hotspot wake <mac>`), reached at home or through KeenDNS.
     static func wake(_ login: RouterLogin, mac: String) async throws {
         try await firstAnswering(login) { address in
@@ -328,18 +357,49 @@ final class LANPowerOn {
         RouterStore.save(router)
         do {
             let address = try await Keenetic.test(router)
-            return "The router accepted this login (\(address))."
+            var note = "The router accepted this login (\(address))."
+            if target == nil {
+                note += await learnFromRouter() ? " It also told Coucou the computer's network card." : ""
+            }
+            return note
         } catch {
             return error.localizedDescription
         }
     }
 
+    /// Asks the router for the computer's card, by the computer's name. True when found.
+    @discardableResult
+    func learnFromRouter() async -> Bool {
+        let computer = LANLink.shared.desktopName.isEmpty ? (LANLink.shared.pairing?.name ?? "") : LANLink.shared.desktopName
+        guard router.isComplete, !computer.isEmpty,
+              let mac = try? await Keenetic.findMac(router, computer: computer) else { return false }
+        var t = target ?? LANWakeTarget(mac: "", ip: "", broadcast: "")
+        t.mac = mac.lowercased()
+        target = t
+        LANWakeStore.save(t)
+        BackgroundLog.add("Wake: network card from the router")
+        return true
+    }
+
     /// The button: the packet from here, and from the router when it is set up.
     func powerOn() {
-        guard let target, let mac = LANWakeTarget.bytes(of: target.mac) else {
-            phase = .failed("Connect once while the computer is on, so Coucou learns its network card.")
+        guard let target, LANWakeTarget.bytes(of: target.mac) != nil else {
+            // Not told by the computer yet: the router may know it.
+            guard router.isComplete else {
+                phase = .failed("Connect once while the computer is on, so Coucou learns its network card.")
+                return
+            }
+            phase = .sending
+            Task {
+                if await learnFromRouter() {
+                    powerOn()
+                } else {
+                    phase = .failed("Neither the computer nor the router told Coucou the network card yet. Enter it by hand below.")
+                }
+            }
             return
         }
+        guard let mac = LANWakeTarget.bytes(of: target.mac) else { return }
         phase = .sending
         let router = self.router
         let hosts = [target.broadcast, "255.255.255.255", target.ip]
