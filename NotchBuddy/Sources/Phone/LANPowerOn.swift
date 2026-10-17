@@ -144,7 +144,6 @@ enum Keenetic {
             // The router at home answers plain HTTP on its local address; a KeenDNS name is HTTPS.
             let host = a.split(separator: "/").first.map(String.init) ?? a
             let local = host.allSatisfy { $0.isNumber || $0 == "." || $0 == ":" } || host.hasSuffix(".local") || !host.contains(".")
-                || host.lowercased() == "my.keenetic.net"
             a = (local ? "http://" : "https://") + a
         }
         while a.hasSuffix("/") { a.removeLast() }
