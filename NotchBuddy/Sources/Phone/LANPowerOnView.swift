@@ -58,6 +58,10 @@ struct PowerOnSection: View {
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
+            TextField("Away from home: name.keenetic.link", text: $power.router.awayAddress)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
             TextField("Login", text: $power.router.login)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
@@ -77,7 +81,7 @@ struct PowerOnSection: View {
         } header: {
             Text("Keenetic router")
         } footer: {
-            Text("iOS may keep Coucou from sending the signal itself: then the router sends it. Use a separate router user for Coucou. The password stays in this iPhone's Keychain and only goes to the router, on your home Wi-Fi.")
+            Text("iOS may keep Coucou from sending the signal itself: then the router sends it. At home Coucou uses the first address; away, the router's KeenDNS name (https://….keenetic.link, with web access from the internet allowed). Use a separate router user for Coucou. The password stays in this iPhone's Keychain and only goes to the router.")
         }
 
         Section {

@@ -67,10 +67,17 @@ enum LANWakeStore {
 /// The Keenetic router: its address and login in the preferences, its password in the Keychain.
 struct RouterLogin: Equatable, Sendable {
     var address: String
+    /// Away from home: the router's KeenDNS name (https://….keenetic.link), empty if none.
+    var awayAddress: String = ""
     var login: String
     var password: String
 
-    var isComplete: Bool { !address.isEmpty && !login.isEmpty && !password.isEmpty }
+    var isComplete: Bool { (!address.isEmpty || !awayAddress.isEmpty) && !login.isEmpty && !password.isEmpty }
+
+    /// The addresses to try, home first.
+    var addresses: [String] {
+        [address, awayAddress].map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+    }
 }
 
 enum RouterStore {
@@ -94,6 +101,7 @@ enum RouterStore {
             password = String(decoding: data, as: UTF8.self)
         }
         return RouterLogin(address: d.string(forKey: "routerAddress") ?? "192.168.1.1",
+                           awayAddress: d.string(forKey: "routerAwayAddress") ?? "",
                            login: d.string(forKey: "routerLogin") ?? "",
                            password: password)
     }
@@ -101,6 +109,7 @@ enum RouterStore {
     static func save(_ login: RouterLogin) {
         let d = UserDefaults.standard
         d.set(login.address, forKey: "routerAddress")
+        d.set(login.awayAddress, forKey: "routerAwayAddress")
         d.set(login.login, forKey: "routerLogin")
         SecItemDelete(baseQuery as CFDictionary)
         guard !login.password.isEmpty else { return }
@@ -119,7 +128,7 @@ enum RouterError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unreachable(let why): "The router did not answer (\(why)). Is this iPhone on your home Wi-Fi?"
+        case .unreachable(let why): "The router did not answer (\(why))."
         case .notKeenetic: "That address doesn't answer like a Keenetic router."
         case .badLogin: "The router refused this login or password."
         case .refused(let why): "The router refused: \(why)"
@@ -131,7 +140,13 @@ enum RouterError: LocalizedError {
 enum Keenetic {
     private static func base(_ address: String) -> String {
         var a = address.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !a.lowercased().hasPrefix("http://") && !a.lowercased().hasPrefix("https://") { a = "http://" + a }
+        if !a.lowercased().hasPrefix("http://") && !a.lowercased().hasPrefix("https://") {
+            // The router at home answers plain HTTP on its local address; a KeenDNS name is HTTPS.
+            let host = a.split(separator: "/").first.map(String.init) ?? a
+            let local = host.allSatisfy { $0.isNumber || $0 == "." || $0 == ":" } || host.hasSuffix(".local") || !host.contains(".")
+                || host.lowercased() == "my.keenetic.net"
+            a = (local ? "http://" : "https://") + a
+        }
         while a.hasSuffix("/") { a.removeLast() }
         return a
     }
@@ -158,8 +173,8 @@ enum Keenetic {
     }
 
     /// Signs in with the router's challenge: SHA-256(challenge + MD5(login:realm:password)).
-    static func signIn(_ login: RouterLogin, session: URLSession) async throws {
-        guard let url = URL(string: base(login.address) + "/auth") else { throw RouterError.notKeenetic }
+    static func signIn(_ login: RouterLogin, at address: String, session: URLSession) async throws {
+        guard let url = URL(string: base(address) + "/auth") else { throw RouterError.notKeenetic }
         let (_, status, response) = try await send(session, URLRequest(url: url))
         if status == 200 { return }
         guard status == 401,
@@ -175,16 +190,38 @@ enum Keenetic {
         guard signed == 200 else { throw RouterError.badLogin }
     }
 
-    /// Checks the address, login and password.
-    static func test(_ login: RouterLogin) async throws {
-        try await signIn(login, session: session())
+    /// Tries each address, home first; the first that answers is used. Returns which one.
+    private static func firstAnswering<T>(_ login: RouterLogin, _ body: (String) async throws -> T) async throws -> T {
+        var last: Error = RouterError.unreachable("no address")
+        for address in login.addresses {
+            do {
+                return try await body(address)
+            } catch RouterError.unreachable(let why) {
+                last = RouterError.unreachable(why)
+            }
+        }
+        throw last
     }
 
-    /// The router sends the magic packet itself (`ip hotspot wake <mac>`).
+    /// Checks the addresses, login and password. Returns the address that answered.
+    static func test(_ login: RouterLogin) async throws -> String {
+        try await firstAnswering(login) { address in
+            try await signIn(login, at: address, session: session())
+            return address
+        }
+    }
+
+    /// The router sends the magic packet itself (`ip hotspot wake <mac>`), reached at home or through KeenDNS.
     static func wake(_ login: RouterLogin, mac: String) async throws {
+        try await firstAnswering(login) { address in
+            try await wake(login, at: address, mac: mac)
+        }
+    }
+
+    private static func wake(_ login: RouterLogin, at address: String, mac: String) async throws {
         let session = session()
-        try await signIn(login, session: session)
-        guard let url = URL(string: base(login.address) + "/rci/") else { throw RouterError.notKeenetic }
+        try await signIn(login, at: address, session: session)
+        guard let url = URL(string: base(address) + "/rci/") else { throw RouterError.notKeenetic }
         var post = URLRequest(url: url)
         post.httpMethod = "POST"
         post.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -291,8 +328,8 @@ final class LANPowerOn {
     func testRouter() async -> String {
         RouterStore.save(router)
         do {
-            try await Keenetic.test(router)
-            return "The router accepted this login."
+            let address = try await Keenetic.test(router)
+            return "The router accepted this login (\(address))."
         } catch {
             return error.localizedDescription
         }
