@@ -48,6 +48,7 @@ struct LANPairingView: View {
                         }
                         Button("Unpair", role: .destructive) { lan.unpair() }
                     }
+                    PowerOnSection()
                     Section {
                         TextField("100.x.y.z", text: $away)
                             .font(.body.monospaced())

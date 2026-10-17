@@ -25,6 +25,7 @@ mod pairing;
 mod relay_client;
 mod relay_crypto;
 mod server;
+pub(crate) mod wake;
 #[cfg(test)]
 mod tests;
 
@@ -204,6 +205,8 @@ impl PhoneLink {
     }
 
     fn start_inner(&self) -> Result<Running, String> {
+        // What the phone needs to switch this computer on again, read in the background.
+        wake::refresh();
         let identity = pairing::load_or_create_identity(&*self.store)
             .map_err(|e| format!("no secure storage for the certificate: {e}"))?;
         let token = pairing::token(&*self.store).map_err(|e| format!("no secure storage for the pairing code: {e}"))?;
