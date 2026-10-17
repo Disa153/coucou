@@ -535,6 +535,10 @@ struct EmptySessionsView: View {
                 .buttonStyle(.borderedProminent)
                 .padding(.top, 4)
             }
+            // The computer is away and Coucou knows its card: it can be switched on from here.
+            if case .offline = LANLink.shared.state, LANPowerOn.shared.target != nil {
+                PowerOnButton()
+            }
             #endif
         }
         #if LAN_LINK

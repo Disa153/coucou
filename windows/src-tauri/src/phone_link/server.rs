@@ -317,6 +317,12 @@ where
     if !offered.is_empty() {
         welcome["caps"] = json!(offered);
     }
+    // Wake-on-LAN: this computer's card and network, kept by the phone for when the computer is off.
+    if asked("wake") {
+        if let Some(wake) = crate::phone_link::wake::known() {
+            welcome["wake"] = wake;
+        }
+    }
     let _ = say(welcome).await;
     let (id, evicted) = shared.hub.subscribe_with(tx.clone(), (shared.clock)(), crate::phone_link::hub::Caps { details, answers, prefs, diffs, usage, relay, services });
 

@@ -280,7 +280,7 @@ final class LANLink {
     @ObservationIgnored private var notified: Set<String> = []
 
     static let protocolVersion = 1
-    private static let askedCaps = ["details", "answers", "chat"]
+    private static let askedCaps = ["details", "answers", "chat", "wake"]
 
     // MARK: Pairing
 
@@ -339,6 +339,16 @@ final class LANLink {
         case .rejected:
             break
         case .unpaired, .offline:
+            failures = 0
+            connect()
+        }
+    }
+
+    /// Tries the computer again now, without touching the background keep-alive
+    /// (the computer is being switched on: LANPowerOn).
+    func retryNow() {
+        guard pairing != nil else { return }
+        if case .offline = state {
             failures = 0
             connect()
         }
@@ -554,6 +564,9 @@ final class LANLink {
             }
             desktopName = message["desktop"] as? String ?? pairing?.name ?? ""
             offeredCaps = Set(message["caps"] as? [String] ?? [])
+            // Wake-on-LAN: the computer's card, kept for when it is off.
+            if let target = LANWakeTarget.from(message["wake"]) { LANPowerOn.shared.learned(target) }
+            LANPowerOn.shared.linkConnected()
             if UIApplication.shared.applicationState != .active, state != .connected { BackgroundLog.add("Link back") }
             state = .connected
             failures = 0
