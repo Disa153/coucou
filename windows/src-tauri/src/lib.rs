@@ -20,6 +20,7 @@ mod integrations;
 mod island;
 mod local_chat;
 mod log;
+mod mixer;
 mod net;
 mod notes;
 mod openai_compat;
@@ -841,6 +842,11 @@ pub fn run() {
             spotify::spotify_control,
             spotify::spotify_open,
             spotify::spotify_installed,
+            mixer::mixer_state,
+            mixer::mixer_set_master,
+            mixer::mixer_set_app,
+            mixer::mixer_set_device,
+            mixer::mixer_open_system,
             transcripts::chats_reveal,
             transcripts::chats_default_dir,
             flow::flow_status,

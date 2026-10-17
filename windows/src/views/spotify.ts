@@ -58,7 +58,7 @@ function setFlag(which: "shuffle" | "repeat", on: boolean) {
 let pendingVolume: number | null = null;
 let volumeTimer: number | null = null;
 
-function setVolume(value: number) {
+export function setVolume(value: number) {
   if (!Spotify.state.running) return;
   const v = Math.min(100, Math.max(0, Math.round(value)));
   Spotify.state = { ...Spotify.state, volume: v };
