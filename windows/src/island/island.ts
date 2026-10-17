@@ -26,6 +26,8 @@ import { h } from "../views/dom";
 import { IslandStateMachine } from "./fsm";
 import { refreshHookPills } from "./integrations";
 import { DesktopLink } from "./desktop";
+import { GlowStrip } from "./glow";
+import { agentBusy, glowLook, readGlow } from "../core/glow";
 import type { ViewCommand } from "./shortcuts";
 import { DRAG_THRESHOLD } from "../mochi/desktop-logic";
 
@@ -60,6 +62,8 @@ export class Island {
   private miniGrid!: HTMLElement;
   private countdown!: HTMLElement;
   private wakeStrip!: HTMLElement;
+  /** The glowing strip along the island (Settings → General → Glow), off by default. */
+  private readonly glow = new GlowStrip();
   /** A press on the island's body that may become a drag of the island. */
   private islandPress: { x: number; y: number } | null = null;
   private islandDragged = false;
@@ -319,7 +323,7 @@ export class Island {
     this.greetingCanvas.style.width = `${EXPANDED_W}px`;
     this.greetingCanvas.style.height = "150px";
 
-    this.root.append(this.wakeStrip, this.islandEl);
+    this.root.append(this.wakeStrip, this.glow.el, this.islandEl);
     this.applyGeometry();
   }
 
@@ -659,6 +663,20 @@ export class Island {
     }
   }
 
+  // ── Glow ────────────────────────────────────────────────────────────────────
+
+  private syncGlow() {
+    const pref = readGlow(State.settings.glow);
+    const look = glowLook(pref, {
+      mode: State.mode,
+      state: State.effectiveState,
+      busy: agentBusy(State.tasks.map((t) => t.state)),
+      music: State.spotifyPlaying,
+    });
+    this.glow.style(look, pref);
+    if (look.visible) this.glow.follow(this.islandRect(), this.radius.value, State.settings.islandEdge);
+  }
+
   // ── Geometry ────────────────────────────────────────────────────────────────
 
   /**
@@ -721,6 +739,7 @@ export class Island {
     this.uploadCanvas.el.style.left = `${(w - EXPANDED_W) / 2}px`;
 
     const rect = { x: place.x, y: place.y, w, h: hh };
+    this.glow.follow(rect, r, State.settings.islandEdge);
     const p = this.pushedRect;
     if (Math.abs(p.x - rect.x) > 0.5 || Math.abs(p.y - rect.y) > 0.5 || Math.abs(p.w - rect.w) > 0.5 || Math.abs(p.h - rect.h) > 0.5) {
       this.pushedRect = rect;
@@ -1262,6 +1281,7 @@ export class Island {
     if (State.breedPreview && !(expanded && State.view === "wardrobe")) State.breedPreview = null;
 
     this.header.sync();
+    this.syncGlow();
     for (const [name, view] of this.views) {
       const on = name === State.view;
       view.el.classList.toggle("on", on);

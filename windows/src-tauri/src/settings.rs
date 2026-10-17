@@ -110,6 +110,46 @@ pub struct Settings {
     pub phone_relay: bool,
     /// The relay's address (`wss://…`), empty until the user enters it. Not a secret. Owned by Rust.
     pub phone_relay_url: String,
+    /// The glowing strip along the island, picked in Settings → General. Off by
+    /// default. Kept as it comes, like `mochi_outfit`: src/core/glow.ts reads
+    /// anything it doesn't know as its default.
+    pub glow: GlowPref,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct GlowPref {
+    pub on: bool,
+    /// "under" (a line on the side facing the screen) or "around" (a frame).
+    pub place: String,
+    /// "#rrggbb" or "rainbow".
+    pub color: String,
+    /// "steady", "pulse", "gradient" or "beat".
+    pub effect: String,
+    pub brightness: f64,
+    pub thickness: f64,
+    /// Seconds per cycle of an animated effect.
+    pub speed: f64,
+    /// Amber, red or green with Mochi's state.
+    pub by_state: bool,
+    /// "always", "working" or "music".
+    pub when: String,
+}
+
+impl Default for GlowPref {
+    fn default() -> Self {
+        Self {
+            on: false,
+            place: "under".into(),
+            color: "#7c5cff".into(),
+            effect: "steady".into(),
+            brightness: 0.8,
+            thickness: 3.0,
+            speed: 3.0,
+            by_state: false,
+            when: "always".into(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -180,6 +220,7 @@ impl Default for Settings {
             phone_services: Vec::new(),
             phone_relay: false,
             phone_relay_url: String::new(),
+            glow: GlowPref::default(),
         }
     }
 }
@@ -471,7 +512,8 @@ mod tests {
   "phoneUsage": true,
   "phoneServices": ["integration_stripe"],
   "phoneRelay": true,
-  "phoneRelayUrl": "wss://relay.example.workers.dev"
+  "phoneRelayUrl": "wss://relay.example.workers.dev",
+  "glow": { "on": true, "place": "around", "color": "rainbow", "effect": "pulse", "brightness": 0.5, "thickness": 5.0, "speed": 6.5, "byState": true, "when": "music" }
 }"##;
 
     fn custom() -> Value {
@@ -984,6 +1026,7 @@ mod tests {
                 "phoneServices",
                 "phoneRelay",
                 "phoneRelayUrl",
+                "glow",
             ]
         );
         let _ = std::fs::remove_dir_all(&dir);
