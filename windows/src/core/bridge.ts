@@ -8,6 +8,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import type { Settings } from "./state";
 import type { RecapHistory, RecapPrefs } from "../recap/summary";
 import type { SpotifyState } from "./spotify";
+import type { VolumeState } from "./volume";
 
 export const IS_TAURI =
   typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -460,6 +461,13 @@ export const Bridge = {
   spotifyOpen: () => call<boolean>("spotify_open"),
   /** Whether there is a Spotify to launch (Settings). */
   spotifyInstalled: () => call<boolean>("spotify_installed"),
+
+  // ── Volume panel (src-tauri/src/volume.rs) ────────────────────────────────
+  /** The master volume and the apps' levels; `supported: false` off Windows. */
+  volumeState: () => call<VolumeState>("volume_state"),
+  /** `target`: "master" or "app:<id>"; `value` 0…100. True when it took. */
+  volumeSet: (target: string, value: number) => call<boolean>("volume_set", { target, value }),
+  volumeMute: (target: string, muted: boolean) => call<boolean>("volume_mute", { target, muted }),
 };
 
 export type SpotifyAction = "playPause" | "next" | "previous" | "seek" | "shuffle" | "repeat" | "volume";

@@ -10,10 +10,11 @@ import { onEvent } from "../core/bridge";
 import { FlowBridge, type FlowPrefs, type FlowStatus, type ModelsStatus } from "../core/flow";
 import { hero, liveMochi } from "./hero";
 import { icon, keyLabel } from "./ui";
+import { HOST_OS } from "../core/pills";
 
 export type PageId =
   | "dictation" | "notes" | "insights" | "dictionary" | "snippets" | "styles" | "flowsettings"
-  | "general" | "pills" | "agents" | "chat" | "voice" | "integrations" | "phone" | "shortcuts";
+  | "general" | "volume" | "pills" | "agents" | "chat" | "voice" | "integrations" | "phone" | "shortcuts";
 
 interface PageDef {
   id: PageId;
@@ -35,6 +36,10 @@ export const FLOW_PAGES: PageDef[] = [
 
 export const NOTCH_PAGES: PageDef[] = [
   { id: "general", icon: "gear", title: () => t("General"), subtitle: () => t("Mochi, his sounds and how the island behaves.") },
+  // The Windows mixer in the island (volume.rs): right after General, on Windows only.
+  ...(HOST_OS === "windows"
+    ? [{ id: "volume" as PageId, icon: "volume", title: () => t("Volume"), subtitle: () => t("The Windows mixer in the island and how it looks.") }]
+    : []),
   { id: "pills", icon: "grid", title: () => t("Active pills"), subtitle: () => t("The pills shown in the island, their order and their colours.") },
   { id: "agents", icon: "terminal", title: () => t("Agents"), subtitle: () => t("Claude Code, Codex and the other agents Mochi follows.") },
   { id: "chat", icon: "chat", title: () => t("Chat"), subtitle: () => t("The AI of the island's chat, with your own keys.") },

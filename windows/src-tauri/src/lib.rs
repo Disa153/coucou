@@ -39,6 +39,7 @@ mod spotify;
 mod tray;
 mod updater;
 mod voice;
+mod volume;
 #[cfg(windows)]
 mod webview_drop;
 
@@ -841,6 +842,9 @@ pub fn run() {
             spotify::spotify_control,
             spotify::spotify_open,
             spotify::spotify_installed,
+            volume::volume_state,
+            volume::volume_set,
+            volume::volume_mute,
             transcripts::chats_reveal,
             transcripts::chats_default_dir,
             flow::flow_status,

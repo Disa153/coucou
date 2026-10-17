@@ -13,6 +13,10 @@ import {
 import { DEFAULT_SETTINGS, type Settings } from "../core/state";
 import { SOUND_NAMES } from "../core/sound";
 import {
+  DEFAULT_VOLUME_PREFS, LIMIT_MAX, LIMIT_MIN, PANEL_SIZES, SLIDER_COLORS, WHEEL_STEPS, sanitizePrefs,
+  type PanelSize, type VolumePanelPrefs,
+} from "../core/volume";
+import {
   MAX_DECLARED, PILL_CATEGORIES, availablePills, chooseMainPill, isComingSoon, mainPillChoices,
   pillDefinition, sanitizeDeclared, toggleDeclared, type PillDefinition,
 } from "../core/pills";
@@ -1371,6 +1375,87 @@ function languageRow(): HTMLElement {
   return h("div", { class: "row" }, h("label", { text: t("Language") }), select);
 }
 
+// ── Volume page ───────────────────────────────────────────────────────────────
+// The island's volume panel (views/volume.ts, src-tauri/src/volume.rs): how it
+// looks and what it lists. Every change is saved and the island follows at once.
+
+function volumeSection(): HTMLElement {
+  const prefs = sanitizePrefs(settings.volumePanel);
+  const commit = (patch: Partial<VolumePanelPrefs>) => {
+    Object.assign(prefs, patch);
+    settings.volumePanel = { ...prefs };
+    void save();
+  };
+  const section = h("section", {});
+  const redraw = () => section.replaceWith(volumeSection());
+
+  const sizeNames: Record<PanelSize, string> = {
+    compact: t("Compact"), normal: t("Normal"), large: t("Large"),
+  };
+  const sizeRow = h("div", { class: "row" }, h("label", { text: t("Panel size") }));
+  for (const size of PANEL_SIZES) {
+    sizeRow.append(h("button", {
+      class: prefs.size === size ? "primary" : "",
+      text: sizeNames[size],
+      onclick: () => { commit({ size }); redraw(); },
+    }));
+  }
+
+  const colorRow = h("div", { class: "row" }, h("label", { text: t("Slider colour") }));
+  const swatches = h("div", { class: "swatches" });
+  for (const color of SLIDER_COLORS) {
+    swatches.append(h("button", {
+      class: prefs.color === color ? "swatch on" : "swatch",
+      style: `background:${color || "#ffffff"}`,
+      "aria-label": color || "#FFFFFF",
+      onclick: () => { commit({ color }); redraw(); },
+    }));
+  }
+  colorRow.append(swatches);
+
+  const flag = (text: string, key: "showPercent" | "showDots" | "onlyPlaying" | "hideSystem" | "presets") =>
+    h("div", { class: "row" },
+      h("label", { text }),
+      toggle(prefs[key], (v) => commit({ [key]: v } as Partial<VolumePanelPrefs>)),
+    );
+
+  const step = h("select", {}) as HTMLSelectElement;
+  for (const n of WHEEL_STEPS) step.append(h("option", { value: String(n), text: `${n}%` }));
+  step.value = String(prefs.wheelStep);
+  step.addEventListener("change", () => commit({ wheelStep: Number(step.value) }));
+
+  const limitOut = h("span", { class: "hint", text: `${prefs.limit}%` });
+  const limit = h("input", {
+    type: "range", min: String(LIMIT_MIN), max: String(LIMIT_MAX), step: "5", value: String(prefs.limit),
+  }) as HTMLInputElement;
+  limit.addEventListener("input", () => {
+    limitOut.textContent = `${limit.value}%`;
+    commit({ limit: Number(limit.value) });
+  });
+
+  const reset = h("button", {
+    text: t("Reset to defaults"),
+    onclick: () => { commit({ ...DEFAULT_VOLUME_PREFS }); redraw(); },
+  });
+
+  section.append(
+    h("h2", {}, h("span", { text: t("Volume") })),
+    sizeRow,
+    colorRow,
+    flag(t("Show percent"), "showPercent"),
+    flag(t("Coloured dots"), "showDots"),
+    flag(t("Only apps playing now"), "onlyPlaying"),
+    flag(t("Hide Windows sounds"), "hideSystem"),
+    flag(t("Quick presets"), "presets"),
+    h("div", { class: "hint", text: t("Night, Game and Call, under the master volume.") }),
+    h("div", { class: "row" }, h("label", { text: t("Mouse wheel step") }), step),
+    h("div", { class: "row" }, h("label", { text: t("Volume limit") }), limit, limitOut),
+    h("div", { class: "hint", text: t("The panel's sliders stop here, so one turn of the wheel can't deafen you.") }),
+    h("div", { class: "row" }, reset),
+  );
+  return section;
+}
+
 // ── Shortcuts section ─────────────────────────────────────────────────────────
 
 const SHORTCUTS_UI = {
@@ -1733,6 +1818,7 @@ async function render() {
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
     general: () => [generalSection(), updatesSection()],
+    volume: () => [volumeSection()],
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [

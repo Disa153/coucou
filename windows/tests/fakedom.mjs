@@ -89,6 +89,8 @@ class FakeElement {
   append(...nodes) {
     for (const n of nodes) {
       const node = typeof n === "string" ? new FakeText(n) : n;
+      // As in a browser, a node that is already somewhere moves rather than being copied.
+      node.parentNode?.removeChild(node);
       node.parentNode = this;
       this.childNodes.push(node);
     }

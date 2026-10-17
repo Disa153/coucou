@@ -12,6 +12,7 @@ import type { ProviderId } from "./providers";
 import type { FileDiff } from "./diff";
 import type { Bindings } from "./shortcuts";
 import { DEFAULT_OUTFIT, type Outfit } from "../mochi/wardrobe";
+import { DEFAULT_VOLUME_PREFS, type VolumePanelPrefs } from "./volume";
 import { pillColor } from "./pill-colors";
 import { Spotify, musicPlaying } from "./spotify";
 
@@ -188,6 +189,8 @@ export interface Settings {
   phoneChatModels?: string[];
   /** The screen edge the island sits on, set by dragging it. Rust owns it too. */
   islandEdge?: IslandEdge;
+  /** The volume panel's look and behaviour (Settings → Volume); read through sanitizePrefs. */
+  volumePanel?: VolumePanelPrefs;
   /** Mochi on the desktop. Rust owns it: whatever the page sends back is ignored. */
   desktopMochi?: {
     onDesktop: boolean;
@@ -225,6 +228,7 @@ export const DEFAULT_SETTINGS: Settings = {
   mochiBreed: "mochi",
   pillColors: {},
   language: "",
+  volumePanel: { ...DEFAULT_VOLUME_PREFS },
 };
 
 type Listener = () => void;

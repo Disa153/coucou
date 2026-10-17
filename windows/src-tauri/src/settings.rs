@@ -110,6 +110,48 @@ pub struct Settings {
     pub phone_relay: bool,
     /// The relay's address (`wss://…`), empty until the user enters it. Not a secret. Owned by Rust.
     pub phone_relay_url: String,
+    /// How the island's volume panel (volume.rs) looks and behaves. Plain preferences:
+    /// the page sanitises what it reads (src/core/volume.ts).
+    pub volume_panel: VolumePanelPref,
+}
+
+/// The volume panel's customisation, edited in Settings → Volume.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct VolumePanelPref {
+    /// "compact", "normal" or "large".
+    pub size: String,
+    /// The sliders' colour "#RRGGBB"; empty is white.
+    pub color: String,
+    pub show_percent: bool,
+    /// A coloured dot before each app.
+    pub show_dots: bool,
+    /// Only the apps that are making sound right now.
+    pub only_playing: bool,
+    /// Hide Windows' own sounds.
+    pub hide_system: bool,
+    /// The quick presets (Night, Game, Call) under the master volume.
+    pub presets: bool,
+    /// How many percent one notch of the mouse wheel moves a slider: 1, 2, 5 or 10.
+    pub wheel_step: u32,
+    /// The highest level the panel's sliders reach, 20…100 (kept from deafening yourself).
+    pub limit: u32,
+}
+
+impl Default for VolumePanelPref {
+    fn default() -> Self {
+        Self {
+            size: "normal".into(),
+            color: String::new(),
+            show_percent: true,
+            show_dots: true,
+            only_playing: true,
+            hide_system: true,
+            presets: true,
+            wheel_step: 5,
+            limit: 100,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -180,6 +222,7 @@ impl Default for Settings {
             phone_services: Vec::new(),
             phone_relay: false,
             phone_relay_url: String::new(),
+            volume_panel: VolumePanelPref::default(),
         }
     }
 }
@@ -471,7 +514,18 @@ mod tests {
   "phoneUsage": true,
   "phoneServices": ["integration_stripe"],
   "phoneRelay": true,
-  "phoneRelayUrl": "wss://relay.example.workers.dev"
+  "phoneRelayUrl": "wss://relay.example.workers.dev",
+  "volumePanel": {
+    "size": "large",
+    "color": "#22C55E",
+    "showPercent": false,
+    "showDots": false,
+    "onlyPlaying": false,
+    "hideSystem": false,
+    "presets": false,
+    "wheelStep": 10,
+    "limit": 80
+  }
 }"##;
 
     fn custom() -> Value {
@@ -669,6 +723,24 @@ mod tests {
         let odd = parse(&custom_with("phoneDetails", Some(serde_json::json!("yes")))).unwrap();
         assert!(!odd.phone_details, "a wrong type does not switch it on");
         assert_eq!(odd.mochi_outfit, "witchHat");
+    }
+
+    #[test]
+    fn a_file_from_before_the_volume_panel_gets_its_defaults() {
+        let d = Settings::default().volume_panel;
+        assert_eq!((d.size.as_str(), d.wheel_step, d.limit), ("normal", 5, 100));
+        assert!(d.show_percent && d.show_dots && d.only_playing && d.hide_system && d.presets);
+        let loaded = parse(&custom_with("volumePanel", None)).unwrap();
+        assert_eq!(loaded.volume_panel, d);
+        assert_eq!(loaded.phone_relay_url, "wss://relay.example.workers.dev", "the rest is kept");
+    }
+
+    #[test]
+    fn a_volume_panel_with_a_wrong_type_costs_only_the_panel() {
+        let part = custom_with("volumePanel", Some(serde_json::json!({ "wheelStep": 2, "limit": "loud" })));
+        let loaded = parse(&part).unwrap();
+        assert_eq!(loaded.volume_panel, VolumePanelPref::default(), "a wrong type costs the panel's preferences, nothing else");
+        assert_eq!(loaded.language, "pt-BR");
     }
 
     #[test]
@@ -984,6 +1056,7 @@ mod tests {
                 "phoneServices",
                 "phoneRelay",
                 "phoneRelayUrl",
+                "volumePanel",
             ]
         );
         let _ = std::fs::remove_dir_all(&dir);
