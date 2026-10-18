@@ -42,7 +42,7 @@ interface Tween {
 type PropKey =
   | "yaw" | "pitch" | "roll" | "tilt" | "open" | "sx" | "sy"
   | "oy" | "ox" | "tint" | "morph" | "hands" | "blush" | "es" | "badgeS"
-  | "outfitPresence" | "nom" | "feet";
+  | "outfitPresence" | "nom" | "feet" | "fedora";
 
 interface BotStateCfg {
   color: RGB;
@@ -212,9 +212,14 @@ export class BotEngine {
   munchUntil = 0;
   /** The moonwalk's shoes: 0 = none, 1 = on. */
   feet = 0;
-  /** The moonwalk is on: his feet slide in turn. */
+  /** The dance is on (keeps frames coming). */
   moonwalking = false;
-  footPhase = 0;
+  /** The dance's feet, set every frame by the island (in R): slide, lift, kick. */
+  feetPose = { ax: 0, bx: 0, al: 0, bl: 0, ak: 0, bk: 0 };
+  /** The dance's fedora: 0 = off, 1 = on. */
+  fedora = 0;
+  /** The fedora tipped (radians) and raised (in R). */
+  fedoraTip = 0;
 
   // Outfit (the main Mochi only — minis never wear one). `outfit` is what is
   // drawn; it changes only once the previous one has left.
@@ -363,10 +368,12 @@ export class BotEngine {
     this.triggerEmote("love", 2.4);
   }
 
-  /** The moonwalk: shoes on and stepping (the island glides him backwards), or off. */
+  /** The dance: shoes and fedora on (the island moves his feet and him), or off. */
   setMoonwalk(on: boolean) {
     this.moonwalking = on;
     this.anim("feet", [[on ? 1 : 0, on ? 240 : 320, Ease.out]]);
+    this.anim("fedora", [[on ? 1 : 0, on ? 320 : 380, on ? Ease.back : Ease.out]]);
+    if (!on) this.feetPose = { ax: 0, bx: 0, al: 0, bl: 0, ak: 0, bk: 0 };
   }
 
   /** Mailbox swallow — opens the slot, chews, then closes. */
@@ -580,7 +587,7 @@ export class BotEngine {
       this.cfg.bounces || this.cfg.scans || this.cfg.breathes || this.cfg.zz || this.cfg.sweat ||
       this.isMini ||
       this.isDancing || this.dancingLevel > 0.001 ||
-      this.moonwalking || this.feet > 0.001 || now() < this.munchUntil ||
+      this.moonwalking || this.feet > 0.001 || this.fedora > 0.001 || now() < this.munchUntil ||
       Math.abs(this.tgYaw - this.yaw) > 0.002 ||
       Math.abs(this.tgPitch - this.pitch) > 0.002 ||
       Math.abs(this.tgTilt - this.tilt) > 0.002 ||
@@ -625,8 +632,6 @@ export class BotEngine {
         }
       }
     }
-
-    if (this.moonwalking) this.footPhase += dt * 7.5;
 
     const t = n - this.t0;
     let ty = this.lookX * 0.62;
@@ -881,6 +886,7 @@ export class BotEngine {
     else drawCuteNose(x, breed, body, R, rx, ry, this.yaw, (this.eyeOverride ?? this.cfg.eye) === "happy");
 
     if (head) drawOutfitFront(x, this.outfit, head, outfitState);
+    this.drawFedora(x, R, rx, ry);
 
     x.restore();
     x.restore();
@@ -1144,23 +1150,49 @@ export class BotEngine {
     x.restore();
   }
 
-  /** The moonwalk's black shoes and white socks, sliding in turn under him. */
+  /** The dance's black shoes and white socks under him, where the island puts them. */
   private drawShoes(x: CanvasRenderingContext2D, R: number, ry: number, cx: number, cy: number) {
     if (this.feet <= 0.01 || this.isMini || R <= 14) return;
-    const slide = Math.sin(this.footPhase) * R * 0.24 * this.feet;
+    const f = this.feetPose;
     const fy = cy + ry * this.sy + R * 0.06;
     x.save();
     x.globalAlpha = Math.min(1, this.feet);
-    for (const [dx, off] of [[-0.32, slide], [0.34, -slide]] as const) {
-      const fx = cx + dx * R + off;
-      const lift = off > 0 ? R * 0.05 : 0;
+    for (const [dx, off, lift, kick] of [[-0.32, f.ax, f.al, f.ak], [0.34, f.bx, f.bl, f.bk]] as const) {
+      x.save();
+      x.translate(cx + (dx + off) * R, fy - lift * R);
+      x.rotate(-kick * 0.6);
       x.fillStyle = "#f2efe9";
-      x.fillRect(fx - R * 0.1, fy - R * 0.2 - lift, R * 0.2, R * 0.1);
+      x.fillRect(-R * 0.1, -R * 0.2, R * 0.2, R * 0.1);
       x.fillStyle = "#16171b";
       x.beginPath();
-      x.ellipse(fx + R * 0.05, fy - lift, R * 0.25, R * 0.11, 0, 0, Math.PI * 2);
+      x.ellipse(R * 0.05, 0, R * 0.25, R * 0.11, 0, 0, Math.PI * 2);
       x.fill();
+      x.restore();
     }
+    x.restore();
+  }
+
+  /** The dance's fedora: black, a white band, tilted, on top of his head. */
+  private drawFedora(x: CanvasRenderingContext2D, R: number, rx: number, ry: number) {
+    if (this.fedora <= 0.01 || this.isMini || R <= 14) return;
+    const a = Math.min(1, this.fedora);
+    x.save();
+    x.translate(0, -ry * 0.92 - (1 - a) * R * 0.6);
+    x.rotate(-0.12 + this.fedoraTip);
+    x.globalAlpha = a;
+    x.fillStyle = "#1b1c20";
+    x.beginPath();
+    x.ellipse(0, 0, rx * 0.95, R * 0.14, 0, 0, Math.PI * 2);
+    x.fill();
+    x.beginPath();
+    x.moveTo(-rx * 0.5, 0);
+    x.quadraticCurveTo(-rx * 0.55, -R * 0.62, -rx * 0.1, -R * 0.6);
+    x.quadraticCurveTo(0, -R * 0.48, rx * 0.12, -R * 0.6);
+    x.quadraticCurveTo(rx * 0.55, -R * 0.62, rx * 0.5, 0);
+    x.closePath();
+    x.fill();
+    x.fillStyle = "#e9e6df";
+    x.fillRect(-rx * 0.5, -R * 0.18, rx, R * 0.11);
     x.restore();
   }
 

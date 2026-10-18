@@ -5,9 +5,19 @@
 
 import { h } from "./dom";
 import { State } from "../core/state";
-import { SNACKS, MOONWALK_TREATS, canMoonwalk, fullNow, hungry, readPet, treatsLeft } from "../core/pet";
+import { SNACKS, MOONWALK_TREATS, canMoonwalk, fullNow, hungry, readPet, treatsLeft, type Move } from "../core/pet";
 import { t, tl } from "../i18n/i18n";
 import type { ViewActions, ViewHost } from "./views";
+
+/** The moves' names, as the Kitchen shows them while he dances. */
+const MOVE_NAMES: Record<Move, () => string> = {
+  moonwalk: () => t("Moonwalk"),
+  spin: () => t("Spin"),
+  toes: () => t("On his toes"),
+  lean: () => t("The lean"),
+  kick: () => t("Kicks"),
+  strut: () => t("Strut"),
+};
 
 /** While the Kitchen is on screen, how often the fullness is read again (it drops slowly). */
 const REFRESH_MS = 30_000;
@@ -26,7 +36,8 @@ export function buildKitchen(actions: ViewActions): ViewHost {
 
   const dots = h("span", { class: "kt-dots" });
   for (let i = 0; i < MOONWALK_TREATS; i++) dots.append(h("i", {}));
-  const dance = h("button", { class: "btn primary kt-dance", onclick: () => actions.moonwalk() }, h("span", { text: tl("Dance") }));
+  const danceLabel = h("span", {});
+  const dance = h("button", { class: "btn primary kt-dance", onclick: () => actions.moonwalk() }, danceLabel);
   const skillHint = h("span", { class: "kt-hint" });
 
   const panel = h(
@@ -94,11 +105,18 @@ export function buildKitchen(actions: ViewActions): ViewHost {
       const eaten = Math.min(MOONWALK_TREATS, pet.treats);
       Array.from(dots.children).forEach((d, i) => d.classList.toggle("on", i < eaten));
       const learned = canMoonwalk(pet);
-      (dance as HTMLButtonElement).disabled = !learned || actions.isMoonwalking();
+      const status = actions.danceStatus();
+      (dance as HTMLButtonElement).disabled = !learned;
+      dance.classList.toggle("stop", status.phase !== "idle");
+      danceLabel.textContent = status.phase === "idle" ? t("Dance") : t("Stop");
       const left = treatsLeft(pet);
-      skillHint.textContent = learned
-        ? pet.music ? t("With Michael Jackson on Spotify") : t("He knows it!")
-        : t("Snacks before he learns it: {count}", { count: left });
+      skillHint.textContent = !learned
+        ? t("Snacks before he learns it: {count}", { count: left })
+        : status.phase === "waiting"
+          ? (status.song ? t("Waiting for {song} to play…", { song: status.song }) : t("Ready…"))
+          : status.move
+            ? MOVE_NAMES[status.move]() + (status.song ? ` · ${status.song}` : "")
+            : pet.music ? t("With Michael Jackson on Spotify") : t("He knows it!");
     },
   };
 }
