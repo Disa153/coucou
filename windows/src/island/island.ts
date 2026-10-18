@@ -13,7 +13,7 @@ import {
 } from "../core/layout";
 import { Sound } from "../core/sound";
 import { State, islandPlacement } from "../core/state";
-import { SPOTIFY_ID, islandDances } from "../core/spotify";
+import { SPOTIFY_ID, Spotify, islandDances } from "../core/spotify";
 import { BotEngine, hexToRGB } from "../mochi/engine";
 import { Greeting } from "../mochi/greeting";
 import { createMiniBot, pruneMiniBots, syncMiniBotStates, tickMiniBots } from "../mochi/minibots";
@@ -28,6 +28,7 @@ import { refreshHookPills } from "./integrations";
 import { DesktopLink } from "./desktop";
 import { GlowStrip } from "./glow";
 import { agentBusy, glowLook, readGlow } from "../core/glow";
+import { MOONWALK_TREATS, feed, moonwalkAt, pickSong, readPet } from "../core/pet";
 import type { ViewCommand } from "./shortcuts";
 import { DRAG_THRESHOLD } from "../mochi/desktop-logic";
 
@@ -62,6 +63,12 @@ export class Island {
   private miniGrid!: HTMLElement;
   private countdown!: HTMLElement;
   private wakeStrip!: HTMLElement;
+  /** A snack held over Mochi in the Kitchen. */
+  private snackHover = false;
+  /** The moonwalk's start (performance.now ms), while he moonwalks. */
+  private moonStart: number | null = null;
+  /** The moonwalk started a song in Spotify: paused after, if the user wants. */
+  private moonMusic = false;
   /** The glowing strip along the island (Settings → General → Glow), off by default. */
   private readonly glow = new GlowStrip();
   /** A press on the island's body that may become a drag of the island. */
@@ -248,6 +255,10 @@ export class Island {
         State.notify();
       },
       openSettingsWindow: () => void Bridge.openSettingsWindow(),
+      snackOver: (x, y) => this.snackOver(x, y),
+      eatSnack: () => this.eatSnack(),
+      moonwalk: () => this.moonwalk(),
+      isMoonwalking: () => this.moonStart != null,
       blip: () => Sound.play("blip"),
       chooseOutfit: (selection) => {
         if (parseOutfit(State.settings.mochiOutfit) === selection) return;
@@ -784,7 +795,7 @@ export class Island {
   private canGrabIsland(target: EventTarget | null): boolean {
     const el = target instanceof Element ? target : null;
     if (!el) return false;
-    if (el.closest("input, textarea, select, [contenteditable], .chat-body, .msg, pre, code, .diff, .ticker")) return false;
+    if (el.closest("input, textarea, select, [contenteditable], .chat-body, .msg, pre, code, .diff, .ticker, .kt-snack, .mx-apps")) return false;
     return true;
   }
 
@@ -1179,8 +1190,10 @@ export class Island {
       this.botCanvas.style.width = `${wCss}px`;
       this.botCanvas.style.height = `${hCss}px`;
     }
-    this.botCanvas.style.left = `${this.botCx.value - wCss / 2}px`;
+    const moon = this.moonPose();
+    this.botCanvas.style.left = `${this.botCx.value + moon.dx - wCss / 2}px`;
     this.botCanvas.style.top = `${this.botCy.value - BOT_OVERHANG / 2 - hCss / 2}px`;
+    this.botCanvas.style.transform = moon.transform;
 
     const ctx = this.botCanvas.getContext("2d");
     if (!ctx) return;
@@ -1193,7 +1206,7 @@ export class Island {
         ? hexToRGB(focus.color)
         : null;
     this.engine.particleOverhang = BOT_OVERHANG;
-    this.engine.lookX = this.lookX();
+    this.engine.lookX = moon.look ?? this.lookX();
     this.engine.lookY = this.lookY();
     if (this.engine.morph > 0.3) {
       this.engine.slotHTarget = State.fileDragOver ? 0.2 : 0;
@@ -1234,6 +1247,92 @@ export class Island {
   }
 
   /** BotCanvasView.lookX / lookY — tanh of the distance to the bot. */
+  // ── Kitchen: snacks and the moonwalk ────────────────────────────────────────
+
+  /** A snack is held at (x, y) in the page: is it over Mochi? He opens his mouth for it. */
+  private snackOver(x: number, y: number): boolean {
+    const r = this.botCanvas.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const over = this.moonStart == null && Math.hypot(x - cx, y - cy) < Math.max(28, r.width * 0.45);
+    if (over !== this.snackHover) {
+      this.snackHover = over;
+      this.engine.wantSnack(over);
+      this.ensureRunning();
+    }
+    return over;
+  }
+
+  /** He eats the snack that was dropped on him. */
+  private eatSnack() {
+    this.snackHover = false;
+    const before = readPet(State.settings.pet);
+    const pet = feed(before, Date.now());
+    State.settings.pet = pet;
+    void Bridge.saveSettings(State.settings);
+    this.engine.eatSnack();
+    Sound.play("love");
+    // He just learned it.
+    if (before.treats < MOONWALK_TREATS && pet.treats >= MOONWALK_TREATS) {
+      window.setTimeout(() => {
+        this.engine.triggerEmote("proud");
+        Sound.play("finish");
+      }, 1500);
+    }
+    this.ensureRunning();
+    State.notify();
+  }
+
+  /** The moonwalk, to a Michael Jackson song in Spotify if the user wants. */
+  private moonwalk() {
+    if (this.moonStart != null) return;
+    const pet = readPet(State.settings.pet);
+    this.moonStart = performance.now();
+    this.moonMusic = false;
+    this.engine.setMoonwalk(true);
+    if (pet.music) {
+      const song = pickSong(pet, Math.random());
+      void Bridge.spotifyPlayTrack(song.id, song.title).then((r) => {
+        this.moonMusic = r === "playing" || r === "opened";
+      });
+    }
+    this.ensureRunning();
+    State.notify();
+  }
+
+  /** Where the moonwalk has him now: how far back, turned, on his toes; and where he looks. */
+  private moonPose(): { dx: number; transform: string; look: number | null } {
+    if (this.moonStart == null) return { dx: 0, transform: "", look: null };
+    const t = (performance.now() - this.moonStart) / 1000;
+    const pose = moonwalkAt(t);
+    if (pose.phase === "done") {
+      this.endMoonwalk();
+      return { dx: 0, transform: "", look: null };
+    }
+    // Backwards across the island, facing the way he came.
+    const room = Math.min(170, this.width.value - this.botCx.value - 60);
+    const dx = Math.max(0, room) * pose.back;
+    if (pose.phase === "glide") this.engine.moonwalking = true;
+    if (pose.phase === "spin") return { dx, transform: `rotate(${pose.spin * 360}deg)`, look: 0 };
+    if (pose.phase === "toes") {
+      this.engine.moonwalking = false;
+      return { dx, transform: "translateY(-6px)", look: 0.2 };
+    }
+    if (pose.phase === "home") this.engine.moonwalking = true;
+    return { dx, transform: "", look: -0.9 };
+  }
+
+  private endMoonwalk() {
+    this.moonStart = null;
+    this.engine.setMoonwalk(false);
+    this.engine.triggerEmote("happy");
+    const pet = readPet(State.settings.pet);
+    // Paused only if it still plays (the user may have stopped it already).
+    if (this.moonMusic && pet.after === "pause" && Spotify.state.playing) void Bridge.spotifyControl("playPause");
+    this.moonMusic = false;
+    State.notify();
+  }
+
   private lookX(): number {
     const rect = this.islandRect();
     const botScreenX = rect.x + this.botCx.value;

@@ -24,6 +24,7 @@ import { Bridge } from "../core/bridge";
 import { buildRecap } from "./recap";
 import { buildWardrobe } from "./wardrobe";
 import { buildMixer } from "./mixer";
+import { buildKitchen } from "./kitchen";
 import { buildSpotifyCard, buildSpotifyPill, type SpotifyPillHost } from "./spotify";
 import { SPOTIFY_ID } from "../core/spotify";
 import type { Outfit, OutfitSelection } from "../mochi/wardrobe";
@@ -58,6 +59,13 @@ export interface ViewActions {
   previewOutfit(outfit: Outfit | null): void;
   chooseBreed(breed: Breed): void;
   previewBreed(breed: Breed | null): void;
+  /** Kitchen: a snack held at (x, y) in the page — true when it is over Mochi. */
+  snackOver(x: number, y: number): boolean;
+  /** Kitchen: the snack was dropped on him. */
+  eatSnack(): void;
+  /** The moonwalk (once he has learned it). */
+  moonwalk(): void;
+  isMoonwalking(): boolean;
 }
 
 export interface ViewHost {
@@ -116,6 +124,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
   const tabChat = h("button", { class: "tab", title: tl("Ask"), onclick: () => go("prompt") }, svg(ICONS.bubble, 13));
   const tabDrop = h("button", { class: "tab", title: tl("Drop"), onclick: () => go("upload") }, svg(ICONS.plus, 13));
 
+  const kitchenBtn = h("button", { title: tl("Feed Mochi"), onclick: () => go(State.view === "kitchen" ? State.defaultView() : "kitchen") }, svg(ICONS.onigiri, 14, { evenOdd: true }));
   const mixerBtn = h("button", { title: tl("Sound mixer"), onclick: () => go(State.view === "mixer" ? State.defaultView() : "mixer") }, svg(ICONS.sliders, 14, { stroke: 2 }));
   const gearBtn = h("button", { title: tl("Settings"), onclick: () => go("settings") }, svg(ICONS.gear, 14));
   const soundBtn = h("button", { title: tl("Mute"), onclick: () => actions.toggleSound() }, svg(ICONS.speakerOn, 14));
@@ -134,7 +143,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
     "div",
     { id: "header" },
     h("div", { class: "tabs" }, tabHome, tabChat, tabDrop),
-    h("div", { class: "header-actions" }, planPills, mixerBtn, gearBtn, soundBtn),
+    h("div", { class: "header-actions" }, planPills, kitchenBtn, mixerBtn, gearBtn, soundBtn),
   );
   const headerActions = el.lastElementChild as HTMLElement;
 
@@ -145,6 +154,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
       tabHome.classList.toggle("on", v === "overview" || v === "empty");
       tabChat.classList.toggle("on", v === "prompt");
       tabDrop.classList.toggle("on", v === "upload");
+      kitchenBtn.classList.toggle("on", v === "kitchen");
       mixerBtn.classList.toggle("on", v === "mixer");
       gearBtn.classList.toggle("on", v === "settings");
       clear(gearBtn);
@@ -851,6 +861,7 @@ export function buildViews(
   map.set("recap", buildRecap(actions));
   map.set("wardrobe", buildWardrobe(actions));
   map.set("mixer", buildMixer());
+  map.set("kitchen", buildKitchen(actions));
   // Not in the Windows v1: sending a file by email, window attach + web result.
   map.set("mail", buildPlaceholder(tl("Sending by email isn't in this version."), ""));
   map.set("searching", buildPlaceholder(tl("Claude is searching…"), ""));

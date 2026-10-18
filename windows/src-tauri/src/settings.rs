@@ -114,6 +114,42 @@ pub struct Settings {
     /// default. Kept as it comes, like `mochi_outfit`: src/core/glow.ts reads
     /// anything it doesn't know as its default.
     pub glow: GlowPref,
+    /// Feeding Mochi and what he learned (src/core/pet.ts reads it), with the
+    /// moonwalk's song. Written by the island as he eats; kept as it comes.
+    pub pet: PetPref,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct PetPref {
+    /// How full he is, 0…100, at `at`.
+    pub full: f64,
+    /// Unix milliseconds of `full` (0: never fed).
+    pub at: f64,
+    /// Snacks eaten, all time.
+    pub treats: f64,
+    /// He slowly gets hungry.
+    pub hunger: bool,
+    /// The moonwalk plays a song in Spotify.
+    pub music: bool,
+    /// "billieJean", "smoothCriminal", "bad", "beatIt" or "random".
+    pub song: String,
+    /// After the moonwalk: "pause" or "keep".
+    pub after: String,
+}
+
+impl Default for PetPref {
+    fn default() -> Self {
+        Self {
+            full: 60.0,
+            at: 0.0,
+            treats: 0.0,
+            hunger: true,
+            music: true,
+            song: "billieJean".into(),
+            after: "pause".into(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -221,6 +257,7 @@ impl Default for Settings {
             phone_relay: false,
             phone_relay_url: String::new(),
             glow: GlowPref::default(),
+            pet: PetPref::default(),
         }
     }
 }
@@ -513,7 +550,8 @@ mod tests {
   "phoneServices": ["integration_stripe"],
   "phoneRelay": true,
   "phoneRelayUrl": "wss://relay.example.workers.dev",
-  "glow": { "on": true, "place": "around", "color": "rainbow", "effect": "pulse", "brightness": 0.5, "thickness": 5.0, "speed": 6.5, "byState": true, "when": "music" }
+  "glow": { "on": true, "place": "around", "color": "rainbow", "effect": "pulse", "brightness": 0.5, "thickness": 5.0, "speed": 6.5, "byState": true, "when": "music" },
+  "pet": { "full": 42.5, "at": 1760000000000.0, "treats": 7.0, "hunger": false, "music": false, "song": "bad", "after": "keep" }
 }"##;
 
     fn custom() -> Value {
@@ -1027,6 +1065,7 @@ mod tests {
                 "phoneRelay",
                 "phoneRelayUrl",
                 "glow",
+                "pet",
             ]
         );
         let _ = std::fs::remove_dir_all(&dir);

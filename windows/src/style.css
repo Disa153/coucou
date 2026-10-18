@@ -2910,3 +2910,142 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
     animation: none !important;
   }
 }
+
+/* ── Kitchen (views/kitchen.ts) ─────────────────────────────────────────── */
+
+.view.kitchen {
+  pointer-events: none;
+}
+
+.view.kitchen.on .kt-panel {
+  pointer-events: auto;
+}
+
+.kt-panel {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  bottom: 0;
+  width: 296px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  z-index: 1;
+}
+
+.kt-sec {
+  display: flex;
+  justify-content: space-between;
+  font: 600 10px var(--font);
+  color: var(--dim-4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kt-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.kt-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--green));
+  transition: width 0.5s;
+}
+
+.kt-mood {
+  font: 400 11px var(--font);
+  color: var(--amber);
+  min-height: 0;
+}
+
+.kt-mood:empty {
+  display: none;
+}
+
+.kt-snacks {
+  display: flex;
+  gap: 6px;
+}
+
+.kt-snack {
+  width: 40px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.kt-snack:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.kt-ghost {
+  position: fixed;
+  z-index: 50;
+  font-size: 26px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: transform 0.12s;
+}
+
+.kt-ghost.over {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+.kt-skill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 12px var(--font);
+  color: #c5c8cd;
+}
+
+.kt-name {
+  flex: 1 1 auto;
+}
+
+.kt-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.kt-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.kt-dots i.on {
+  background: var(--amber);
+}
+
+.kt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kt-dance:disabled {
+  opacity: 0.35;
+}
+
+.kt-hint {
+  font: 400 11px var(--font);
+  color: var(--dim-2);
+}

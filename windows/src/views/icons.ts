@@ -74,6 +74,8 @@ export const ICONS = {
   volume1: "M3.5 9.5h3L11 5.8v12.4l-4.5-3.7h-3zM14.5 9.6a3.4 3.4 0 0 1 0 4.8",
   volume2: "M3.5 9.5h3L11 5.8v12.4l-4.5-3.7h-3zM14.5 9.6a3.4 3.4 0 0 1 0 4.8M17 7.2a6.8 6.8 0 0 1 0 9.6",
   volume3: "M3.5 9.5h3L11 5.8v12.4l-4.5-3.7h-3zM14.5 9.6a3.4 3.4 0 0 1 0 4.8M17 7.2a6.8 6.8 0 0 1 0 9.6M19.4 4.8a10.2 10.2 0 0 1 0 14.4",
+  // an onigiri (the Kitchen's button): the rice, its nori cut out
+  onigiri: "M12 3.4c1 0 1.9.6 2.5 1.5l5.9 9.9c1.4 2.3-.3 5.2-3 5.2H6.6c-2.7 0-4.4-2.9-3-5.2l5.9-9.9c.6-.9 1.5-1.5 2.5-1.5zM8.7 14.6v4.4h6.6v-4.4z",
   // slider.vertical.3 (stroked): the sound mixer's button
   sliders: "M5 20v-6M5 10V4M12 20v-8M12 8V4M19 20v-4M19 12V4M2.5 14h5M9.5 8h5M16.5 16h5",
 } as const;

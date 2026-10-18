@@ -22,6 +22,7 @@ import { FLOW_PAGE_RENDERERS } from "../hub/pages";
 import { agentsSection } from "./agents";
 import { phoneSection } from "./phone";
 import { glowSection } from "./glow";
+import { petSection } from "./pet";
 import { colorDot } from "./colors";
 import { renderDiff, statusDot } from "./parts";
 import {
@@ -1733,7 +1734,7 @@ async function render() {
   shortcutsListener = null;
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
-    general: () => [generalSection(), glowSection(() => settings, toggle, () => void save()), updatesSection()],
+    general: () => [generalSection(), glowSection(() => settings, toggle, () => void save()), petSection(() => settings, toggle, () => void save()), updatesSection()],
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [
