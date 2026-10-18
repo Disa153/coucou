@@ -3,7 +3,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  DEFAULT_PET, SONGS, canMoonwalk, feed, fullNow, hungry, moonwalkAt, MOONWALK_S, pickSong, readPet, treatsLeft,
+  DANCE_LOOP, DEFAULT_PET, SONGS, beatAt, canMoonwalk, danceAt, feed, fullNow, hungry, pickSong, readPet, songPlaying,
+  treatsLeft,
 } from "../src/core/pet.ts";
 
 const H = 3_600_000;
@@ -45,11 +46,30 @@ test("the song, picked or random", () => {
   for (const s of Object.values(SONGS)) assert.match(s.id, /^[A-Za-z0-9]{22}$/);
 });
 
-test("the moonwalk goes back, spins, stands on its toes and walks home", () => {
-  assert.deepEqual(moonwalkAt(2.1), { phase: "glide", back: 0.5, spin: 0 });
-  assert.equal(moonwalkAt(4.6).phase, "spin");
-  assert.equal(moonwalkAt(5.5).phase, "toes");
-  assert.equal(moonwalkAt(7).phase, "home");
-  assert.ok(moonwalkAt(7).back < 1 && moonwalkAt(7).back > 0);
-  assert.equal(moonwalkAt(MOONWALK_S + 0.1).phase, "done");
+test("the dance, beat by beat, round after round", () => {
+  assert.equal(danceAt(0).move, "moonwalk");
+  assert.deepEqual(danceAt(8), { move: "moonwalk", k: 0.5, whole: 8, frac: 0, round: 0 });
+  assert.equal(danceAt(16.5).move, "spin");
+  assert.equal(danceAt(19).move, "toes");
+  assert.equal(danceAt(21).move, "lean");
+  assert.equal(danceAt(30).move, "kick");
+  assert.equal(danceAt(40).move, "strut");
+  assert.equal(danceAt(DANCE_LOOP + 1).move, "moonwalk");
+  assert.equal(danceAt(DANCE_LOOP + 1).round, 1);
+  assert.equal(danceAt(-3).whole, 0);
+});
+
+test("the beat follows the song's tempo", () => {
+  assert.equal(beatAt(60, 117), 117);
+  assert.equal(beatAt(-1, 117), 0);
+  for (const s of Object.values(SONGS)) assert.ok(s.bpm > 90 && s.bpm < 160, s.title);
+});
+
+test("the song plays when Spotify plays it by that name", () => {
+  const song = SONGS.billieJean;
+  assert.equal(songPlaying({ playing: true, track: { title: "Billie Jean" } }, song), true);
+  assert.equal(songPlaying({ playing: true, track: { title: "Billie Jean - Single Version" } }, song), true);
+  assert.equal(songPlaying({ playing: false, track: { title: "Billie Jean" } }, song), false);
+  assert.equal(songPlaying({ playing: true, track: { title: "Thriller" } }, song), false);
+  assert.equal(songPlaying({ playing: true, track: null }, song), false);
 });

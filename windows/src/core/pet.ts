@@ -33,12 +33,16 @@ export const HUNGER_HOURS = 12;
 export const HUNGRY_BELOW = 25;
 
 /** The moonwalk's songs on Spotify (track ids). */
-export const SONGS: Record<SongId, { title: string; id: string }> = {
-  billieJean: { title: "Billie Jean", id: "7J1uxwnxfQLu4APicE5Rnj" },
-  smoothCriminal: { title: "Smooth Criminal", id: "5T7ywazdGIydr6JCW6t02j" },
-  bad: { title: "Bad", id: "6JkYFfx8ucsKXFhbUXkzie" },
-  beatIt: { title: "Beat It", id: "3BovdzfaX4jb5KFQwoPfAw" },
+/** The moonwalk's songs on Spotify (track ids) and their tempo, so he steps on the beat. */
+export interface Song { title: string; id: string; bpm: number }
+export const SONGS: Record<SongId, Song> = {
+  billieJean: { title: "Billie Jean", id: "7J1uxwnxfQLu4APicE5Rnj", bpm: 117 },
+  smoothCriminal: { title: "Smooth Criminal", id: "5T7ywazdGIydr6JCW6t02j", bpm: 118 },
+  bad: { title: "Bad", id: "6JkYFfx8ucsKXFhbUXkzie", bpm: 114 },
+  beatIt: { title: "Beat It", id: "3BovdzfaX4jb5KFQwoPfAw", bpm: 139 },
 };
+/** His own count when no song plays. */
+export const OWN_BPM = 116;
 
 export const SNACKS = ["🍙", "🍪", "🍓", "🍣", "🍩"] as const;
 
@@ -89,24 +93,41 @@ export function treatsLeft(p: PetPref): number {
 }
 
 /** The song for this moonwalk; `random` is 0…1. */
-export function pickSong(p: PetPref, random: number): { title: string; id: string } {
+export function pickSong(p: PetPref, random: number): Song {
   const id = p.song === "random" ? SONG_IDS[Math.min(SONG_IDS.length - 1, Math.floor(random * SONG_IDS.length))] : p.song;
   return SONGS[id];
 }
 
-/** The moonwalk's timeline in seconds: glide back, spin, toes, walk home. */
-export const MOONWALK = { glide: 4.2, spin: 0.8, toes: 1.2, home: 1.6 } as const;
-export const MOONWALK_S = MOONWALK.glide + MOONWALK.spin + MOONWALK.toes + MOONWALK.home;
+/** The dance, in beats; it repeats while the song plays (DANCE_LOOP beats a round). */
+export type Move = "moonwalk" | "spin" | "toes" | "lean" | "kick" | "strut";
+export const DANCE: readonly { move: Move; from: number; to: number }[] = [
+  { move: "moonwalk", from: 0, to: 16 },
+  { move: "spin", from: 16, to: 18 },
+  { move: "toes", from: 18, to: 20 },
+  { move: "lean", from: 20, to: 28 },
+  { move: "kick", from: 28, to: 32 },
+  { move: "strut", from: 32, to: 48 },
+];
+export const DANCE_LOOP = 48;
 
-export type MoonPhase = "glide" | "spin" | "toes" | "home" | "done";
+/** Where the dance is at `beat` (beats since the first one): the move, how far
+ *  through it (0…1), and the beat's whole number and fraction. */
+export function danceAt(beat: number): { move: Move; k: number; whole: number; frac: number; round: number } {
+  const b = Math.max(0, beat);
+  const whole = Math.floor(b);
+  const frac = b - whole;
+  const round = Math.floor(b / DANCE_LOOP);
+  const inLoop = b - round * DANCE_LOOP;
+  const part = DANCE.find((p) => inLoop >= p.from && inLoop < p.to) ?? DANCE[DANCE.length - 1];
+  return { move: part.move, k: (inLoop - part.from) / (part.to - part.from), whole, frac, round };
+}
 
-/** Where he is in the moonwalk at `t` seconds, and how far back he is (0…1 of the glide). */
-export function moonwalkAt(t: number): { phase: MoonPhase; back: number; spin: number } {
-  const { glide, spin, toes, home } = MOONWALK;
-  if (t < 0) return { phase: "glide", back: 0, spin: 0 };
-  if (t < glide) return { phase: "glide", back: t / glide, spin: 0 };
-  if (t < glide + spin) return { phase: "spin", back: 1, spin: (t - glide) / spin };
-  if (t < glide + spin + toes) return { phase: "toes", back: 1, spin: 0 };
-  if (t < MOONWALK_S) return { phase: "home", back: 1 - (t - glide - spin - toes) / home, spin: 0 };
-  return { phase: "done", back: 0, spin: 0 };
+/** Beats since the first one, `seconds` into a song at `bpm`. */
+export function beatAt(seconds: number, bpm: number): number {
+  return Math.max(0, seconds) * bpm / 60;
+}
+
+/** He has the song: it plays and it is the one he asked for. */
+export function songPlaying(state: { playing: boolean; track: { title: string } | null }, song: Song): boolean {
+  return state.playing && !!state.track && state.track.title.toLowerCase().includes(song.title.toLowerCase());
 }

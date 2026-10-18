@@ -13,7 +13,7 @@ import {
 } from "../core/layout";
 import { Sound } from "../core/sound";
 import { State, islandPlacement } from "../core/state";
-import { SPOTIFY_ID, Spotify, islandDances } from "../core/spotify";
+import { SPOTIFY_ID, Spotify, islandDances, spotifyPosition } from "../core/spotify";
 import { BotEngine, hexToRGB } from "../mochi/engine";
 import { Greeting } from "../mochi/greeting";
 import { createMiniBot, pruneMiniBots, syncMiniBotStates, tickMiniBots } from "../mochi/minibots";
@@ -28,7 +28,9 @@ import { refreshHookPills } from "./integrations";
 import { DesktopLink } from "./desktop";
 import { GlowStrip } from "./glow";
 import { agentBusy, glowLook, readGlow } from "../core/glow";
-import { MOONWALK_TREATS, feed, moonwalkAt, pickSong, readPet } from "../core/pet";
+import {
+  MOONWALK_TREATS, OWN_BPM, beatAt, danceAt, feed, pickSong, readPet, songPlaying, type Move, type Song,
+} from "../core/pet";
 import type { ViewCommand } from "./shortcuts";
 import { DRAG_THRESHOLD } from "../mochi/desktop-logic";
 
@@ -44,6 +46,24 @@ const UPLOAD_VIEWS: ReadonlySet<IslandViewName> = new Set(["upload", "uploading"
 
 /** Seconds between the drop and the moment the progress bar starts filling. */
 const PRE_PROGRESS = USC.T_PROG_START - USC.T_DROP;
+
+/** The dance in progress (Island.moonwalk). */
+interface Dance {
+  phase: "waiting" | "dancing";
+  song: Song;
+  /** A song plays with it (else: one round on his own count). */
+  music: boolean;
+  /** performance.now() at the press. */
+  started: number;
+  /** performance.now() when the steps began, for counting without Spotify's position. */
+  clock: number | null;
+  /** When his song stopped playing (0: it plays). */
+  lost: number;
+  /** Spotify's report showed his song playing at least once (only then can it stop him). */
+  seen: boolean;
+  /** The round whose toe stand was already greeted. */
+  toesShown: number;
+}
 
 const modeOrder = (m: IslandMode) => (m === "hidden" ? 0 : m === "compact" ? 1 : 2);
 
@@ -65,10 +85,9 @@ export class Island {
   private wakeStrip!: HTMLElement;
   /** A snack held over Mochi in the Kitchen. */
   private snackHover = false;
-  /** The moonwalk's start (performance.now ms), while he moonwalks. */
-  private moonStart: number | null = null;
-  /** The moonwalk started a song in Spotify: paused after, if the user wants. */
-  private moonMusic = false;
+  /** The dance, while he dances (or waits for the song). */
+  private dance: Dance | null = null;
+  private danceMove: Move | null = null;
   /** The glowing strip along the island (Settings → General → Glow), off by default. */
   private readonly glow = new GlowStrip();
   /** A press on the island's body that may become a drag of the island. */
@@ -258,7 +277,7 @@ export class Island {
       snackOver: (x, y) => this.snackOver(x, y),
       eatSnack: () => this.eatSnack(),
       moonwalk: () => this.moonwalk(),
-      isMoonwalking: () => this.moonStart != null,
+      danceStatus: () => this.danceStatus(),
       blip: () => Sound.play("blip"),
       chooseOutfit: (selection) => {
         if (parseOutfit(State.settings.mochiOutfit) === selection) return;
@@ -1194,6 +1213,7 @@ export class Island {
     this.botCanvas.style.left = `${this.botCx.value + moon.dx - wCss / 2}px`;
     this.botCanvas.style.top = `${this.botCy.value - BOT_OVERHANG / 2 - hCss / 2}px`;
     this.botCanvas.style.transform = moon.transform;
+    this.botCanvas.style.transformOrigin = moon.transform ? "50% 72%" : "";
 
     const ctx = this.botCanvas.getContext("2d");
     if (!ctx) return;
@@ -1254,7 +1274,7 @@ export class Island {
     const r = this.botCanvas.getBoundingClientRect();
     const cx = r.left + r.width / 2;
     const cy = r.top + r.height / 2;
-    const over = this.moonStart == null && Math.hypot(x - cx, y - cy) < Math.max(28, r.width * 0.45);
+    const over = this.dance == null && Math.hypot(x - cx, y - cy) < Math.max(28, r.width * 0.45);
     if (over !== this.snackHover) {
       this.snackHover = over;
       this.engine.wantSnack(over);
@@ -1283,53 +1303,171 @@ export class Island {
     State.notify();
   }
 
-  /** The moonwalk, to a Michael Jackson song in Spotify if the user wants. */
+  /** The dance (moonwalk and the rest), to a Michael Jackson song in Spotify if the user wants:
+   *  he waits until the song really plays, then steps on its beats; or stops it. */
   private moonwalk() {
-    if (this.moonStart != null) return;
+    if (this.dance) {
+      this.endDance();
+      return;
+    }
     const pet = readPet(State.settings.pet);
-    this.moonStart = performance.now();
-    this.moonMusic = false;
+    const song = pickSong(pet, Math.random());
+    const dance: Dance = { phase: "waiting", song, music: pet.music, started: performance.now(), clock: null, lost: 0, seen: false, toesShown: -1 };
+    this.dance = dance;
     this.engine.setMoonwalk(true);
+    // The island stays open while he dances (the song can be long).
+    this.fsm.pinned = true;
+    this.fsm.cancelTimers();
     if (pet.music) {
-      const song = pickSong(pet, Math.random());
       void Bridge.spotifyPlayTrack(song.id, song.title).then((r) => {
-        this.moonMusic = r === "playing" || r === "opened";
+        if (this.dance !== dance) return;
+        if (r !== "playing") {
+          // No song after all: one round on his own count.
+          dance.music = false;
+          this.startSteps(dance, performance.now());
+        } else if (!songPlaying(Spotify.state, song)) {
+          // Spotify said so before its report reached us: count from now.
+          this.startSteps(dance, performance.now());
+        }
       });
+    } else {
+      this.startSteps(dance, performance.now());
     }
     this.ensureRunning();
     State.notify();
   }
 
-  /** Where the moonwalk has him now: how far back, turned, on his toes; and where he looks. */
-  private moonPose(): { dx: number; transform: string; look: number | null } {
-    if (this.moonStart == null) return { dx: 0, transform: "", look: null };
-    const t = (performance.now() - this.moonStart) / 1000;
-    const pose = moonwalkAt(t);
-    if (pose.phase === "done") {
-      this.endMoonwalk();
-      return { dx: 0, transform: "", look: null };
-    }
-    // Backwards across the island, facing the way he came.
-    const room = Math.min(170, this.width.value - this.botCx.value - 60);
-    const dx = Math.max(0, room) * pose.back;
-    if (pose.phase === "glide") this.engine.moonwalking = true;
-    if (pose.phase === "spin") return { dx, transform: `rotate(${pose.spin * 360}deg)`, look: 0 };
-    if (pose.phase === "toes") {
-      this.engine.moonwalking = false;
-      return { dx, transform: "translateY(-6px)", look: 0.2 };
-    }
-    if (pose.phase === "home") this.engine.moonwalking = true;
-    return { dx, transform: "", look: -0.9 };
+  private startSteps(dance: Dance, at: number) {
+    if (dance.phase === "dancing") return;
+    dance.phase = "dancing";
+    dance.clock = at;
+    State.notify();
   }
 
-  private endMoonwalk() {
-    this.moonStart = null;
+  /** What the Kitchen shows: waiting for the song, the move he is on, or nothing. */
+  danceStatus(): { phase: "idle" | "waiting" | "dancing"; move: Move | null; song: string } {
+    const d = this.dance;
+    if (!d) return { phase: "idle", move: null, song: "" };
+    return { phase: d.phase, move: d.phase === "dancing" ? this.danceMove : null, song: d.music ? d.song.title : "" };
+  }
+
+  /** Seconds into the song: from Spotify while it plays the song, else from when the steps began. */
+  private danceSeconds(d: Dance, nowMs: number): number | null {
+    if (d.music && songPlaying(Spotify.state, d.song)) {
+      d.lost = 0;
+      d.seen = true;
+      if (d.phase === "waiting") this.startSteps(d, nowMs);
+      return spotifyPosition(Spotify.state, Date.now());
+    }
+    if (d.phase !== "dancing" || d.clock == null) return null;
+    return (nowMs - d.clock) / 1000;
+  }
+
+  /** Where the dance has him this frame: how far across, turned, leaning, lifted; his feet; where he looks. */
+  private moonPose(): { dx: number; transform: string; look: number | null } {
+    const d = this.dance;
+    const rest = { dx: 0, transform: "", look: null };
+    if (!d) return rest;
+    const nowMs = performance.now();
+    const f = this.engine.feetPose;
+    // Leaving the Kitchen, or the island folding, ends it.
+    if (State.mode !== "expanded" || State.view !== "kitchen") {
+      this.endDance();
+      return rest;
+    }
+    if (d.phase === "waiting") {
+      // Tapping a foot, looking at the panel, until the song plays (6 s at most).
+      const t = (nowMs - d.started) / 1000;
+      f.ax = 0; f.bx = 0; f.ak = 0; f.bk = 0;
+      f.al = Math.max(0, Math.sin(t * 9)) * 0.12;
+      f.bl = 0;
+      this.danceSeconds(d, nowMs);
+      if (d.phase === "waiting" && t > 6) {
+        d.music = false;
+        this.startSteps(d, nowMs);
+      }
+      return { dx: 0, transform: "", look: 0.7 };
+    }
+    const seconds = this.danceSeconds(d, nowMs);
+    if (d.music && d.seen && !songPlaying(Spotify.state, d.song)) {
+      // Paused or changed in Spotify: a moment's grace, then he stops.
+      d.lost = d.lost || nowMs;
+      if (nowMs - d.lost > 1500) {
+        this.endDance();
+        return rest;
+      }
+    }
+    if (seconds == null) return rest;
+    const at = danceAt(beatAt(seconds, d.music ? d.song.bpm : OWN_BPM));
+    // Without a song, one round on his own count.
+    if (!d.music && at.round >= 1) {
+      this.endDance();
+      return rest;
+    }
+    if (at.move !== this.danceMove) {
+      this.danceMove = at.move;
+      State.notify();
+    }
+    const room = Math.max(0, Math.min(190, this.width.value - this.botCx.value - 70));
+    const pulse = Math.pow(1 - at.frac, 3);
+    const odd = at.whole % 2 === 1;
+    Object.assign(f, { ax: 0, bx: 0, al: 0, bl: 0, ak: 0, bk: 0 });
+    this.engine.fedoraTip = 0;
+    switch (at.move) {
+      case "moonwalk": {
+        // One slide a beat, gliding back across the island, facing the way he came.
+        const slide = (odd ? 1 : -1) * (at.frac * 2 - 1) * 0.3;
+        f.ax = slide; f.bx = -slide;
+        f.al = odd ? 0.08 * (1 - at.frac) : 0;
+        f.bl = odd ? 0 : 0.08 * (1 - at.frac);
+        return { dx: room * at.k, transform: "rotate(-3deg)", look: -0.9 };
+      }
+      case "spin":
+        return { dx: room, transform: `rotate(${at.k * 360}deg)`, look: Math.sin(at.k * 12) * 0.8 };
+      case "toes": {
+        if (this.dance && this.dance.toesShown !== at.round) {
+          this.dance.toesShown = at.round;
+          this.engine.triggerEmote("happy", 1.2);
+          this.engine.squash();
+        }
+        this.engine.fedoraTip = -0.25;
+        f.al = 0.12; f.bl = 0.12;
+        return { dx: room, transform: "translateY(-7px)", look: 0.2 };
+      }
+      case "lean": {
+        // Smooth Criminal: forward, held, and back up.
+        const lean = Math.min(1, at.k * 3, (1 - at.k) * 3);
+        return { dx: room, transform: `rotate(${lean * 38}deg)`, look: 0.3 };
+      }
+      case "kick": {
+        const up = Math.sin(at.frac * Math.PI);
+        if (!odd) { f.ak = up; f.al = up * 0.4; f.ax = -up * 0.2; } else { f.bk = -up; f.bl = up * 0.4; f.bx = up * 0.2; }
+        return { dx: room, transform: `scale(${1 + pulse * 0.04}, ${1 - pulse * 0.04})`, look: odd ? 0.5 : -0.5 };
+      }
+      default: {
+        // Strutting home on the beat, shoulders bouncing.
+        const step = (odd ? 1 : -1) * 0.18 * (1 - at.frac);
+        f.ax = step; f.bx = -step;
+        f.al = odd ? 0 : 0.12 * pulse;
+        f.bl = odd ? 0.12 * pulse : 0;
+        return { dx: room * (1 - at.k), transform: `translateY(${-pulse * 3}px) scale(${1 + pulse * 0.05}, ${1 - pulse * 0.05})`, look: -0.6 };
+      }
+    }
+  }
+
+  private endDance() {
+    const d = this.dance;
+    if (!d) return;
+    this.dance = null;
+    this.danceMove = null;
     this.engine.setMoonwalk(false);
+    this.fsm.pinned = State.isPinned;
+    if (!State.isPinned && !this.wasInIsland && this.fsm.state === "home") this.fsm.mouseLeft();
+    this.engine.fedoraTip = 0;
     this.engine.triggerEmote("happy");
     const pet = readPet(State.settings.pet);
-    // Paused only if it still plays (the user may have stopped it already).
-    if (this.moonMusic && pet.after === "pause" && Spotify.state.playing) void Bridge.spotifyControl("playPause");
-    this.moonMusic = false;
+    // Paused only if it is still his song playing (the user may have stopped or changed it).
+    if (d.music && pet.after === "pause" && songPlaying(Spotify.state, d.song)) void Bridge.spotifyControl("playPause");
     State.notify();
   }
 

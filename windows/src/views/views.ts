@@ -65,7 +65,8 @@ export interface ViewActions {
   eatSnack(): void;
   /** The moonwalk (once he has learned it). */
   moonwalk(): void;
-  isMoonwalking(): boolean;
+  /** Waiting for the song, dancing (and the move), or not. */
+  danceStatus(): { phase: "idle" | "waiting" | "dancing"; move: import("../core/pet").Move | null; song: string };
 }
 
 export interface ViewHost {

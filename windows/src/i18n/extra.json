@@ -5560,6 +5560,94 @@
    "pt-BR": "Depois da dança",
    "ru": "После танца",
    "id": "Setelah menari"
+  },
+  "Waiting for {song} to play…": {
+   "zh-Hans": "等待 {song} 开始播放…",
+   "hi": "{song} बजने का इंतज़ार…",
+   "es": "Esperando a que suene {song}…",
+   "ar": "بانتظار تشغيل {song}…",
+   "fr": "En attendant que {song} démarre…",
+   "bn": "{song} বাজার অপেক্ষায়…",
+   "pt-BR": "Esperando {song} tocar…",
+   "ru": "Ждёт, пока заиграет {song}…",
+   "id": "Menunggu {song} diputar…"
+  },
+  "Ready…": {
+   "zh-Hans": "准备…",
+   "hi": "तैयार…",
+   "es": "Listo…",
+   "ar": "استعداد…",
+   "fr": "Prêt…",
+   "bn": "প্রস্তুত…",
+   "pt-BR": "Pronto…",
+   "ru": "Приготовился…",
+   "id": "Siap…"
+  },
+  "Moonwalk": {
+   "zh-Hans": "太空步",
+   "hi": "मूनवॉक",
+   "es": "Moonwalk",
+   "ar": "مشية القمر",
+   "fr": "Moonwalk",
+   "bn": "মুনওয়াক",
+   "pt-BR": "Moonwalk",
+   "ru": "Лунная походка",
+   "id": "Moonwalk"
+  },
+  "Spin": {
+   "zh-Hans": "旋转",
+   "hi": "घूमना",
+   "es": "Giro",
+   "ar": "دوران",
+   "fr": "Pirouette",
+   "bn": "ঘূর্ণন",
+   "pt-BR": "Giro",
+   "ru": "Вращение",
+   "id": "Berputar"
+  },
+  "On his toes": {
+   "zh-Hans": "踮脚尖",
+   "hi": "पंजों पर",
+   "es": "De puntillas",
+   "ar": "على أطراف أصابعه",
+   "fr": "Sur la pointe des pieds",
+   "bn": "পায়ের আঙুলে",
+   "pt-BR": "Na ponta dos pés",
+   "ru": "На носочки",
+   "id": "Berjinjit"
+  },
+  "The lean": {
+   "zh-Hans": "倾斜",
+   "hi": "झुकाव",
+   "es": "La inclinación",
+   "ar": "الانحناء",
+   "fr": "L'inclinaison",
+   "bn": "হেলে পড়া",
+   "pt-BR": "A inclinação",
+   "ru": "Наклон",
+   "id": "Condong"
+  },
+  "Kicks": {
+   "zh-Hans": "踢腿",
+   "hi": "किक",
+   "es": "Patadas",
+   "ar": "ركلات",
+   "fr": "Coups de pied",
+   "bn": "লাথি",
+   "pt-BR": "Chutes",
+   "ru": "Махи ногой",
+   "id": "Tendangan"
+  },
+  "Strut": {
+   "zh-Hans": "踏步",
+   "hi": "ठसक भरी चाल",
+   "es": "Pavoneo",
+   "ar": "مشية واثقة",
+   "fr": "Démarche",
+   "bn": "দাপটে হাঁটা",
+   "pt-BR": "Gingado",
+   "ru": "Шаги в такт",
+   "id": "Melenggang"
   }
  }
 }
