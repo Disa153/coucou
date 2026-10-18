@@ -483,6 +483,54 @@ pub async fn spotify_open() -> bool {
     }
 }
 
+/// A Spotify track id: 22 letters and digits.
+pub fn is_track_id(id: &str) -> bool {
+    id.len() == 22 && id.chars().all(|c| c.is_ascii_alphanumeric())
+}
+
+/// Mochi's moonwalk song: plays `spotify:track:<id>` in Spotify. "playing" once
+/// Spotify plays a track named `title`; "opened" when Spotify only showed it
+/// (the Windows app opens a track link without always starting it);
+/// "unavailable" without Spotify.
+#[tauri::command]
+pub async fn spotify_play_track(app: AppHandle, id: String, title: String) -> String {
+    if !is_track_id(&id) {
+        return "unavailable".into();
+    }
+    let uri = format!("spotify:track:{id}");
+    #[cfg(target_os = "linux")]
+    {
+        let _ = (&app, &title);
+        let played = tauri::async_runtime::spawn_blocking(move || linux::open_uri(&uri)).await.unwrap_or(false);
+        return if played { "playing" } else { "unavailable" }.into();
+    }
+    #[cfg(windows)]
+    {
+        if !win::launch(&uri) {
+            return "unavailable".into();
+        }
+        // Spotify switches within a second or two when it does.
+        for _ in 0..8 {
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            let a = app.clone();
+            let state = tauri::async_runtime::spawn_blocking(move || win::refresh(&a)).await.ok().flatten();
+            if let Some(state) = state {
+                let same = state.track.as_ref().is_some_and(|t| t.title.to_lowercase().contains(&title.to_lowercase()));
+                if same && state.playing {
+                    return "playing".into();
+                }
+            }
+        }
+        crate::log::line(format!("music: Spotify opened {title} but did not start it"));
+        return "opened".into();
+    }
+    #[cfg(not(any(target_os = "linux", windows)))]
+    {
+        let _ = (app, uri, title);
+        "unavailable".into()
+    }
+}
+
 /// For Settings: whether there is a Spotify to launch.
 #[tauri::command]
 pub fn spotify_installed() -> bool {
@@ -995,6 +1043,28 @@ mod linux {
 
     pub fn installed() -> bool {
         launcher().is_some()
+    }
+
+    /// Plays a `spotify:` URI: through MPRIS when Spotify runs (OpenUri plays it),
+    /// else starts Spotify on it.
+    pub fn open_uri(uri: &str) -> bool {
+        let played = with_control(|c| {
+            if name_owner(c).is_none() {
+                return Ok(false);
+            }
+            let p = c.with_proxy(BUS, PATH, CALL);
+            p.method_call::<(), _, _, _>(PLAYER, "OpenUri", (uri,))?;
+            Ok(true)
+        })
+        .unwrap_or(false);
+        if played {
+            return true;
+        }
+        let Some(mut argv) = launcher() else { return false };
+        argv.push(format!("--uri={uri}").into());
+        let mut cmd = Command::new(&argv[0]);
+        cmd.args(&argv[1..]);
+        cmd.spawn().is_ok()
     }
 
     pub fn open() -> bool {
@@ -1912,7 +1982,7 @@ mod win {
         ok
     }
 
-    fn launch(target: &str) -> bool {
+    pub fn launch(target: &str) -> bool {
         Command::new("explorer.exe").arg(target).creation_flags(CREATE_NO_WINDOW).spawn().is_ok()
     }
 
@@ -1933,6 +2003,16 @@ mod win {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn moonwalk_songs_are_spotify_track_ids() {
+        for id in ["7J1uxwnxfQLu4APicE5Rnj", "5T7ywazdGIydr6JCW6t02j", "6JkYFfx8ucsKXFhbUXkzie", "3BovdzfaX4jb5KFQwoPfAw"] {
+            assert!(is_track_id(id), "{id}");
+        }
+        assert!(!is_track_id("7J1uxwnxfQLu4APicE5Rn"));
+        assert!(!is_track_id("7J1uxwnxfQLu4APicE5Rn&"));
+        assert!(!is_track_id("../../../etc/passwd/xx"));
+    }
 
     #[test]
     fn a_players_sound_is_found_by_its_program() {

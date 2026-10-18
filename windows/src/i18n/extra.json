@@ -5340,6 +5340,226 @@
    "pt-BR": "Uma faixa fixa não custa nada. A respiração, o arco-íris e o ritmo da música deixam o computador um pouco ocupado enquanto brilham.",
    "ru": "Ровная полоса ничего не стоит. Дыхание, радуга и ритм музыки немного нагружают компьютер, пока светятся.",
    "id": "Strip tetap tidak membebani. Bernapas, pelangi, dan ketukan musik membuat komputer sedikit sibuk selama menyala."
+  },
+  "Snack": {
+   "zh-Hans": "零食",
+   "hi": "नाश्ता",
+   "es": "Bocado",
+   "ar": "وجبة خفيفة",
+   "fr": "En-cas",
+   "bn": "খাবার",
+   "pt-BR": "Lanche",
+   "ru": "Угощение",
+   "id": "Camilan"
+  },
+  "Dance": {
+   "zh-Hans": "跳舞",
+   "hi": "नाचो",
+   "es": "Bailar",
+   "ar": "ارقص",
+   "fr": "Danser",
+   "bn": "নাচো",
+   "pt-BR": "Dançar",
+   "ru": "Станцевать",
+   "id": "Menari"
+  },
+  "Full": {
+   "zh-Hans": "饱腹",
+   "hi": "पेट भरा",
+   "es": "Lleno",
+   "ar": "الشبع",
+   "fr": "Rassasié",
+   "bn": "পেট ভরা",
+   "pt-BR": "Saciedade",
+   "ru": "Сытость",
+   "id": "Kenyang"
+  },
+  "Drag a snack onto Mochi": {
+   "zh-Hans": "把零食拖到 Mochi 身上",
+   "hi": "नाश्ता Mochi पर खींचें",
+   "es": "Arrastra un bocado hasta Mochi",
+   "ar": "اسحب وجبة إلى Mochi",
+   "fr": "Glissez un en-cas sur Mochi",
+   "bn": "খাবার টেনে Mochi-র উপর রাখুন",
+   "pt-BR": "Arraste um lanche até o Mochi",
+   "ru": "Перетащи еду на Mochi",
+   "id": "Seret camilan ke Mochi"
+  },
+  "🕺 Moonwalk": {
+   "zh-Hans": "🕺 太空步",
+   "hi": "🕺 मूनवॉक",
+   "es": "🕺 Moonwalk",
+   "ar": "🕺 مشية القمر",
+   "fr": "🕺 Moonwalk",
+   "bn": "🕺 মুনওয়াক",
+   "pt-BR": "🕺 Moonwalk",
+   "ru": "🕺 Лунная походка",
+   "id": "🕺 Moonwalk"
+  },
+  "He's hungry!": {
+   "zh-Hans": "他饿了！",
+   "hi": "उसे भूख लगी है!",
+   "es": "¡Tiene hambre!",
+   "ar": "إنه جائع!",
+   "fr": "Il a faim !",
+   "bn": "ওর খিদে পেয়েছে!",
+   "pt-BR": "Ele está com fome!",
+   "ru": "Он проголодался!",
+   "id": "Dia lapar!"
+  },
+  "Full up. Thank you!": {
+   "zh-Hans": "吃饱了，谢谢！",
+   "hi": "पेट भर गया, धन्यवाद!",
+   "es": "Lleno. ¡Gracias!",
+   "ar": "شبعت، شكرًا!",
+   "fr": "Repu. Merci !",
+   "bn": "পেট ভরে গেছে, ধন্যবাদ!",
+   "pt-BR": "Satisfeito. Obrigado!",
+   "ru": "Наелся. Спасибо!",
+   "id": "Kenyang. Terima kasih!"
+  },
+  "With Michael Jackson on Spotify": {
+   "zh-Hans": "配上 Spotify 里的迈克尔·杰克逊",
+   "hi": "Spotify पर माइकल जैक्सन के साथ",
+   "es": "Con Michael Jackson en Spotify",
+   "ar": "مع مايكل جاكسون على Spotify",
+   "fr": "Avec Michael Jackson sur Spotify",
+   "bn": "Spotify-তে মাইকেল জ্যাকসনের সাথে",
+   "pt-BR": "Com Michael Jackson no Spotify",
+   "ru": "С Майклом Джексоном в Spotify",
+   "id": "Dengan Michael Jackson di Spotify"
+  },
+  "He knows it!": {
+   "zh-Hans": "他学会了！",
+   "hi": "उसने सीख लिया!",
+   "es": "¡Ya lo sabe!",
+   "ar": "لقد تعلّمها!",
+   "fr": "Il sait le faire !",
+   "bn": "ও শিখে গেছে!",
+   "pt-BR": "Ele aprendeu!",
+   "ru": "Он научился!",
+   "id": "Dia sudah bisa!"
+  },
+  "Snacks before he learns it: {count}": {
+   "zh-Hans": "再吃 {count} 份零食就学会",
+   "hi": "सीखने तक बाकी नाश्ते: {count}",
+   "es": "Bocados hasta que lo aprenda: {count}",
+   "ar": "وجبات حتى يتعلّمها: {count}",
+   "fr": "En-cas avant qu'il l'apprenne : {count}",
+   "bn": "শেখা পর্যন্ত খাবার বাকি: {count}",
+   "pt-BR": "Lanches até ele aprender: {count}",
+   "ru": "Угощений до навыка: {count}",
+   "id": "Camilan sampai dia bisa: {count}"
+  },
+  "Feed Mochi": {
+   "zh-Hans": "喂 Mochi",
+   "hi": "Mochi को खिलाएँ",
+   "es": "Dar de comer a Mochi",
+   "ar": "أطعم Mochi",
+   "fr": "Nourrir Mochi",
+   "bn": "Mochi-কে খাওয়ান",
+   "pt-BR": "Alimentar o Mochi",
+   "ru": "Покормить Mochi",
+   "id": "Beri makan Mochi"
+  },
+  "A random one of these": {
+   "zh-Hans": "其中随机一首",
+   "hi": "इनमें से कोई भी",
+   "es": "Una al azar",
+   "ar": "واحدة عشوائية منها",
+   "fr": "Une au hasard",
+   "bn": "এগুলোর যেকোনো একটি",
+   "pt-BR": "Uma aleatória",
+   "ru": "Случайная из этих",
+   "id": "Salah satu secara acak"
+  },
+  "Pause it": {
+   "zh-Hans": "暂停",
+   "hi": "रोकें",
+   "es": "Pausarla",
+   "ar": "إيقاف مؤقت",
+   "fr": "La mettre en pause",
+   "bn": "থামান",
+   "pt-BR": "Pausar",
+   "ru": "Поставить на паузу",
+   "id": "Jeda"
+  },
+  "Let it play": {
+   "zh-Hans": "继续播放",
+   "hi": "चलने दें",
+   "es": "Dejar que suene",
+   "ar": "دعها تعمل",
+   "fr": "La laisser jouer",
+   "bn": "চলতে দিন",
+   "pt-BR": "Deixar tocar",
+   "ru": "Пусть играет дальше",
+   "id": "Biarkan diputar"
+  },
+  "Hunger": {
+   "zh-Hans": "饥饿",
+   "hi": "भूख",
+   "es": "Hambre",
+   "ar": "الجوع",
+   "fr": "Faim",
+   "bn": "খিদে",
+   "pt-BR": "Fome",
+   "ru": "Голод",
+   "id": "Lapar"
+  },
+  "He slowly gets hungry; feed him from the onigiri in the island.": {
+   "zh-Hans": "他会慢慢饿；点岛上的饭团喂他。",
+   "hi": "उसे धीरे-धीरे भूख लगती है; आइलैंड के ओनिगिरी से उसे खिलाएँ।",
+   "es": "Le entra hambre poco a poco; dale de comer desde el onigiri de la isla.",
+   "ar": "يجوع ببطء؛ أطعمه من الأونيغيري في الجزيرة.",
+   "fr": "Il a faim peu à peu ; nourrissez-le depuis l'onigiri de l'îlot.",
+   "bn": "ধীরে ধীরে খিদে পায়; আইল্যান্ডের অনিগিরি থেকে খাওয়ান।",
+   "pt-BR": "Ele vai ficando com fome; alimente-o pelo onigiri da ilha.",
+   "ru": "Понемногу проголодается; корми его через онигири в острове.",
+   "id": "Dia pelan-pelan lapar; beri makan lewat onigiri di pulau."
+  },
+  "Moonwalk music": {
+   "zh-Hans": "太空步音乐",
+   "hi": "मूनवॉक संगीत",
+   "es": "Música del moonwalk",
+   "ar": "موسيقى مشية القمر",
+   "fr": "Musique du moonwalk",
+   "bn": "মুনওয়াকের গান",
+   "pt-BR": "Música do moonwalk",
+   "ru": "Музыка для лунной походки",
+   "id": "Musik moonwalk"
+  },
+  "Plays Michael Jackson in Spotify while he moonwalks.": {
+   "zh-Hans": "他跳太空步时在 Spotify 播放迈克尔·杰克逊。",
+   "hi": "मूनवॉक के समय Spotify में माइकल जैक्सन बजाता है।",
+   "es": "Pone a Michael Jackson en Spotify mientras hace el moonwalk.",
+   "ar": "يشغّل مايكل جاكسون في Spotify أثناء مشية القمر.",
+   "fr": "Lance Michael Jackson dans Spotify pendant son moonwalk.",
+   "bn": "মুনওয়াকের সময় Spotify-তে মাইকেল জ্যাকসন চালায়।",
+   "pt-BR": "Toca Michael Jackson no Spotify enquanto ele faz o moonwalk.",
+   "ru": "Включает Майкла Джексона в Spotify, пока он танцует.",
+   "id": "Memutar Michael Jackson di Spotify saat dia moonwalk."
+  },
+  "Song": {
+   "zh-Hans": "歌曲",
+   "hi": "गाना",
+   "es": "Canción",
+   "ar": "الأغنية",
+   "fr": "Chanson",
+   "bn": "গান",
+   "pt-BR": "Música",
+   "ru": "Песня",
+   "id": "Lagu"
+  },
+  "After the dance": {
+   "zh-Hans": "跳完之后",
+   "hi": "नाच के बाद",
+   "es": "Después del baile",
+   "ar": "بعد الرقص",
+   "fr": "Après la danse",
+   "bn": "নাচের পরে",
+   "pt-BR": "Depois da dança",
+   "ru": "После танца",
+   "id": "Setelah menari"
   }
  }
 }

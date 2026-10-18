@@ -1,6 +1,7 @@
 // App state — mirror of AppState.swift (the parts the island needs).
 
 import type { GlowPref } from "./glow";
+import type { PetPref } from "./pet";
 import type { Breed } from "../mochi/breeds";
 import type { BotEmoteName, BotStateName, IslandMode, IslandViewName } from "./layout";
 import type { EyeShape } from "../mochi/engine";
@@ -191,6 +192,8 @@ export interface Settings {
   islandEdge?: IslandEdge;
   /** The glowing strip along the island (core/glow.ts reads it); absent means off. */
   glow?: Partial<GlowPref>;
+  /** Feeding Mochi and his moonwalk (core/pet.ts reads it). */
+  pet?: Partial<PetPref>;
   /** Mochi on the desktop. Rust owns it: whatever the page sends back is ignored. */
   desktopMochi?: {
     onDesktop: boolean;

@@ -42,7 +42,7 @@ interface Tween {
 type PropKey =
   | "yaw" | "pitch" | "roll" | "tilt" | "open" | "sx" | "sy"
   | "oy" | "ox" | "tint" | "morph" | "hands" | "blush" | "es" | "badgeS"
-  | "outfitPresence";
+  | "outfitPresence" | "nom" | "feet";
 
 interface BotStateCfg {
   color: RGB;
@@ -206,6 +206,15 @@ export class BotEngine {
   yaw = 0; pitch = 0; roll = 0; tilt = 0; open = 1;
   sx = 1; sy = 1; oy = 0; ox = 0;
   tint = 0; morph = 0; hands = 0; blush = 0; es = 1; badgeS = 0;
+  /** A snack in front of him: how open his mouth is (Kitchen, views/kitchen.ts). */
+  nom = 0;
+  /** Chewing a snack until then (seconds, `now()`). */
+  munchUntil = 0;
+  /** The moonwalk's shoes: 0 = none, 1 = on. */
+  feet = 0;
+  /** The moonwalk is on: his feet slide in turn. */
+  moonwalking = false;
+  footPhase = 0;
 
   // Outfit (the main Mochi only — minis never wear one). `outfit` is what is
   // drawn; it changes only once the previous one has left.
@@ -337,6 +346,27 @@ export class BotEngine {
     this.physVy += 0.6;
     this.anim("sy", [[0.78, 70, Ease.out], [1.1, 130, Ease.out], [1, 170, Ease.inOut]]);
     this.anim("sx", [[1.16, 70, Ease.out], [0.95, 130, Ease.out], [1, 170, Ease.inOut]]);
+  }
+
+  /** A snack is held over him: he opens his mouth for it, or closes it again. */
+  wantSnack(open: boolean) {
+    if (this.morph > 0.05) return;
+    this.anim("nom", [[open ? 1 : 0, open ? 170 : 130, Ease.out]]);
+  }
+
+  /** He eats the snack: mouth shut, a happy chew, a blush and hearts. */
+  eatSnack() {
+    this.anim("nom", [[0, 90, Ease.out]]);
+    this.munchUntil = now() + 1.4;
+    this.anim("blush", [[1, 220, Ease.out], [1, 900, Ease.inOut], [0, 700, Ease.inOut]]);
+    this.squash();
+    this.triggerEmote("love", 2.4);
+  }
+
+  /** The moonwalk: shoes on and stepping (the island glides him backwards), or off. */
+  setMoonwalk(on: boolean) {
+    this.moonwalking = on;
+    this.anim("feet", [[on ? 1 : 0, on ? 240 : 320, Ease.out]]);
   }
 
   /** Mailbox swallow — opens the slot, chews, then closes. */
@@ -550,6 +580,7 @@ export class BotEngine {
       this.cfg.bounces || this.cfg.scans || this.cfg.breathes || this.cfg.zz || this.cfg.sweat ||
       this.isMini ||
       this.isDancing || this.dancingLevel > 0.001 ||
+      this.moonwalking || this.feet > 0.001 || now() < this.munchUntil ||
       Math.abs(this.tgYaw - this.yaw) > 0.002 ||
       Math.abs(this.tgPitch - this.pitch) > 0.002 ||
       Math.abs(this.tgTilt - this.tilt) > 0.002 ||
@@ -594,6 +625,8 @@ export class BotEngine {
         }
       }
     }
+
+    if (this.moonwalking) this.footPhase += dt * 7.5;
 
     const t = n - this.t0;
     let ty = this.lookX * 0.62;
@@ -810,6 +843,7 @@ export class BotEngine {
     }
 
     this.drawHandsBehind(x, R, rx, ry, cx, cy);
+    this.drawShoes(x, R, ry, cx, cy);
 
     x.save();
     x.translate(cx, cy);
@@ -843,6 +877,7 @@ export class BotEngine {
 
     this.drawEyes(x, body, R, rx, ry);
     if (this.morph > 0.05) this.drawMouth(x, body, R);
+    else if (this.nom > 0.02 || now() < this.munchUntil) this.drawSnackMouth(x, body, R, rx, ry);
     else drawCuteNose(x, breed, body, R, rx, ry, this.yaw, (this.eyeOverride ?? this.cfg.eye) === "happy");
 
     if (head) drawOutfitFront(x, this.outfit, head, outfitState);
@@ -1089,6 +1124,44 @@ export class BotEngine {
         break;
       }
     }
+  }
+
+  /** His mouth for a snack: open while it is held over him, then a chew. */
+  private drawSnackMouth(x: CanvasRenderingContext2D, body: Path2D, R: number, rx: number, ry: number) {
+    x.save();
+    x.clip(body);
+    const mx = this.yaw * rx * 0.5;
+    const my = ry * 0.36;
+    x.fillStyle = "#3a1d22";
+    x.beginPath();
+    if (this.nom > 0.02) {
+      x.ellipse(mx, my, R * (0.13 + 0.08 * this.nom), R * 0.2 * this.nom, 0, 0, Math.PI * 2);
+    } else {
+      const chew = Math.abs(Math.sin(now() * 14));
+      x.ellipse(mx, my, R * 0.11, R * (0.03 + 0.05 * chew), 0, 0, Math.PI * 2);
+    }
+    x.fill();
+    x.restore();
+  }
+
+  /** The moonwalk's black shoes and white socks, sliding in turn under him. */
+  private drawShoes(x: CanvasRenderingContext2D, R: number, ry: number, cx: number, cy: number) {
+    if (this.feet <= 0.01 || this.isMini || R <= 14) return;
+    const slide = Math.sin(this.footPhase) * R * 0.24 * this.feet;
+    const fy = cy + ry * this.sy + R * 0.06;
+    x.save();
+    x.globalAlpha = Math.min(1, this.feet);
+    for (const [dx, off] of [[-0.32, slide], [0.34, -slide]] as const) {
+      const fx = cx + dx * R + off;
+      const lift = off > 0 ? R * 0.05 : 0;
+      x.fillStyle = "#f2efe9";
+      x.fillRect(fx - R * 0.1, fy - R * 0.2 - lift, R * 0.2, R * 0.1);
+      x.fillStyle = "#16171b";
+      x.beginPath();
+      x.ellipse(fx + R * 0.05, fy - lift, R * 0.25, R * 0.11, 0, 0, Math.PI * 2);
+      x.fill();
+    }
+    x.restore();
   }
 
   /** Mailbox slot: dark pill cut into the box face, with rim and lip highlights. */

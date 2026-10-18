@@ -842,6 +842,7 @@ pub fn run() {
             spotify::spotify_control,
             spotify::spotify_open,
             spotify::spotify_installed,
+            spotify::spotify_play_track,
             mixer::mixer_state,
             mixer::mixer_set_master,
             mixer::mixer_set_app,

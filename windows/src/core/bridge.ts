@@ -460,6 +460,8 @@ export const Bridge = {
   spotifyOpen: () => call<boolean>("spotify_open"),
   /** Whether there is a Spotify to launch (Settings). */
   spotifyInstalled: () => call<boolean>("spotify_installed"),
+  /** Mochi's moonwalk song: "playing", "opened" (shown but not started) or "unavailable". */
+  spotifyPlayTrack: (id: string, title: string) => call<string>("spotify_play_track", { id, title }),
 
   // ── Sound mixer (src-tauri/src/mixer.rs) ──────────────────────────────────
   /** The outputs, the speakers' level and every program with sound. */
