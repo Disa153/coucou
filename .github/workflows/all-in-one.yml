@@ -184,10 +184,9 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           COUCOU_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          COUCOU_VERSION_CODE: ${{ 100 + github.run_number }}
-          COUCOU_VERSION_NAME: 0.2.0-fork.${{ github.run_number }}
         run: |
           set -o pipefail
+          export COUCOU_VERSION_CODE=$((100 + GITHUB_RUN_NUMBER)) COUCOU_VERSION_NAME="0.2.0-fork.$GITHUB_RUN_NUMBER"
           # Signed with the fork's own key when it is set up (Settings → Secrets: ANDROID_KEYSTORE_B64 and
           # ANDROID_KEYSTORE_PASSWORD), so every new APK installs over the last one. Without it: a debug build.
           if [ -n "$KEYSTORE_B64" ] && [ -n "$COUCOU_KEYSTORE_PASSWORD" ]; then
