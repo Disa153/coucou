@@ -3054,3 +3054,132 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   background: rgba(244, 80, 94, 0.18);
   color: var(--red-text);
 }
+
+/* ── Lyrics (views/lyrics.ts) ───────────────────────────────────────────── */
+
+.np-lyrics {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: transparent;
+  color: #c5c8cd;
+  border-radius: 999px;
+  font: 600 10.5px var(--font);
+  padding: 2px 9px;
+  margin-right: 8px;
+  cursor: default;
+}
+
+.np-lyrics:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+
+.ly-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px 12px 64px;
+  gap: 6px;
+}
+
+.ly-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+}
+
+.ly-back {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: default;
+}
+
+.ly-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ly-title b,
+.ly-title small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ly-title b {
+  font: 600 13px var(--font);
+  color: var(--ink);
+}
+
+.ly-title small {
+  font: 400 11px var(--font);
+  color: var(--dim-2);
+}
+
+.ly-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ly-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+  mask: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+}
+
+.ly-lines {
+  transition: transform 0.45s cubic-bezier(0.3, 0.9, 0.4, 1);
+}
+
+.ly-line {
+  font: 700 17px/1.25 var(--font);
+  padding: 4px 0;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: default;
+  transition: color 0.3s;
+  unicode-bidi: plaintext;
+}
+
+.ly-line:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ly-line.past {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ly-line.ly-on {
+  color: #fff;
+}
+
+.ly-line.plain {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.view.lyrics .ly-viewport:has(.plain) {
+  overflow-y: auto;
+  -webkit-mask: none;
+  mask: none;
+}
+
+.ly-note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  font: 400 12.5px var(--font);
+  color: var(--dim);
+}

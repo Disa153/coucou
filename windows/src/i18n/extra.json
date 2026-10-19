@@ -5648,6 +5648,105 @@
    "pt-BR": "Gingado",
    "ru": "Шаги в такт",
    "id": "Melenggang"
+  },
+  "Lyrics": {
+   "zh-Hans": "歌词",
+   "hi": "गीत के बोल",
+   "es": "Letra",
+   "ar": "كلمات الأغنية",
+   "fr": "Paroles",
+   "bn": "গানের কথা",
+   "pt-BR": "Letra",
+   "ru": "Текст",
+   "id": "Lirik"
+  },
+  "Nothing is playing": {
+   "zh-Hans": "没有在播放",
+   "hi": "कुछ नहीं चल रहा",
+   "es": "No suena nada",
+   "ar": "لا شيء قيد التشغيل",
+   "fr": "Rien ne joue",
+   "bn": "কিছু চলছে না",
+   "pt-BR": "Nada tocando",
+   "ru": "Ничего не играет",
+   "id": "Tidak ada yang diputar"
+  },
+  "Turn on lyrics": {
+   "zh-Hans": "开启歌词",
+   "hi": "बोल चालू करें",
+   "es": "Activar letras",
+   "ar": "تشغيل الكلمات",
+   "fr": "Activer les paroles",
+   "bn": "গানের কথা চালু করুন",
+   "pt-BR": "Ativar letras",
+   "ru": "Включить текст",
+   "id": "Aktifkan lirik"
+  },
+  "Looking for the words…": {
+   "zh-Hans": "正在查找歌词…",
+   "hi": "बोल खोजे जा रहे हैं…",
+   "es": "Buscando la letra…",
+   "ar": "جارٍ البحث عن الكلمات…",
+   "fr": "Recherche des paroles…",
+   "bn": "কথা খোঁজা হচ্ছে…",
+   "pt-BR": "Procurando a letra…",
+   "ru": "Ищу текст…",
+   "id": "Mencari lirik…"
+  },
+  "LRCLIB could not be reached. Try again in a moment.": {
+   "zh-Hans": "无法连接 LRCLIB，请稍后再试。",
+   "hi": "LRCLIB तक नहीं पहुँच सके। थोड़ी देर बाद फिर कोशिश करें।",
+   "es": "No se pudo conectar con LRCLIB. Inténtalo de nuevo en un momento.",
+   "ar": "تعذّر الوصول إلى LRCLIB. حاول بعد قليل.",
+   "fr": "LRCLIB est injoignable. Réessayez dans un instant.",
+   "bn": "LRCLIB-এ পৌঁছানো যায়নি। একটু পরে আবার চেষ্টা করুন।",
+   "pt-BR": "Não foi possível acessar o LRCLIB. Tente de novo em instantes.",
+   "ru": "Не удалось связаться с LRCLIB. Попробуй чуть позже.",
+   "id": "LRCLIB tidak bisa dihubungi. Coba lagi sebentar lagi."
+  },
+  "This one has no words.": {
+   "zh-Hans": "这首没有歌词。",
+   "hi": "इसमें बोल नहीं हैं।",
+   "es": "Esta no tiene letra.",
+   "ar": "هذه بلا كلمات.",
+   "fr": "Celle-ci n'a pas de paroles.",
+   "bn": "এটিতে কোনো কথা নেই।",
+   "pt-BR": "Esta não tem letra.",
+   "ru": "В этой песне нет слов.",
+   "id": "Lagu ini tanpa lirik."
+  },
+  "No lyrics found for this song.": {
+   "zh-Hans": "没有找到这首歌的歌词。",
+   "hi": "इस गाने के बोल नहीं मिले।",
+   "es": "No se encontró la letra de esta canción.",
+   "ar": "لم يُعثر على كلمات لهذه الأغنية.",
+   "fr": "Aucunes paroles trouvées pour cette chanson.",
+   "bn": "এই গানের কথা পাওয়া যায়নি।",
+   "pt-BR": "Nenhuma letra encontrada para esta música.",
+   "ru": "Текста для этой песни не нашлось.",
+   "id": "Lirik lagu ini tidak ditemukan."
+  },
+  "Lyrics come from LRCLIB, an open database of song words on the internet. Coucou asks it only for the song that plays.": {
+   "zh-Hans": "歌词来自互联网上的开放歌词库 LRCLIB。Coucou 只查询正在播放的歌曲。",
+   "hi": "बोल LRCLIB से आते हैं, जो इंटरनेट पर गीतों के बोलों का खुला डेटाबेस है। Coucou केवल चल रहे गाने के बारे में पूछता है।",
+   "es": "Las letras vienen de LRCLIB, una base abierta de letras en internet. Coucou solo pregunta por la canción que suena.",
+   "ar": "تأتي الكلمات من LRCLIB، قاعدة بيانات مفتوحة لكلمات الأغاني على الإنترنت. لا يسأل Coucou إلا عن الأغنية المشغّلة.",
+   "fr": "Les paroles viennent de LRCLIB, une base ouverte de paroles sur internet. Coucou ne lui demande que la chanson qui joue.",
+   "bn": "গানের কথা আসে LRCLIB থেকে, ইন্টারনেটে গানের কথার একটি উন্মুক্ত ডেটাবেস। Coucou শুধু চলমান গানটির কথা জানতে চায়।",
+   "pt-BR": "As letras vêm do LRCLIB, uma base aberta de letras na internet. O Coucou só pergunta pela música que está tocando.",
+   "ru": "Текст берётся из LRCLIB — открытой базы текстов песен в интернете. Coucou спрашивает её только о песне, которая играет.",
+   "id": "Lirik berasal dari LRCLIB, basis data lirik terbuka di internet. Coucou hanya menanyakan lagu yang sedang diputar."
+  },
+  "The playing song's words from LRCLIB, in the music card.": {
+   "zh-Hans": "在音乐卡片中显示来自 LRCLIB 的当前歌曲歌词。",
+   "hi": "म्यूज़िक कार्ड में LRCLIB से चल रहे गाने के बोल।",
+   "es": "La letra de la canción que suena, desde LRCLIB, en la tarjeta de música.",
+   "ar": "كلمات الأغنية المشغّلة من LRCLIB في بطاقة الموسيقى.",
+   "fr": "Les paroles de la chanson en cours, depuis LRCLIB, dans la carte musique.",
+   "bn": "মিউজিক কার্ডে LRCLIB থেকে চলমান গানের কথা।",
+   "pt-BR": "A letra da música tocando, do LRCLIB, no cartão de música.",
+   "ru": "Текст играющей песни из LRCLIB, в музыкальной карточке.",
+   "id": "Lirik lagu yang diputar dari LRCLIB, di kartu musik."
   }
  }
 }

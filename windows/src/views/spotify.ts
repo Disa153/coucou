@@ -17,7 +17,7 @@ import {
 } from "../core/spotify";
 import { createMiniBot } from "../mochi/minibots";
 import { pillDefinition } from "../core/pills";
-import { N_, t } from "../i18n/i18n";
+import { N_, t, tl } from "../i18n/i18n";
 
 
 function lighter(hex: string, amount: number): string {
@@ -37,7 +37,7 @@ export function togglePlay() {
   void Bridge.spotifyControl("playPause");
 }
 
-function seek(seconds: number) {
+export function seek(seconds: number) {
   const s = Spotify.state;
   const track = s.track;
   if (!s.running || !track || isAd(track)) return;
@@ -254,7 +254,8 @@ export interface SpotifyCardHost {
 }
 
 /** SpotifyCardView: now playing, or the idle card (not playing / not installed). */
-export function buildSpotifyCard(): SpotifyCardHost {
+/** `onLyrics`: the card's Lyrics button (the island's Lyrics view). */
+export function buildSpotifyCard(onLyrics?: () => void): SpotifyCardHost {
   const green = SPOTIFY_GREEN;
 
   // Now playing: artwork row, progress row, controls row.
@@ -324,9 +325,16 @@ export function buildSpotifyCard(): SpotifyCardHost {
     },
     { passive: false },
   );
+  const lyricsBtn = h("button", { class: "np-lyrics", title: tl("Lyrics"), text: tl("Lyrics") });
+  lyricsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    onLyrics?.();
+  });
+  if (!onLyrics) lyricsBtn.style.display = "none";
   const controls = h("div", { class: "np-controls" },
     h("div", { class: "np-buttons" }, shuffle, prev, play, next, repeat),
     h("div", { class: "grow" }),
+    lyricsBtn,
     volumeBox,
   );
   const playingEl = h("div", { class: "np-card" }, head, progressRow, controls);

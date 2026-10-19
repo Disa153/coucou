@@ -278,6 +278,15 @@ export class Island {
       eatSnack: () => this.eatSnack(),
       moonwalk: () => this.moonwalk(),
       danceStatus: () => this.danceStatus(),
+      holdOpen: (on) => {
+        if (on) {
+          this.fsm.pinned = true;
+          this.fsm.cancelTimers();
+        } else if (!this.dance) {
+          this.fsm.pinned = State.isPinned;
+          if (!State.isPinned && !this.wasInIsland && this.fsm.state === "home") this.fsm.mouseLeft();
+        }
+      },
       blip: () => Sound.play("blip"),
       chooseOutfit: (selection) => {
         if (parseOutfit(State.settings.mochiOutfit) === selection) return;
@@ -814,7 +823,7 @@ export class Island {
   private canGrabIsland(target: EventTarget | null): boolean {
     const el = target instanceof Element ? target : null;
     if (!el) return false;
-    if (el.closest("input, textarea, select, [contenteditable], .chat-body, .msg, pre, code, .diff, .ticker, .kt-snack, .mx-apps")) return false;
+    if (el.closest("input, textarea, select, [contenteditable], .chat-body, .msg, pre, code, .diff, .ticker, .kt-snack, .mx-apps, .ly-viewport")) return false;
     return true;
   }
 

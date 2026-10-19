@@ -25,6 +25,7 @@ import { buildRecap } from "./recap";
 import { buildWardrobe } from "./wardrobe";
 import { buildMixer } from "./mixer";
 import { buildKitchen } from "./kitchen";
+import { buildLyrics } from "./lyrics";
 import { buildSpotifyCard, buildSpotifyPill, type SpotifyPillHost } from "./spotify";
 import { SPOTIFY_ID } from "../core/spotify";
 import type { Outfit, OutfitSelection } from "../mochi/wardrobe";
@@ -65,6 +66,8 @@ export interface ViewActions {
   eatSnack(): void;
   /** The moonwalk (once he has learned it). */
   moonwalk(): void;
+  /** Keeps the island from folding while true (the Lyrics view is read, not clicked). */
+  holdOpen(on: boolean): void;
   /** Waiting for the song, dancing (and the move), or not. */
   danceStatus(): { phase: "idle" | "waiting" | "dancing"; move: import("../core/pet").Move | null; song: string };
 }
@@ -215,7 +218,7 @@ function buildOverview(actions: ViewActions): ViewHost {
   let planTimer: number | null = null;
   // Spotify's card and pill are kept and updated in place: the progress bar
   // runs on, and a slider being dragged must not be rebuilt under the pointer.
-  const spotifyCard = buildSpotifyCard();
+  const spotifyCard = buildSpotifyCard(() => actions.setView("lyrics"));
   let spotifyPill: SpotifyPillHost | null = null;
 
   const el = h("div", { class: "view overview" },
@@ -863,6 +866,7 @@ export function buildViews(
   map.set("wardrobe", buildWardrobe(actions));
   map.set("mixer", buildMixer());
   map.set("kitchen", buildKitchen(actions));
+  map.set("lyrics", buildLyrics(actions));
   // Not in the Windows v1: sending a file by email, window attach + web result.
   map.set("mail", buildPlaceholder(tl("Sending by email isn't in this version."), ""));
   map.set("searching", buildPlaceholder(tl("Claude is searching…"), ""));
