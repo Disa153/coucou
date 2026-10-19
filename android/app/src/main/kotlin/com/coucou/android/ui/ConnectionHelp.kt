@@ -48,6 +48,11 @@ fun LinkHealthPanel(model: AppModel, onHelp: () -> Unit) {
         }
         RowDivider()
         ListRow(stringResource(R.string.diag_title), onClick = onHelp, trailing = { CoucouIcon(IconKind.CHEVRON, tint = t.textDim.c(), size = 20.dp) })
+        // The computer may just be off: switch it on from here (Wake-on-LAN), when its card is known or a router is set up.
+        if (model.wakeTarget != null || model.router.complete) {
+            RowDivider()
+            PowerOnRow(model)
+        }
     }
 }
 

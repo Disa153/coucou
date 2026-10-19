@@ -33,7 +33,8 @@ class ScanScreenTest {
     @Test fun theCameraIsAskedForOnlyOnTheScanScreenAfterTheUserTappedScan() {
         val ui = src("ui/ScanScreen.kt")
         assertTrue(ui.contains("launcher.launch(Manifest.permission.CAMERA)"))
-        for (f in kotlinFiles.filter { it.name != "ScanScreen.kt" }) {
+        // The chat's "Take a photo" asks too, only after that tap (the system camera needs it once the app declares the camera).
+        for (f in kotlinFiles.filter { it.name != "ScanScreen.kt" && it.name != "ChatScreen.kt" }) {
             assertFalse("${f.name} must not ask for the camera", f.readText().contains("Manifest.permission.CAMERA"))
         }
         assertTrue("a short reason is shown first", ui.contains("R.string.scan_why"))

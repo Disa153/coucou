@@ -1,5 +1,6 @@
 name: android
 on:
+  workflow_dispatch:
   pull_request:
     paths: ['android/**', 'docs/ANDROID_LINK.md', '.github/workflows/android.yml']
   push:
@@ -19,7 +20,20 @@ jobs:
       - name: English strings are up to date
         run: node scripts/gen-strings.mjs --check
       - name: Tests, debug build, lint
-        run: ./gradlew test assembleDebug lint --console=plain
+        run: |
+          set -o pipefail
+          ./gradlew test assembleDebug lint --console=plain 2>&1 | tee build.log
+      - name: Show what failed
+        if: failure()
+        run: |
+          # The log can't be read from outside: what failed goes into one annotation.
+          msg=$(grep -E "^e: |FAILED|> Task .* FAILED|What went wrong|Lint found|Error:|error:|expected|but was|AssertionError|Exception" build.log | head -60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Android build::${msg:0:60000}"
+          for f in app/build/test-results/*/*.xml; do
+            grep -l "<failure" "$f" >/dev/null 2>&1 || continue
+            t=$(grep -oE '<testcase name="[^"]*" classname="[^"]*"|<failure message="[^"]{0,300}' "$f" | head -20 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::warning title=$(basename "$f")::${t:0:20000}"
+          done
       - name: No ads, billing or analytics (condition of the author's permission)
         run: "! grep -rEi 'admob|play-services-ads|billingclient|firebase-analytics|crashlytics|com.google.android.gms' app/build.gradle.kts"
       - uses: actions/upload-artifact@v7

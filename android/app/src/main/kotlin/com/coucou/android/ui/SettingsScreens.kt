@@ -171,6 +171,11 @@ fun SettingsScreen(model: AppModel, onHistory: () -> Unit, onGallery: () -> Unit
             item { RelayCard(model) }
         }
 
+        if (model.mode == Mode.PAIRED) {
+            item { SectionHeading(stringResource(R.string.power_section)) }
+            item { PowerOnCard(model) }
+        }
+
         if (model.batteryHintVisible) item { BatteryCard(model) }
 
         item { SectionHeading(stringResource(R.string.settings_section_display)) }
