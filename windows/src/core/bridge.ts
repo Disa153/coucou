@@ -462,6 +462,9 @@ export const Bridge = {
   spotifyInstalled: () => call<boolean>("spotify_installed"),
   /** Mochi's moonwalk song: "playing", "opened" (shown but not started) or "unavailable". */
   spotifyPlayTrack: (id: string, title: string) => call<string>("spotify_play_track", { id, title }),
+  /** The playing song's lyrics (LRCLIB, kept on this computer). Rejects with "off" until the user turns them on. */
+  lyricsGet: (title: string, artist: string, album: string, duration: number) =>
+    callOrThrow<LyricsAnswer>("lyrics_get", { title, artist, album, duration }),
 
   // ── Sound mixer (src-tauri/src/mixer.rs) ──────────────────────────────────
   /** The outputs, the speakers' level and every program with sound. */
@@ -476,6 +479,13 @@ export const Bridge = {
   /** Windows' own sound settings. */
   mixerOpenSystem: () => call<boolean>("mixer_open_system"),
 };
+
+export interface LyricsAnswer {
+  /** LRC: "[mm:ss.xx] words" lines. */
+  synced: string | null;
+  plain: string | null;
+  instrumental: boolean;
+}
 
 export interface MixerDevice {
   id: string;

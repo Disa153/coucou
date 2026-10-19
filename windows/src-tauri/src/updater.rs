@@ -321,7 +321,8 @@ fn system_proxy() -> Option<String> {
 }
 
 /// A client for GitHub, through the system proxy when there is one.
-fn client(timeout: Duration) -> Result<reqwest::Client, String> {
+/// Also used by lyrics.rs: the same system proxy, for any public service.
+pub(crate) fn client(timeout: Duration) -> Result<reqwest::Client, String> {
     let mut builder = reqwest::Client::builder().connect_timeout(Duration::from_secs(20)).timeout(timeout);
     if let Some(proxy) = system_proxy() {
         if let Ok(p) = reqwest::Proxy::all(&proxy) {

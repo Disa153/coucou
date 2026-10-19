@@ -20,6 +20,7 @@ mod integrations;
 mod island;
 mod local_chat;
 mod log;
+mod lyrics;
 mod mixer;
 mod net;
 mod notes;
@@ -843,6 +844,7 @@ pub fn run() {
             spotify::spotify_open,
             spotify::spotify_installed,
             spotify::spotify_play_track,
+            lyrics::lyrics_get,
             mixer::mixer_state,
             mixer::mixer_set_master,
             mixer::mixer_set_app,

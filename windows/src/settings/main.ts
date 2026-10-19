@@ -518,7 +518,7 @@ const CHAT_STRINGS = {
 };
 
 interface CloudDef {
-  id: "google" | "openai" | "openrouter";
+  id: "google" | "openai" | "openrouter" | "deepseek";
   name: string;
   placeholder: string;
   where: string;
@@ -528,6 +528,7 @@ const CLOUD: CloudDef[] = [
   { id: "google", name: "Google AI", placeholder: "AIza…", where: "aistudio.google.com" },
   { id: "openai", name: "OpenAI", placeholder: "sk-…", where: "platform.openai.com" },
   { id: "openrouter", name: "OpenRouter", placeholder: "sk-or-…", where: "openrouter.ai/keys" },
+  { id: "deepseek", name: "DeepSeek", placeholder: "sk-…", where: "platform.deepseek.com/api_keys" },
 ];
 
 function chatProvidersSection(
@@ -1234,6 +1235,14 @@ function integrationsSection(present: Record<string, boolean>): HTMLElement {
 
     if (def.hint) rows.append(h("div", { class: "hint", text: t(def.hint) }));
     if (def.id === "integration_spotify") {
+      // The music card's Lyrics: a call to LRCLIB, so only once turned on.
+      rows.append(
+        h("div", { class: "row" },
+          h("label", { style: "min-width:104px", text: t("Lyrics") }),
+          toggle(settings.lyrics ?? false, (v) => { settings.lyrics = v; void save(); }),
+          h("span", { class: "hint", text: t("The playing song's words from LRCLIB, in the music card.") }),
+        ),
+      );
       // As on the Mac's row: said only when there is no Spotify to launch.
       const hint = h("div", { class: "hint", style: "padding-top:5px" });
       rows.append(hint);

@@ -25,7 +25,8 @@ export type IslandViewName =
   | "recap"
   | "wardrobe"
   | "mixer"
-  | "kitchen";
+  | "kitchen"
+  | "lyrics";
 
 export type BotStateName =
   | "idle"
@@ -99,6 +100,8 @@ export const VIEW_LAYOUTS: Record<IslandViewName, ViewLayout> = {
   mixer: { height: 300, botX: 46, botY: 74, botDiameter: 40, agentMode: "none" },
   // The Kitchen: Mochi big on the left, with room to moonwalk back across the island.
   kitchen: { height: 200, botX: 96, botY: 118, botDiameter: 62, agentMode: "none" },
+  // The playing song's words: Mochi small in the corner, the lines take the island.
+  lyrics: { height: 300, botX: 40, botY: 62, botDiameter: 30, agentMode: "none" },
 };
 
 // The upload views above are only the fallback geometry. Once a file is actually

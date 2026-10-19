@@ -117,6 +117,9 @@ pub struct Settings {
     /// Feeding Mochi and what he learned (src/core/pet.ts reads it), with the
     /// moonwalk's song. Written by the island as he eats; kept as it comes.
     pub pet: PetPref,
+    /// The music card's Lyrics: the playing song's words from LRCLIB (lyrics.rs).
+    /// Off until the user turns it on: it is a network call to a service.
+    pub lyrics: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -258,6 +261,7 @@ impl Default for Settings {
             phone_relay_url: String::new(),
             glow: GlowPref::default(),
             pet: PetPref::default(),
+            lyrics: false,
         }
     }
 }
@@ -551,7 +555,8 @@ mod tests {
   "phoneRelay": true,
   "phoneRelayUrl": "wss://relay.example.workers.dev",
   "glow": { "on": true, "place": "around", "color": "rainbow", "effect": "pulse", "brightness": 0.5, "thickness": 5.0, "speed": 6.5, "byState": true, "when": "music" },
-  "pet": { "full": 42.5, "at": 1760000000000.0, "treats": 7.0, "hunger": false, "music": false, "song": "bad", "after": "keep" }
+  "pet": { "full": 42.5, "at": 1760000000000.0, "treats": 7.0, "hunger": false, "music": false, "song": "bad", "after": "keep" },
+  "lyrics": true
 }"##;
 
     fn custom() -> Value {
@@ -1066,6 +1071,7 @@ mod tests {
                 "phoneRelayUrl",
                 "glow",
                 "pet",
+                "lyrics",
             ]
         );
         let _ = std::fs::remove_dir_all(&dir);

@@ -19,7 +19,7 @@ use crate::{chat, claude, log, openai_compat, secrets, Shared};
 pub const MAX_ALLOWED: usize = 50;
 const MAX_MODEL_CHARS: usize = 200;
 
-const PROVIDERS: [&str; 9] = ["anthropic", "claude-code", "gemini-cli", "google", "openai", "openrouter", "ollama", "lmstudio", "custom"];
+const PROVIDERS: [&str; 10] = ["anthropic", "claude-code", "gemini-cli", "google", "openai", "openrouter", "deepseek", "ollama", "lmstudio", "custom"];
 
 pub struct AppChat {
     app: AppHandle,
@@ -134,6 +134,7 @@ pub fn provider_name(provider: &str) -> String {
         "google" => "Google".into(),
         "openai" => "OpenAI".into(),
         "openrouter" => "OpenRouter".into(),
+        "deepseek" => "DeepSeek".into(),
         "ollama" => "Ollama".into(),
         "lmstudio" => "LM Studio".into(),
         _ => "Custom server".into(),

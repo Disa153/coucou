@@ -194,6 +194,8 @@ export interface Settings {
   glow?: Partial<GlowPref>;
   /** Feeding Mochi and his moonwalk (core/pet.ts reads it). */
   pet?: Partial<PetPref>;
+  /** The music card's Lyrics, from LRCLIB (src-tauri/src/lyrics.rs). Off by default. */
+  lyrics?: boolean;
   /** Mochi on the desktop. Rust owns it: whatever the page sends back is ignored. */
   desktopMochi?: {
     onDesktop: boolean;

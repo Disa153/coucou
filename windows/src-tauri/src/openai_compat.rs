@@ -1,6 +1,6 @@
 // Cloud providers that speak the OpenAI chat completions API: OpenAI, Google AI
-// (Gemini's OpenAI-compatible endpoint, as ClaudeService.swift uses it) and
-// OpenRouter. One table describes them; one client talks to all three.
+// (Gemini's OpenAI-compatible endpoint, as ClaudeService.swift uses it),
+// OpenRouter and DeepSeek. One table describes them; one client talks to all.
 //
 // Same contract as claude.rs: the key never leaves the credential store and
 // file bytes never cross the IPC boundary. Chat only — no tools are sent, so
@@ -62,6 +62,16 @@ pub const PROVIDERS: &[Provider] = &[
         key: "openrouter-api-key",
         models_path: "models",
         default_model: "openrouter/auto",
+        not_chat: &[],
+        max_tokens_field: "max_tokens",
+    },
+    Provider {
+        id: "deepseek",
+        name: "DeepSeek",
+        base_url: "https://api.deepseek.com/v1",
+        key: "deepseek-api-key",
+        models_path: "models",
+        default_model: "deepseek-chat",
         not_chat: &[],
         max_tokens_field: "max_tokens",
     },
