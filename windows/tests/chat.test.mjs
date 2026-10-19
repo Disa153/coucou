@@ -55,7 +55,7 @@ test("a provider without a key is never asked for its models", async () => {
   await flush();
   assert.ok($(".chat-body").classList.contains("picking"));
   // Claude Code and Gemini CLI (this fork) need no key: they sit next to Anthropic.
-  assert.deepEqual(chips(), ["Anthropic", "Claude Code", "Gemini CLI", "Google", "OpenAI", "OpenRouter"]);
+  assert.deepEqual(chips(), ["Anthropic", "Claude Code", "Gemini CLI", "Google", "OpenAI", "OpenRouter", "DeepSeek"]);
   assert.deepEqual(sent("secret_present"), [{ key: "anthropic-api-key" }]);
   assert.deepEqual(sent("chat_models"), []);
   assert.match($(".picker-status").textContent, /No API key/);

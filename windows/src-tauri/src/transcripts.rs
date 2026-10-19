@@ -80,6 +80,7 @@ pub fn provider_label(provider: &str) -> &str {
         "openai" => "OpenAI",
         "google" => "Google",
         "openrouter" => "OpenRouter",
+        "deepseek" => "DeepSeek",
         "ollama" => "Ollama",
         "lmstudio" => "LM Studio",
         "custom" => "Custom server",
