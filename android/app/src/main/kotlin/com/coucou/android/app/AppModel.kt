@@ -230,14 +230,22 @@ class AppModel(private val context: Context) : LinkListener {
     /** Asks the computer again which models are allowed (when the Chat screen opens). */
     fun chatRefreshModels() { link?.chatModels() }
 
-    /** Null when sent, else why not (for a message under the box). */
-    fun chatSend(text: String): ChatSession.Refusal? {
-        val sent = chatSession.send(text, chatModel, connected = chatAvailable)
+    /** Null when sent, else why not (for a message under the box). [photos]: JPEGs sent before the message (they go to Claude Code or Gemini CLI). */
+    fun chatSend(text: String, photos: List<ByteArray> = emptyList()): ChatSession.Refusal? {
+        // A photo with no words is still a question; the bubble shows a camera for each photo.
+        val shown = ("\uD83D\uDCF7 ".repeat(photos.size.coerceAtMost(Protocol.CHAT_MAX_IMAGES)) + text.trim()).trim()
+        val sent = chatSession.send(shown, chatModel, connected = chatAvailable)
         return when (sent) {
             is ChatSession.Sent.No -> sent.why
             is ChatSession.Sent.Ok -> {
                 chatChanged(save = true)
-                if (link?.chatSend(sent.msg.id, sent.msg.model, sent.msg.text) != true) {
+                val delivered = if (photos.isEmpty()) {
+                    link?.chatSend(sent.msg.id, sent.msg.model, sent.msg.text)
+                } else {
+                    val named = photos.take(Protocol.CHAT_MAX_IMAGES).map { "img-" + java.util.UUID.randomUUID().toString().replace("-", "") to it }
+                    link?.chatSendWithImages(sent.msg.id, sent.msg.model, text.trim(), named)
+                }
+                if (delivered != true) {
                     chatSession.onDisconnected()
                     chatChanged(save = true)
                 }
@@ -654,11 +662,147 @@ class AppModel(private val context: Context) : LinkListener {
                 screenWasOff = power?.isInteractive == false // the screen is off right now: this link starts its life asleep
             }
             if (state == LinkState.CONNECTED) finder.connected() // found it (or never lost it): stop looking
+            if (state == LinkState.CONNECTED && powerPhase == PowerPhase.WAITING) powerPhase = PowerPhase.ON
             // A card for a request we can no longer answer would only produce "no longer pending".
             if (state != LinkState.CONNECTED && mode == Mode.PAIRED) dropApprovals()
             if (state != LinkState.CONNECTED) chatLinkLost()
             refreshIsland()
         }
+    }
+
+    override fun onWake(target: com.coucou.android.link.WakeTarget) {
+        main.post {
+            if (target != wakeTarget) {
+                wakeTarget = target
+                prefs.edit().putString("wake_mac", target.mac).putString("wake_ip", target.ip).putString("wake_broadcast", target.broadcast).apply()
+            }
+        }
+    }
+
+    // ── Turn on computer (Wake-on-LAN, as on the iPhone) ───────────────────────
+
+    enum class PowerPhase { IDLE, SENDING, WAITING, ON, FAILED }
+
+    /** The computer's card, as it last told us (or as typed in Settings). */
+    var wakeTarget by mutableStateOf(
+        prefs.getString("wake_mac", null)?.takeIf { com.coucou.android.link.PowerOn.macBytes(it) != null }?.let {
+            com.coucou.android.link.WakeTarget(it, prefs.getString("wake_ip", "") ?: "", prefs.getString("wake_broadcast", "") ?: "")
+        },
+    ); private set
+    var router by mutableStateOf(
+        com.coucou.android.link.RouterLogin(
+            prefs.getString("router_address", "192.168.1.1") ?: "", prefs.getString("router_away", "") ?: "",
+            prefs.getString("router_login", "") ?: "", store.loadSecret("router_password"),
+        ),
+    ); private set
+    var powerPhase by mutableStateOf(PowerPhase.IDLE); private set
+    /** Why the last try failed: a router problem, or null when the phone itself could not send (and no router is set up). */
+    var powerProblem by mutableStateOf<com.coucou.android.link.RouterProblem?>(null); private set
+    /** The router sent the signal (else this phone did). */
+    var powerByRouter by mutableStateOf(false); private set
+    /** The last "Save and check" of the router: null not tried, else the address that answered or the problem. */
+    var routerCheck by mutableStateOf<String?>(null); private set
+    var routerChecking by mutableStateOf(false); private set
+
+    fun setWakeMac(text: String): Boolean {
+        val mac = com.coucou.android.link.PowerOn.colonMac(text) ?: return false
+        val t = (wakeTarget ?: com.coucou.android.link.WakeTarget("", "", "")).copy(mac = mac)
+        wakeTarget = t
+        prefs.edit().putString("wake_mac", t.mac).putString("wake_ip", t.ip).putString("wake_broadcast", t.broadcast).apply()
+        return true
+    }
+
+    fun saveRouter(login: com.coucou.android.link.RouterLogin) {
+        router = login
+        prefs.edit().putString("router_address", login.address).putString("router_away", login.awayAddress)
+            .putString("router_login", login.login).apply()
+        store.saveSecret("router_password", login.password)
+    }
+
+    /** Signs in to the router (and, if the computer never told us, asks it for the computer's card). */
+    fun checkRouter(login: com.coucou.android.link.RouterLogin) {
+        saveRouter(login)
+        routerChecking = true
+        routerCheck = null
+        val computer = desktopName ?: ""
+        Thread {
+            val result = try {
+                val address = com.coucou.android.link.PowerOn.testRouter(login)
+                if (wakeTarget == null) {
+                    com.coucou.android.link.PowerOn.routerFindMac(login, computer)?.let { mac -> main.post { setWakeMac(mac) } }
+                }
+                "ok:$address"
+            } catch (e: com.coucou.android.link.RouterException) {
+                "err:${e.problem.name}"
+            } catch (_: Exception) {
+                "err:UNREACHABLE"
+            }
+            main.post { routerCheck = result; routerChecking = false }
+        }.start()
+    }
+
+    /** The button: the packet from this phone, and from the router when it is set up; then the link is tried until it answers. */
+    fun powerOn() {
+        if (powerPhase == PowerPhase.SENDING) return
+        val login = router
+        val target = wakeTarget
+        val computer = desktopName ?: ""
+        powerPhase = PowerPhase.SENDING
+        powerProblem = null
+        Thread {
+            var mac = target?.mac?.let { com.coucou.android.link.PowerOn.colonMac(it) }
+            var problem: com.coucou.android.link.RouterProblem? = null
+            if (mac == null && login.complete) {
+                mac = try { com.coucou.android.link.PowerOn.routerFindMac(login, computer) } catch (e: com.coucou.android.link.RouterException) { problem = e.problem; null }
+                mac?.let { m -> main.post { setWakeMac(m) } }
+            }
+            val bytes = mac?.let { com.coucou.android.link.PowerOn.macBytes(it) }
+            if (bytes == null) {
+                main.post { powerProblem = problem; powerPhase = PowerPhase.FAILED }
+                return@Thread
+            }
+            val sent = try {
+                com.coucou.android.link.PowerOn.sendMagic(bytes, listOfNotNull(target?.broadcast, "255.255.255.255", target?.ip))
+            } catch (_: Exception) { 0 }
+            var byRouter = false
+            if (login.complete) {
+                try {
+                    com.coucou.android.link.PowerOn.routerWake(login, mac!!)
+                    byRouter = true
+                } catch (e: com.coucou.android.link.RouterException) {
+                    problem = e.problem
+                } catch (_: Exception) {
+                    problem = com.coucou.android.link.RouterProblem.UNREACHABLE
+                }
+            }
+            main.post {
+                powerByRouter = byRouter
+                powerProblem = if (byRouter) null else problem
+                if (byRouter || sent > 0) {
+                    powerPhase = PowerPhase.WAITING
+                    waitForComputer(0)
+                } else {
+                    powerPhase = PowerPhase.FAILED
+                }
+            }
+        }.start()
+    }
+
+    /** Every 10 s for 3 minutes, the link is tried again until the computer answers. */
+    private fun waitForComputer(tries: Int) {
+        main.postDelayed({
+            if (powerPhase != PowerPhase.WAITING) return@postDelayed
+            if (linkState == LinkState.CONNECTED) {
+                powerPhase = PowerPhase.ON
+                return@postDelayed
+            }
+            if (tries >= 18) {
+                powerPhase = PowerPhase.FAILED
+                return@postDelayed
+            }
+            link?.checkNow()
+            waitForComputer(tries + 1)
+        }, 10_000)
     }
 
     override fun onWelcome(desktopName: String, os: String) {

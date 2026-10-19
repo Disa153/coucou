@@ -79,6 +79,29 @@ import com.coucou.android.core.MarkdownLite
 import com.coucou.android.core.MdBlock
 import com.coucou.android.core.MdSpan
 import com.coucou.android.link.Protocol
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.core.content.FileProvider
+import com.coucou.android.app.ChatPhoto
+import com.coucou.android.app.ChatPhotos
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** The words for a code the computer (or this app) gives when an answer did not complete. */
 @Composable
@@ -155,6 +178,7 @@ fun ChatScreen(model: AppModel, onHome: () -> Unit, onSettings: () -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
     var refusal by remember { mutableStateOf<ChatSession.Refusal?>(null) }
     var confirmClear by remember { mutableStateOf(false) }
+    val photos = remember { mutableStateListOf<ChatPhoto>() }
     val listState = rememberLazyListState()
     val messages = model.chatMessages
 
@@ -211,11 +235,11 @@ fun ChatScreen(model: AppModel, onHome: () -> Unit, onSettings: () -> Unit) {
             }
         }
         Composer(
-            model, text, refusal,
+            model, text, refusal, photos,
             onText = { text = it; refusal = null },
             onSend = {
-                val r = model.chatSend(text)
-                if (r == null) { text = ""; refusal = null } else refusal = r
+                val r = model.chatSend(text, photos.map { it.jpeg })
+                if (r == null) { text = ""; refusal = null; photos.clear() } else refusal = r
             },
         )
     }
@@ -317,13 +341,91 @@ private fun styled(spans: List<MdSpan>, codeBackground: androidx.compose.ui.grap
 }
 
 @Composable
-private fun Composer(model: AppModel, text: String, refusal: ChatSession.Refusal?, onText: (String) -> Unit, onSend: () -> Unit) {
+private fun Composer(
+    model: AppModel, text: String, refusal: ChatSession.Refusal?, photos: MutableList<ChatPhoto>,
+    onText: (String) -> Unit, onSend: () -> Unit,
+) {
     val limit = Protocol.CHAT_MAX_TEXT
     val length = text.trim().length
     val t = tokens()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
+    var photoMenu by remember { mutableStateOf(false) }
+    var mediaNote by remember { mutableStateOf<Int?>(null) }
+    var cameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    fun addPhoto(read: () -> ChatPhoto?) {
+        scope.launch {
+            val photo = withContext(Dispatchers.Default) { read() }
+            if (photo == null) mediaNote = R.string.chat_photo_unreadable
+            else if (photos.size < Protocol.CHAT_MAX_IMAGES) photos.add(photo)
+        }
+    }
+
+    // Photos: from the gallery (no permission: the system picker), or the camera (a full-size picture into this app's cache).
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(Protocol.CHAT_MAX_IMAGES)) { uris ->
+        for (uri in uris.take(Protocol.CHAT_MAX_IMAGES - photos.size)) addPhoto { ChatPhotos.fromUri(context, uri) }
+    }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        val uri = cameraUri
+        if (ok && uri != null) addPhoto { ChatPhotos.fromUri(context, uri) }
+    }
+    fun openCamera() {
+        val dir = java.io.File(context.cacheDir, "camera").apply { mkdirs() }
+        val file = java.io.File(dir, "photo-${System.currentTimeMillis()}.jpg")
+        val uri = FileProvider.getUriForFile(context, context.packageName + ".photos", file)
+        cameraUri = uri
+        try { camera.launch(uri) } catch (_: ActivityNotFoundException) { mediaNote = R.string.chat_no_camera }
+    }
+    val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) openCamera() else mediaNote = R.string.chat_no_camera
+    }
+    // Dictation: Android's own speech recognizer; the words go into the box, to be read before sending.
+    val voice = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val heard = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.trim()
+        if (!heard.isNullOrEmpty()) onText(if (text.isBlank()) heard else text.trimEnd() + " " + heard)
+    }
+    val dictatePrompt = stringResource(R.string.chat_dictate_prompt)
+
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ModelChip(model)
+        if (photos.isNotEmpty()) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                photos.forEachIndexed { i, photo ->
+                    Box {
+                        Image(
+                            photo.preview.asImageBitmap(), null,
+                            Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop,
+                        )
+                        val remove = stringResource(R.string.chat_photo_remove)
+                        Box(
+                            Modifier.align(Alignment.TopEnd).padding(3.dp).size(22.dp).clip(CircleShape).background(t.panel2.c())
+                                .clickable(role = Role.Button) { if (i < photos.size) photos.removeAt(i) }
+                                .semantics { contentDescription = remove },
+                            contentAlignment = Alignment.Center,
+                        ) { Text("\u00D7", style = TypeScale.LABEL.style(t.text.c())) }
+                    }
+                }
+            }
+        }
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box {
+                RoundButton("\uD83D\uDCF7", stringResource(R.string.chat_add_photo), enabled = model.chatAvailable && photos.size < Protocol.CHAT_MAX_IMAGES) { photoMenu = true }
+                DropdownMenu(expanded = photoMenu, onDismissRequest = { photoMenu = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.chat_take_photo)) }, onClick = {
+                        photoMenu = false
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) ==
+                            android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) openCamera() else cameraPermission.launch(android.Manifest.permission.CAMERA)
+                    })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.chat_choose_photo)) }, onClick = {
+                        photoMenu = false
+                        gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    })
+                }
+            }
             OutlinedTextField(
                 value = text, onValueChange = { onText(it.take(limit + 200)) }, modifier = Modifier.weight(1f),
                 placeholder = { Text(stringResource(R.string.chat_placeholder), color = t.textFaint.c()) },
@@ -334,14 +436,24 @@ private fun Composer(model: AppModel, text: String, refusal: ChatSession.Refusal
                     focusedTextColor = t.text.c(), unfocusedTextColor = t.text.c(), cursorColor = t.text.c(),
                 ),
             )
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                // Hide the keyboard: above Send, as on the iPhone.
+                SmallButton("\u2304", stringResource(R.string.chat_hide_keyboard)) { keyboard?.hide(); focus.clearFocus() }
+                RoundButton("\uD83C\uDF99", stringResource(R.string.chat_dictate), enabled = model.chatAvailable) {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        .putExtra(RecognizerIntent.EXTRA_PROMPT, dictatePrompt)
+                    try { voice.launch(intent) } catch (_: ActivityNotFoundException) { mediaNote = R.string.chat_no_dictation }
+                }
+            }
             if (model.chatBusy) {
                 PillButton(stringResource(R.string.chat_stop), { model.chatCancel() }, Modifier.height(56.dp))
             } else {
-                val canSend = model.chatAvailable && length in 1..limit
+                val canSend = model.chatAvailable && length <= limit && (length > 0 || photos.isNotEmpty())
                 val send = stringResource(R.string.chat_send)
                 Box(
                     Modifier.alpha(if (canSend) 1f else 0.4f).size(56.dp).clip(CircleShape).background(t.primaryButton.c())
-                        .clickable(enabled = model.chatAvailable && length in 1..limit, role = Role.Button, onClick = onSend)
+                        .clickable(enabled = canSend, role = Role.Button, onClick = onSend)
                         .semantics { contentDescription = send },
                     contentAlignment = Alignment.Center,
                 ) { CoucouIcon(IconKind.SEND, tint = t.onPrimaryButton.c(), size = 22.dp) }
@@ -352,13 +464,39 @@ private fun Composer(model: AppModel, text: String, refusal: ChatSession.Refusal
             refusal == ChatSession.Refusal.NO_MODEL -> stringResource(R.string.chat_ref_no_model)
             refusal == ChatSession.Refusal.BUSY -> stringResource(R.string.chat_ref_busy)
             refusal == ChatSession.Refusal.OFFLINE -> stringResource(R.string.chat_ref_offline)
+            mediaNote != null -> stringResource(mediaNote!!)
+            photos.isNotEmpty() -> stringResource(R.string.chat_photos_note)
             else -> null
         }
-        if (note != null) Text(note, style = TypeScale.SECONDARY.style(t.danger.c()))
+        if (note != null) Text(note, style = TypeScale.SECONDARY.style(if (refusal != null) t.danger.c() else t.textDim.c()))
         else if (length > limit * 9 / 10) {
             Text(stringResource(R.string.chat_count, length, limit), style = TypeScale.SECONDARY.style(t.textDim.c()))
         }
     }
+}
+
+/** A round button with a symbol, 44 dp: photo, dictation. */
+@Composable
+private fun RoundButton(symbol: String, label: String, enabled: Boolean = true, onClick: () -> Unit) {
+    val t = tokens()
+    Box(
+        Modifier.alpha(if (enabled) 1f else 0.4f).size(44.dp).clip(CircleShape).background(t.panel2.c())
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) { Text(symbol, style = TypeScale.BODY.style(t.text.c())) }
+}
+
+/** A small button above the round ones: hiding the keyboard. */
+@Composable
+private fun SmallButton(symbol: String, label: String, onClick: () -> Unit) {
+    val t = tokens()
+    Box(
+        Modifier.width(44.dp).height(32.dp).clip(RoundedCornerShape(12.dp)).background(t.panel2.c())
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) { Text(symbol, style = TypeScale.LABEL.style(t.text.c())) }
 }
 
 /** The model above the box, like the PC's: tap to pick another of the ones the computer allows. */

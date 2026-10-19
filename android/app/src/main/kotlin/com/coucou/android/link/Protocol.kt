@@ -18,7 +18,7 @@ object Protocol {
     /** One message never exceeds this; a longer line is a protocol error. */
     const val MAX_LINE_BYTES = 64 * 1024
     /** Optional features this app understands; the desktop offers back the ones it has switched on. */
-    val CAPABILITIES = listOf("chat", "details", "answers", "prefs", "diffs", "usage", "services", "relay")
+    val CAPABILITIES = listOf("chat", "details", "answers", "prefs", "diffs", "usage", "services", "relay", "wake")
     const val CAP_CHAT = "chat"
     /** Steps, last line, project folder name and colour of each session. */
     const val CAP_DETAILS = "details"
@@ -34,6 +34,12 @@ object Protocol {
     const val CAP_SERVICES = "services"
     /** The computer's relay switch is on: it sends the new access key when the user replaces it (docs/RELAY_LINK.md). */
     const val CAP_RELAY = "relay"
+    /** This computer's wired card and network, kept for "Turn on computer" (Wake-on-LAN) when it is off. */
+    const val CAP_WAKE = "wake"
+    /** Photos in the chat: at most this many per message, each a JPEG cut in parts of [CHAT_IMAGE_PART_BYTES]. */
+    const val CHAT_MAX_IMAGES = 4
+    const val CHAT_IMAGE_PART_BYTES = 36_000
+    const val CHAT_MAX_IMAGE_BYTES = 4 * 1024 * 1024
     const val MAX_SERVICES = 7
     const val MAX_SERVICE_ITEMS = 3
     const val MAX_SERVICE_TEXT = 80
@@ -117,8 +123,15 @@ data class AskedQuestion(val question: String, val options: List<AskedOption>, v
 /** A question waiting for an answer (cap `answers`). */
 data class QuestionRequest(val pillId: String, val fingerprint: String, val questions: List<AskedQuestion>, val createdAtMs: Long)
 
+/** What the computer said about itself for Wake-on-LAN: its card's MAC ("aa:bb:..."), its address and its network's broadcast address. */
+data class WakeTarget(val mac: String, val ip: String, val broadcast: String)
+
 sealed interface ServerMsg {
-    data class Welcome(val version: Int, val desktopName: String, val os: String, val caps: Set<String> = emptySet()) : ServerMsg
+    data class Welcome(
+        val version: Int, val desktopName: String, val os: String, val caps: Set<String> = emptySet(),
+        /** Only to a phone that asked for `wake`, when the computer could read its card. */
+        val wake: WakeTarget? = null,
+    ) : ServerMsg
     data class Sessions(val sessions: List<SessionInfo>) : ServerMsg
     data class Approval(val request: ApprovalRequest) : ServerMsg
     data class ApprovalResolved(val fingerprint: String) : ServerMsg
@@ -158,7 +171,10 @@ sealed interface ClientMsg {
     /** The lines of one file the session list showed (cap `diffs`). */
     data class GetDiff(val pillId: String, val fileId: Long) : ClientMsg
     data object ChatModels : ClientMsg
-    data class ChatSend(val id: String, val model: String, val text: String) : ClientMsg
+    /** [images]: the ids of the photos sent just before as [ChatImage] lines (none: a text message, as before). */
+    data class ChatSend(val id: String, val model: String, val text: String, val images: List<String> = emptyList()) : ClientMsg
+    /** One part of a photo for the next [ChatSend]: base64 JPEG [data], part [part] of [parts]. */
+    data class ChatImage(val id: String, val part: Int, val parts: Int, val data: String) : ClientMsg
     data class ChatCancel(val id: String) : ClientMsg
     /** New chat: the computer forgets its side of the conversation and stops a running answer. */
     data object ChatReset : ClientMsg
@@ -181,7 +197,11 @@ object Wire {
                 .put("picks", JSONArray(m.picks.map { JSONArray(it) }))
             is ClientMsg.GetDiff -> o.put("type", "getDiff").put("pillId", m.pillId).put("fileId", m.fileId)
             ClientMsg.ChatModels -> o.put("type", "chatModels")
-            is ClientMsg.ChatSend -> o.put("type", "chatSend").put("id", m.id).put("model", m.model).put("text", m.text)
+            is ClientMsg.ChatSend -> {
+                o.put("type", "chatSend").put("id", m.id).put("model", m.model).put("text", m.text)
+                if (m.images.isNotEmpty()) o.put("images", JSONArray(m.images))
+            }
+            is ClientMsg.ChatImage -> o.put("type", "chatImage").put("id", m.id).put("part", m.part).put("parts", m.parts).put("data", m.data)
             is ClientMsg.ChatCancel -> o.put("type", "chatCancel").put("id", m.id)
             ClientMsg.ChatReset -> o.put("type", "chatReset")
         }
@@ -194,7 +214,13 @@ object Wire {
         return try {
             val o = JSONObject(line)
             when (o.getString("type")) {
-                "welcome" -> ServerMsg.Welcome(o.getInt("v"), o.optString("desktop", ""), o.optString("os", ""), strings(o.optJSONArray("caps")))
+                "welcome" -> ServerMsg.Welcome(
+                    o.getInt("v"), o.optString("desktop", ""), o.optString("os", ""), strings(o.optJSONArray("caps")),
+                    o.optJSONObject("wake")?.let { w ->
+                        WakeTarget(w.optString("mac", ""), w.optString("ip", ""), w.optString("broadcast", ""))
+                            .takeIf { PowerOn.macBytes(it.mac) != null }
+                    },
+                )
                 "sessions" -> ServerMsg.Sessions(o.getJSONArray("sessions").objects().map(::session))
                 "approval" -> ServerMsg.Approval(
                     ApprovalRequest(

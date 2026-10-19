@@ -12,7 +12,8 @@ class PillsTest {
 
     private fun reference(): List<Ref> {
         val src = ReferenceFiles.read("windows/src/core/pills.ts")
-        val re = Regex("""\{\s*id:\s*"([^"]+)",\s*name:\s*"([^"]+)",\s*color:\s*([^,]+),\s*category:\s*"([^"]+)"""")
+        // A name may differ on the Windows page ("Music" there, the pill's own name elsewhere): the phone wears the latter.
+        val re = Regex("""\{\s*id:\s*"([^"]+)",\s*name:\s*(?:IS_WINDOWS_PAGE\s*\?\s*"[^"]+"\s*:\s*)?"([^"]+)",\s*color:\s*([^,]+),\s*category:\s*"([^"]+)"""")
         val accents = Regex("""(\w+):\s*"(#[0-9A-Fa-f]{6})"""").findAll(src.substringBefore("export const PILL_CATALOG"))
             .associate { it.groupValues[1] to it.groupValues[2] }
         return re.findAll(src).map { m ->

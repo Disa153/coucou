@@ -53,6 +53,8 @@ interface LinkListener {
     fun onChatDelta(id: String, text: String) {}
     fun onChatDone(id: String, text: String?) {}
     fun onChatError(id: String, reason: String, message: String) {}
+    /** The computer's card for Wake-on-LAN, in the welcome of a computer that could read it. */
+    fun onWake(target: WakeTarget) {}
 }
 
 /** What the UI talks to: the real [LinkClient] or the offline [DemoLink]. */
@@ -80,6 +82,8 @@ interface DesktopLink {
     fun chatModels() {}
     /** False if the link is down; the answer arrives through the listener. */
     fun chatSend(id: String, model: String, text: String): Boolean = false
+    /** With photos (JPEG bytes, one id each): their parts first, then the message naming them. */
+    fun chatSendWithImages(id: String, model: String, text: String, images: List<Pair<String, ByteArray>>): Boolean = false
     fun chatCancel(id: String) {}
     fun chatReset() {}
 }
@@ -243,6 +247,18 @@ class LinkClient(
 
     override fun chatModels() { queue(ClientMsg.ChatModels) }
     override fun chatSend(id: String, model: String, text: String) = queue(ClientMsg.ChatSend(id, model, text))
+    override fun chatSendWithImages(id: String, model: String, text: String, images: List<Pair<String, ByteArray>>): Boolean {
+        for ((imageId, jpeg) in images) {
+            val parts = (jpeg.size + Protocol.CHAT_IMAGE_PART_BYTES - 1) / Protocol.CHAT_IMAGE_PART_BYTES
+            for (part in 0 until parts) {
+                val from = part * Protocol.CHAT_IMAGE_PART_BYTES
+                val piece = jpeg.copyOfRange(from, minOf(jpeg.size, from + Protocol.CHAT_IMAGE_PART_BYTES))
+                val data = java.util.Base64.getEncoder().encodeToString(piece)
+                if (!queue(ClientMsg.ChatImage(imageId, part, parts, data))) return false
+            }
+        }
+        return queue(ClientMsg.ChatSend(id, model, text, images.map { it.first }))
+    }
     override fun chatCancel(id: String) { queue(ClientMsg.ChatCancel(id)) }
     override fun chatReset() { queue(ClientMsg.ChatReset) }
 
@@ -341,6 +357,7 @@ class LinkClient(
                     listener.onState(LinkState.CONNECTED)
                     listener.onWelcome(msg.desktopName, msg.os)
                     listener.onCaps(msg.caps)
+                    if (Protocol.CAP_WAKE in caps) msg.wake?.let { listener.onWake(it) }
                     // Told what it may use right away, so the Chat screen has its list when it opens.
                     if (Protocol.CAP_CHAT in msg.caps && Protocol.CAP_CHAT in caps) queue(ClientMsg.ChatModels)
                 }
