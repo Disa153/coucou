@@ -41,7 +41,9 @@ class ChatScreenTest {
 
     @Test fun theBoxCannotSendWhenUnavailableEmptyOrTooLong() {
         val ui = src("ui/ChatScreen.kt")
-        assertTrue(ui.contains("enabled = model.chatAvailable && length in 1..limit"))
+        // Text within the limit, or a photo with no words; never while the chat is unavailable.
+        assertTrue(ui.contains("val canSend = model.chatAvailable && length <= limit && (length > 0 || photos.isNotEmpty())"))
+        assertTrue(ui.contains("enabled = canSend"))
         assertTrue(ui.contains("enabled = model.chatAvailable"))
     }
 

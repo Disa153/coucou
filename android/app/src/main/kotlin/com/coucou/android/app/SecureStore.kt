@@ -57,31 +57,6 @@ class SecureStore(context: Context) {
 
     fun clearPairing() = prefs.edit().remove(PREF).apply()
 
-    /** Another secret (the router's password for "Turn on computer"), encrypted with the same Keystore key; empty removes it. */
-    fun saveSecret(name: String, value: String) {
-        val pref = "secret_$name"
-        if (value.isEmpty()) {
-            prefs.edit().remove(pref).apply()
-            return
-        }
-        val c = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
-        val ct = c.doFinal(value.toByteArray(Charsets.UTF_8))
-        prefs.edit().putString(pref, Base64.encodeToString(c.iv + ct, Base64.NO_WRAP)).apply()
-    }
-
-    fun loadSecret(name: String): String {
-        val blob = prefs.getString("secret_$name", null) ?: return ""
-        return try {
-            val raw = Base64.decode(blob, Base64.NO_WRAP)
-            val c = Cipher.getInstance("AES/GCM/NoPadding").apply {
-                init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, raw, 0, IV_BYTES))
-            }
-            String(c.doFinal(raw, IV_BYTES, raw.size - IV_BYTES), Charsets.UTF_8)
-        } catch (_: Exception) {
-            ""
-        }
-    }
-
     private companion object {
         const val ALIAS = "coucou_pairing_key"
         const val PREF = "pairing"

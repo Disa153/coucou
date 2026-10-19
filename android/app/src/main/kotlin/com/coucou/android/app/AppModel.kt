@@ -66,6 +66,7 @@ enum class Mode { NONE, DEMO, PAIRED }
 class AppModel(private val context: Context) : LinkListener {
     private val main = Handler(Looper.getMainLooper())
     private val store = SecureStore(context)
+    private val routerSecret = RouterSecret(context)
     val sounds = SoundPlayer(context)
     val notifier = Notifications(context)
 
@@ -692,7 +693,7 @@ class AppModel(private val context: Context) : LinkListener {
     var router by mutableStateOf(
         com.coucou.android.link.RouterLogin(
             prefs.getString("router_address", "192.168.1.1") ?: "", prefs.getString("router_away", "") ?: "",
-            prefs.getString("router_login", "") ?: "", store.loadSecret("router_password"),
+            prefs.getString("router_login", "") ?: "", routerSecret.load(),
         ),
     ); private set
     var powerPhase by mutableStateOf(PowerPhase.IDLE); private set
@@ -716,7 +717,7 @@ class AppModel(private val context: Context) : LinkListener {
         router = login
         prefs.edit().putString("router_address", login.address).putString("router_away", login.awayAddress)
             .putString("router_login", login.login).apply()
-        store.saveSecret("router_password", login.password)
+        routerSecret.save(login.password)
     }
 
     /** Signs in to the router (and, if the computer never told us, asks it for the computer's card). */
