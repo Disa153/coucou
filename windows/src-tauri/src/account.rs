@@ -247,6 +247,8 @@ pub enum AccountError {
     NotOwner,
     /// The release token is missing (Settings → Updates).
     NoReleaseToken,
+    /// GitHub turned the release token down (expired, deleted or revoked).
+    ReleaseTokenRefused,
     /// The release token cannot write the repository's files.
     NeedsContents,
     NoSaves,
@@ -528,7 +530,8 @@ async fn read_list(token: &str) -> Result<(Vec<Person>, Option<String>), Account
     match status {
         200 => {}
         404 => return Ok((Vec::new(), None)),
-        401 | 403 => return Err(AccountError::NeedsContents),
+        401 => return Err(AccountError::ReleaseTokenRefused),
+        403 => return Err(AccountError::NeedsContents),
         _ => return Err(AccountError::Network),
     }
     let v: Value = serde_json::from_slice(&body).map_err(|_| AccountError::Network)?;
@@ -568,7 +571,8 @@ async fn write_list(app: &AppHandle, edit: impl FnOnce(&mut Vec<Person>)) -> Res
     let (status, _) = call(reqwest::Method::PUT, TESTERS_API, Some(&token), Some(body)).await?;
     match status {
         200 | 201 => {}
-        401 | 403 | 404 => return Err(AccountError::NeedsContents),
+        401 => return Err(AccountError::ReleaseTokenRefused),
+        403 | 404 => return Err(AccountError::NeedsContents),
         _ => return Err(AccountError::Network),
     }
     *state(app).testers.lock().unwrap() = Some(list.clone());
