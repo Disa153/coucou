@@ -42,8 +42,10 @@ export function buildPromo(actions: ViewActions): ViewHost {
   const more = h("div", { class: "pr-more" });
   const moreBtn = h("button", { class: "btn secondary" }, h("span", { text: tl("More") }));
   const open = h("button", { class: "btn primary" }, h("span", { text: tl("Open on GitHub") }));
-  const later = h("button", { class: "btn secondary" }, h("span", { text: tl("Not now") }));
-  const never = h("button", { class: "pr-never", text: tl("Don't show again") });
+  const later = h("button", { class: "btn secondary" }, h("span", { text: tl("Later") }));
+  const never = h("button", { class: "pr-never", text: tl("Don't show") });
+  // What it looks like, always beside the words; a click makes it fill the card.
+  const shot = h("img", { class: "pr-shot", src: shotUrl, alt: "Custom UI" });
   const panel = h(
     "div",
     { class: "rv-panel pr-panel" },
@@ -51,25 +53,23 @@ export function buildPromo(actions: ViewActions): ViewHost {
       h("img", { class: "pr-icon", src: iconUrl, alt: "" }),
       h("div", {}, h("div", { class: "pr-tag", text: tl("A friend's project") }), title),
     ),
-    line,
-    more,
+    h("div", { class: "pr-body" }, h("div", { class: "pr-text" }, line, more), shot),
     h("div", { class: "rv-row" }, never, h("span", { class: "rv-grow" }), moreBtn, later, open),
   );
   const el = h("div", { class: "view review promo" }, panel);
   let expanded = false;
+  shot.addEventListener("click", () => panel.classList.toggle("big"));
 
   function paint() {
     clear(more);
     more.style.display = expanded ? "" : "none";
     line.style.display = expanded ? "none" : "";
     if (expanded) {
-      const shot = h("img", { class: "pr-shot", src: shotUrl, alt: "Custom UI" });
-      shot.addEventListener("click", () => more.classList.toggle("big"));
       const list = h("ul", {});
       for (const d of DETAILS) list.append(h("li", { text: d() }));
-      more.append(shot, list);
+      more.append(list);
     } else {
-      more.classList.remove("big");
+      panel.classList.remove("big");
     }
     moreBtn.style.display = expanded ? "none" : "";
   }

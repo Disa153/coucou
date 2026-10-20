@@ -3365,7 +3365,6 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
 .pr-line {
   font: 400 12px var(--font);
   color: var(--dim);
-  flex: 1 1 auto;
 }
 
 .pr-more {
@@ -3376,28 +3375,43 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   color: var(--ink-2);
 }
 
-.pr-more:not(:empty) {
+.pr-body {
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
+}
+
+.pr-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .pr-shot {
   width: 170px;
   flex: 0 0 170px;
   border-radius: 8px;
-  border: 1px solid var(--hairline);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: zoom-in;
 }
 
-.pr-more.big ul {
+.pr-panel.big .pr-text {
   display: none;
 }
 
-.pr-more.big .pr-shot {
+.pr-panel.big .pr-shot {
   width: 100%;
   flex-basis: 100%;
   cursor: zoom-out;
+}
+
+.pr-panel .btn,
+.pr-never {
+  white-space: nowrap;
 }
 
 .pr-more ul {
