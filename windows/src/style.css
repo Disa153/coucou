@@ -3183,3 +3183,115 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   font: 400 12.5px var(--font);
   color: var(--dim);
 }
+
+/* The review card (views/review.ts): Mochi asks on the left, the panel on the right. */
+.view.review {
+  pointer-events: none;
+}
+
+.view.review.on .rv-panel {
+  pointer-events: auto;
+}
+
+.rv-panel {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  bottom: 0;
+  left: 140px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  padding: 10px 14px;
+  z-index: 1;
+}
+
+.rv-form,
+.rv-thanks {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  height: 100%;
+}
+
+.rv-thanks {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: 400 12px var(--font);
+  color: var(--dim);
+}
+
+.rv-thanks b {
+  font: 600 15px var(--font);
+  color: var(--ink);
+}
+
+.rv-title {
+  font: 600 13.5px var(--font);
+}
+
+.rv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rv-grow {
+  flex: 1 1 auto;
+}
+
+.rv-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rv-star {
+  border: 0;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  padding: 0 1px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.18);
+  transition: transform 0.1s, color 0.15s;
+}
+
+.rv-star.on {
+  color: #fbbf24;
+}
+
+.rv-star:hover {
+  transform: scale(1.12);
+}
+
+.rv-word {
+  font: 400 11px var(--font);
+  color: var(--dim);
+}
+
+.rv-text {
+  flex: 1 1 0;
+  min-height: 0;
+  resize: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  color: var(--ink);
+  font: 400 12px var(--font);
+  padding: 6px 9px;
+  outline: none;
+}
+
+.rv-text:focus {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.rv-note {
+  font: 400 11px var(--font);
+  color: var(--dim);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

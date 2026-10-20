@@ -65,6 +65,26 @@ export interface AccountState {
   sync: boolean;
   parts: string[];
   lastSync: number;
+  /** When and whom a build's review is asked of (the owner sets it). */
+  survey: { days: number; who: "testers" | "everyone" };
+}
+
+/** Reviews of a build (src-tauri/src/reviews.rs). */
+export type ReviewError = "notSignedIn" | "signInAgain" | "notAllowed" | "noStars" | "network";
+
+export interface Review {
+  login: string;
+  stars: number;
+  add: string;
+  remove: string;
+  /** Unix seconds. */
+  at: number;
+}
+
+export interface BuildReviews {
+  build: number;
+  page: string;
+  reviews: Review[];
 }
 
 export interface DeviceCode {
@@ -288,6 +308,14 @@ export const Bridge = {
   accountTesterAdd: (login: string, name: string) => callOrThrow<Person[]>("account_tester_add", { login, name }),
   accountTesterRemove: (login: string) => callOrThrow<Person[]>("account_tester_remove", { login }),
   accountSearch: (query: string) => callOrThrow<Person[]>("account_search", { query }),
+  accountSetSurvey: (days: number, who: string) => callOrThrow<AccountState>("account_set_survey", { days, who }),
+  /** Reviews (src-tauri/src/reviews.rs). The throwing ones reject with a ReviewError. */
+  reviewDue: () => call<{ build: number } | null>("review_due"),
+  reviewLater: (build: number) => call<void>("review_later", { build }),
+  reviewSkip: (build: number) => call<void>("review_skip", { build }),
+  reviewSend: (build: number, stars: number, add: string, remove: string) =>
+    callOrThrow<void>("review_send", { build, stars, add, remove }),
+  reviewList: () => callOrThrow<BuildReviews[]>("review_list"),
 
   /** In-app updates (src-tauri/src/updater.rs). */
   updateInfo: () => call<UpdateInfo>("update_info"),

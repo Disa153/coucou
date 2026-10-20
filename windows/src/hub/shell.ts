@@ -13,7 +13,7 @@ import { icon, keyLabel } from "./ui";
 
 export type PageId =
   | "dictation" | "notes" | "insights" | "dictionary" | "snippets" | "styles" | "flowsettings"
-  | "general" | "account" | "pills" | "agents" | "chat" | "voice" | "integrations" | "phone" | "shortcuts";
+  | "general" | "account" | "reviews" | "pills" | "agents" | "chat" | "voice" | "integrations" | "phone" | "shortcuts";
 
 interface PageDef {
   id: PageId;
@@ -36,6 +36,7 @@ export const FLOW_PAGES: PageDef[] = [
 export const NOTCH_PAGES: PageDef[] = [
   { id: "general", icon: "gear", title: () => t("General"), subtitle: () => t("Mochi, his sounds and how the island behaves.") },
   { id: "account", icon: "user", title: () => t("Account"), subtitle: () => t("Sign in with GitHub: your saves on any computer, and the beta for invited testers.") },
+  { id: "reviews", icon: "star", title: () => t("Reviews"), subtitle: () => t("What the beta testers think of each build.") },
   { id: "pills", icon: "grid", title: () => t("Active pills"), subtitle: () => t("The pills shown in the island, their order and their colours.") },
   { id: "agents", icon: "terminal", title: () => t("Agents"), subtitle: () => t("Claude Code, Codex and the other agents Mochi follows.") },
   { id: "chat", icon: "chat", title: () => t("Chat"), subtitle: () => t("The AI of the island's chat, with your own keys.") },
