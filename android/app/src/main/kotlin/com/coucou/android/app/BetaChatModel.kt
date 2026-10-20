@@ -47,7 +47,7 @@ class BetaChatModel(private val context: Context, private val prefs: SharedPrefe
     private val downs = BetaDownAssembler()
     private val outgoing = HashMap<String, Pair<String, List<Triple<String, String, ByteArray>>>>()
 
-    fun setOffered(on: Boolean) {
+    fun offer(on: Boolean) {
         offered = on
         if (on) refresh(full = true) else { unread = 0 }
     }

@@ -817,7 +817,7 @@ class AppModel(private val context: Context) : LinkListener {
     override fun onCaps(caps: Set<String>) {
         main.post {
             chatOffered = Protocol.CAP_CHAT in caps
-            betaChat.setOffered(Protocol.CAP_BETA_CHAT in caps)
+            betaChat.offer(Protocol.CAP_BETA_CHAT in caps)
             detailsOffered = Protocol.CAP_DETAILS in caps
             diffsOffered = Protocol.CAP_DIFFS in caps
             if (Protocol.CAP_USAGE !in caps) usage = null
