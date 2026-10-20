@@ -6667,6 +6667,83 @@
    "pt-BR": "Quem responde",
    "ru": "Кого спрашивать",
    "id": "Siapa yang ditanya"
+  },
+  "On GitHub": {
+   "zh-Hans": "在 GitHub 上",
+   "hi": "GitHub पर",
+   "es": "En GitHub",
+   "ar": "على GitHub",
+   "fr": "Sur GitHub",
+   "bn": "GitHub-এ",
+   "pt-BR": "No GitHub",
+   "ru": "На GitHub",
+   "id": "Di GitHub"
+  },
+  "Beta chat": {
+   "zh-Hans": "测试者聊天",
+   "hi": "बीटा चैट",
+   "es": "Chat beta",
+   "ar": "دردشة المختبرين",
+   "fr": "Chat bêta",
+   "bn": "বিটা চ্যাট",
+   "pt-BR": "Chat beta",
+   "ru": "Бета-чат",
+   "id": "Obrolan beta"
+  },
+  "Write to the testers… (not passwords or keys: the chat is public on GitHub)": {
+   "zh-Hans": "给测试者写消息…（不要写密码或密钥：聊天在 GitHub 上公开）",
+   "hi": "टेस्टरों को लिखें… (पासवर्ड या कुंजियाँ नहीं: चैट GitHub पर सार्वजनिक है)",
+   "es": "Escribe a los probadores… (sin contraseñas ni claves: el chat es público en GitHub)",
+   "ar": "اكتب للمختبرين… (لا كلمات مرور ولا مفاتيح: الدردشة علنية على GitHub)",
+   "fr": "Écrire aux testeurs… (ni mots de passe ni clés : le chat est public sur GitHub)",
+   "bn": "টেস্টারদের লিখুন… (পাসওয়ার্ড বা কী নয়: চ্যাট GitHub-এ সর্বজনীন)",
+   "pt-BR": "Escreva aos testadores… (nada de senhas ou chaves: o chat é público no GitHub)",
+   "ru": "Написать тестерам… (без паролей и ключей: чат открыт на GitHub)",
+   "id": "Tulis ke penguji… (jangan kata sandi atau kunci: obrolan ini publik di GitHub)"
+  },
+  "Attach your build number": {
+   "zh-Hans": "附上你的版本号",
+   "hi": "अपना बिल्ड नंबर जोड़ें",
+   "es": "Adjuntar tu número de compilación",
+   "ar": "أرفق رقم إصدارك",
+   "fr": "Joindre votre numéro de version",
+   "bn": "আপনার বিল্ড নম্বর যোগ করুন",
+   "pt-BR": "Anexar o número da sua versão",
+   "ru": "Приложить номер вашей сборки",
+   "id": "Lampirkan nomor build Anda"
+  },
+  "No messages yet. Say hello to the testers!": {
+   "zh-Hans": "还没有消息。和测试者打个招呼吧！",
+   "hi": "अभी कोई संदेश नहीं। टेस्टरों को नमस्ते कहें!",
+   "es": "Aún no hay mensajes. ¡Saluda a los probadores!",
+   "ar": "لا رسائل بعد. ألقِ التحية على المختبرين!",
+   "fr": "Pas encore de messages. Dites bonjour aux testeurs !",
+   "bn": "এখনো কোনো বার্তা নেই। টেস্টারদের হ্যালো বলুন!",
+   "pt-BR": "Ainda não há mensagens. Diga oi aos testadores!",
+   "ru": "Сообщений пока нет. Поздоровайтесь с тестерами!",
+   "id": "Belum ada pesan. Sapa para penguji!"
+  },
+  "owner": {
+   "zh-Hans": "所有者",
+   "hi": "मालिक",
+   "es": "propietario",
+   "ar": "المالك",
+   "fr": "propriétaire",
+   "bn": "মালিক",
+   "pt-BR": "dono",
+   "ru": "владелец",
+   "id": "pemilik"
+  },
+  "🧪 build {build}": {
+   "zh-Hans": "🧪 版本 {build}",
+   "hi": "🧪 बिल्ड {build}",
+   "es": "🧪 compilación {build}",
+   "ar": "🧪 الإصدار {build}",
+   "fr": "🧪 version {build}",
+   "bn": "🧪 বিল্ড {build}",
+   "pt-BR": "🧪 versão {build}",
+   "ru": "🧪 сборка {build}",
+   "id": "🧪 build {build}"
   }
  }
 }

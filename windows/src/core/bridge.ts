@@ -81,6 +81,23 @@ export interface Review {
   at: number;
 }
 
+/** The beta chat (src-tauri/src/betachat.rs). */
+export interface ChatMessage {
+  id: number;
+  login: string;
+  text: string;
+  build: number | null;
+  /** Unix seconds. */
+  at: number;
+  owner: boolean;
+  mine: boolean;
+}
+
+export interface ChatNews {
+  unread: number;
+  last: ChatMessage | null;
+}
+
 export interface BuildReviews {
   build: number;
   page: string;
@@ -316,6 +333,11 @@ export const Bridge = {
   reviewSend: (build: number, stars: number, add: string, remove: string) =>
     callOrThrow<void>("review_send", { build, stars, add, remove }),
   reviewList: () => callOrThrow<BuildReviews[]>("review_list"),
+  /** The beta chat (src-tauri/src/betachat.rs); rejects with a ReviewError. */
+  betaChatMessages: () => callOrThrow<{ messages: ChatMessage[]; page: string; owner: boolean }>("beta_chat_messages"),
+  betaChatUnread: () => callOrThrow<ChatNews>("beta_chat_unread"),
+  betaChatSend: (text: string, withBuild: boolean) => callOrThrow<void>("beta_chat_send", { text, withBuild }),
+  betaChatDelete: (id: number) => callOrThrow<void>("beta_chat_delete", { id }),
 
   /** In-app updates (src-tauri/src/updater.rs). */
   updateInfo: () => call<UpdateInfo>("update_info"),
