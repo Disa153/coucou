@@ -53,7 +53,7 @@ export type ReleaseRefusal = "notConnected" | "badToken" | "wrongPassword" | "no
 /** Settings → Account (src-tauri/src/account.rs). */
 export type AccountError =
   | "notConfigured" | "denied" | "expired" | "network" | "notSignedIn" | "signedOut" | "notOwner"
-  | "noReleaseToken" | "needsContents" | "noSaves" | "badLogin";
+  | "noReleaseToken" | "releaseTokenRefused" | "needsContents" | "noSaves" | "badLogin";
 
 export interface AccountState {
   configured: boolean;

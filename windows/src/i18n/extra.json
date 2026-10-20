@@ -6242,6 +6242,17 @@
    "pt-BR": "Entre com o GitHub: seus dados salvos em qualquer computador e a beta para testadores convidados.",
    "ru": "Вход через GitHub: ваши сохранения на любом компьютере и бета для приглашённых тестеров.",
    "id": "Masuk dengan GitHub: simpanan Anda di komputer mana pun, dan beta untuk penguji yang diundang."
+  },
+  "GitHub refused the release token. In Updates, disconnect GitHub and connect it again with a new token.": {
+   "zh-Hans": "GitHub 拒绝了发布令牌。请在“更新”中断开 GitHub，再用新令牌重新连接。",
+   "hi": "GitHub ने रिलीज़ टोकन अस्वीकार कर दिया। अपडेट में GitHub डिस्कनेक्ट करें और नए टोकन से फिर कनेक्ट करें।",
+   "es": "GitHub rechazó el token de publicación. En Actualizaciones, desconecta GitHub y vuelve a conectarlo con un token nuevo.",
+   "ar": "رفض GitHub رمز النشر. في التحديثات، افصل GitHub ثم اربطه من جديد برمز جديد.",
+   "fr": "GitHub a refusé le jeton de publication. Dans Mises à jour, déconnectez GitHub puis reconnectez-le avec un nouveau jeton.",
+   "bn": "GitHub রিলিজ টোকেন প্রত্যাখ্যান করেছে। আপডেটে GitHub বিচ্ছিন্ন করে নতুন টোকেন দিয়ে আবার সংযোগ করুন।",
+   "pt-BR": "O GitHub recusou o token de lançamento. Em Atualizações, desconecte o GitHub e conecte de novo com um token novo.",
+   "ru": "GitHub отклонил токен для выпуска. В «Обновлениях» отключите GitHub и подключите снова с новым токеном.",
+   "id": "GitHub menolak token rilis. Di Pembaruan, putuskan GitHub lalu hubungkan lagi dengan token baru."
   }
  }
 }

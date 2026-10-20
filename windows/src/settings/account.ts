@@ -40,6 +40,7 @@ export function errorText(e: unknown): string {
     signedOut: t("GitHub no longer accepts this sign-in. Sign in again."),
     notOwner: t("Only Coucou's owner can do this."),
     noReleaseToken: t("Connect GitHub in Updates first (Release to everyone…)."),
+    releaseTokenRefused: t("GitHub refused the release token. In Updates, disconnect GitHub and connect it again with a new token."),
     needsContents: t("The GitHub token can't edit the list. Create it again with Contents: Read and write."),
     noSaves: t("No saves on GitHub yet."),
     badLogin: t("That is not a GitHub login."),
