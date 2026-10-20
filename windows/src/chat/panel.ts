@@ -98,6 +98,8 @@ interface Pending {
 
 export interface ChatPanel {
   el: HTMLElement;
+  /** Opens the photo viewer on this attachment (the island asked the window to). */
+  openPhoto(url: string): void;
   /** On screen or not: reading every 10 s only while shown. */
   shown(on: boolean): void;
   focus(): void;
@@ -112,6 +114,8 @@ export interface PanelOptions {
   /** Extra buttons for the head (the island's back, the window's pin). */
   lead?: HTMLElement[];
   tail?: HTMLElement[];
+  /** A photo was clicked: the island opens the chat's window on it; by default it opens here. */
+  photoClick?(f: ChatFile): void;
 }
 
 export function createChatPanel(opts: PanelOptions): ChatPanel {
@@ -226,7 +230,7 @@ export function createChatPanel(opts: PanelOptions): ChatPanel {
       const img = h("img", { class: "bc-img", alt: f.name }) as HTMLImageElement;
       box.append(img);
       void blobUrl(f).then((u) => (img.src = u)).catch(() => box.append(h("span", { class: "bc-time", text: t("Could not load {name}.", { name: f.name }) })));
-      img.addEventListener("click", () => box.classList.toggle("big"));
+      img.addEventListener("click", () => (opts.photoClick ? opts.photoClick(f) : viewer.open(f.url)));
       return box;
     }
     if (f.mime.startsWith("video/")) {
@@ -321,6 +325,7 @@ export function createChatPanel(opts: PanelOptions): ChatPanel {
       messages = p.messages;
       opts.onRead?.();
       paint();
+      openWanted();
     } catch (e) {
       note.dataset.kind = "read";
       note.textContent = reviewErrorText(e);
@@ -385,9 +390,155 @@ export function createChatPanel(opts: PanelOptions): ChatPanel {
     if (isShown) void refresh();
   });
 
+  // ── The photo viewer: over the chat, the whole photo, zoom and pan, every photo of the chat in turn ──
+  const viewer = (() => {
+    const name = h("b", {});
+    const from = h("span", {});
+    const fitBtn = h("button", { class: "bc-vbtn" });
+    const save = h("button", { class: "bc-vbtn", text: tl("⬇ Save") });
+    const close = h("button", { class: "bc-vbtn", title: tl("Close"), text: "✕" });
+    const img = h("img", { class: "bc-vimg", alt: "" }) as HTMLImageElement;
+    const prev = h("button", { class: "bc-vnav l", title: tl("Previous"), text: "‹" });
+    const next = h("button", { class: "bc-vnav r", title: tl("Next"), text: "›" });
+    const stage = h("div", { class: "bc-vstage" }, prev, img, next);
+    const count = h("span", {});
+    const status = h("span", { class: "bc-vstatus" });
+    const box = h("div", { class: "bc-viewer" },
+      h("div", { class: "bc-vbar" }, name, from, h("span", { class: "bc-grow" }), fitBtn, save, close),
+      stage,
+      h("div", { class: "bc-vfoot" }, count, status),
+      h("div", { class: "bc-vhint", text: tl("Wheel to zoom · drag to move · double-click for 100% · ← → for the others · Esc to close") }),
+    );
+    let photos: { f: ChatFile; login: string }[] = [];
+    let at = 0;
+    let scale = 1, x = 0, y = 0;
+    let natural = 1;
+    const apply = () => {
+      img.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
+      fitBtn.textContent = scale === 1 ? "100%" : t("Fit");
+    };
+    const fit = () => {
+      scale = 1;
+      x = 0;
+      y = 0;
+      apply();
+    };
+    const show = (i: number) => {
+      if (!photos.length) return;
+      at = (i + photos.length) % photos.length;
+      const p = photos[at];
+      name.textContent = p.f.name;
+      from.textContent = t("from @{login}", { login: p.login });
+      count.textContent = t("{n} of {total}", { n: at + 1, total: photos.length });
+      status.textContent = t("Loading…");
+      img.removeAttribute("src");
+      prev.style.display = next.style.display = photos.length > 1 ? "" : "none";
+      fit();
+      void blobUrl(p.f)
+        .then((u) => {
+          if (photos[at] !== p) return;
+          img.src = u;
+          status.textContent = "";
+        })
+        .catch(() => (status.textContent = t("Could not load {name}.", { name: p.f.name })));
+    };
+    img.addEventListener("load", () => {
+      // How much bigger the photo's own pixels are than it shows when it fits.
+      const shown = img.getBoundingClientRect().width / scale;
+      natural = shown > 0 ? Math.max(1, img.naturalWidth / shown) : 1;
+    });
+    const hide = () => box.classList.remove("on");
+    fitBtn.addEventListener("click", () => {
+      if (scale === 1) {
+        scale = Math.min(8, natural);
+        apply();
+      } else fit();
+    });
+    img.addEventListener("dblclick", () => fitBtn.click());
+    close.addEventListener("click", hide);
+    prev.addEventListener("click", (e) => {
+      e.stopPropagation();
+      show(at - 1);
+    });
+    next.addEventListener("click", (e) => {
+      e.stopPropagation();
+      show(at + 1);
+    });
+    save.addEventListener("click", () => {
+      const p = photos[at];
+      if (!p) return;
+      status.textContent = t("Saving…");
+      Bridge.betaChatSave(p.f.url, p.f.name)
+        .then((path) => (status.textContent = t("Saved in {path}", { path })))
+        .catch((e: unknown) => (status.textContent = reviewErrorText(e)));
+    });
+    stage.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const r = stage.getBoundingClientRect();
+      const cx = e.clientX - r.left - r.width / 2;
+      const cy = e.clientY - r.top - r.height / 2;
+      const to = Math.min(8, Math.max(1, scale * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+      x = cx - ((cx - x) * to) / scale;
+      y = cy - ((cy - y) * to) / scale;
+      scale = to;
+      if (scale === 1) fit();
+      else apply();
+    }, { passive: false });
+    let drag: { sx: number; sy: number } | null = null;
+    stage.addEventListener("pointerdown", (e) => {
+      if (e.target !== img) return;
+      drag = { sx: e.clientX - x, sy: e.clientY - y };
+      stage.classList.add("drag");
+      stage.setPointerCapture(e.pointerId);
+    });
+    stage.addEventListener("pointermove", (e) => {
+      if (!drag || scale === 1) return;
+      x = e.clientX - drag.sx;
+      y = e.clientY - drag.sy;
+      apply();
+    });
+    const end = () => {
+      drag = null;
+      stage.classList.remove("drag");
+    };
+    stage.addEventListener("pointerup", end);
+    stage.addEventListener("pointercancel", end);
+    box.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hide();
+      else if (e.key === "ArrowLeft") show(at - 1);
+      else if (e.key === "ArrowRight") show(at + 1);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    box.tabIndex = -1;
+    el.append(box);
+    return {
+      open(url: string) {
+        photos = messages.flatMap((m) => m.files.filter((f) => f.mime.startsWith("image/")).map((f) => ({ f, login: m.login })));
+        const i = photos.findIndex((p) => p.f.url === url);
+        if (i < 0) return false;
+        box.classList.add("on");
+        show(i);
+        box.focus();
+        return true;
+      },
+    };
+  })();
+
+  /** Asked for a photo before the chat was read (the island opened the window on it): opened once it is there. */
+  let wanted: string | null = null;
+  const openWanted = () => {
+    if (wanted && viewer.open(wanted)) wanted = null;
+  };
+
   paintTray();
   return {
     el,
+    openPhoto(url) {
+      wanted = url;
+      openWanted();
+    },
     shown(on) {
       if (on === isShown) return;
       isShown = on;

@@ -28,6 +28,10 @@ async function main() {
   // Read while the window is on screen, not while it is hidden.
   const follow = () => panel.shown(document.visibilityState === "visible");
   document.addEventListener("visibilitychange", follow);
+  void onEvent<string>("beta-chat-photo", (url) => {
+    panel.shown(true);
+    panel.openPhoto(url);
+  });
   void onEvent<null>("beta-chat-shown", () => {
     panel.shown(true);
     panel.focus();

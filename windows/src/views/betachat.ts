@@ -5,7 +5,7 @@
 import { h, svg } from "./dom";
 import { ICONS } from "./icons";
 import { State } from "../core/state";
-import { Bridge } from "../core/bridge";
+import { Bridge, emitToWindow } from "../core/bridge";
 import { tl } from "../i18n/i18n";
 import { createChatPanel } from "../chat/panel";
 import { BetaChat } from "../island/betachat";
@@ -26,6 +26,12 @@ export function buildBetaChat(actions: ViewActions): ViewHost {
     },
     lead: [back],
     tail: [popout],
+    // The island is small: a photo opens in the chat's own window.
+    photoClick: (f) => {
+      void Bridge.betaChatWindow().then(() => emitToWindow("betachat", "beta-chat-photo", f.url));
+      actions.setView(State.defaultView());
+      actions.collapse();
+    },
   });
   const el = h("div", { class: "view betachat" }, h("div", { class: "card bc-card" }, panel.el));
 

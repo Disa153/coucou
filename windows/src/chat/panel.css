@@ -316,3 +316,116 @@
   font: 600 10.5px var(--font);
   cursor: pointer;
 }
+
+/* The photo viewer, over the chat (panel.ts). */
+.bc-panel {
+  position: relative;
+}
+
+.bc-viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  flex-direction: column;
+  background: rgba(6, 7, 9, 0.97);
+  border-radius: 12px;
+  outline: none;
+}
+
+.bc-viewer.on {
+  display: flex;
+}
+
+.bc-vbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 8px;
+  font: 400 12px var(--font);
+  color: var(--dim);
+  min-width: 0;
+}
+
+.bc-vbar b {
+  color: var(--ink);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.bc-vbtn {
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 11px;
+  font: 600 11.5px var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bc-vstage {
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.bc-vstage.drag {
+  cursor: grabbing;
+}
+
+.bc-vimg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: 100%;
+  max-height: 100%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.bc-vnav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: 600 18px var(--font);
+  cursor: pointer;
+}
+
+.bc-vnav.l {
+  left: 8px;
+}
+
+.bc-vnav.r {
+  right: 8px;
+}
+
+.bc-vfoot {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px;
+  font: 400 11px var(--font);
+  color: var(--dim);
+}
+
+.bc-vhint {
+  text-align: center;
+  font: 400 10.5px var(--font);
+  color: var(--dim);
+  padding-bottom: 4px;
+}

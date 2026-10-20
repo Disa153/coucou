@@ -7217,6 +7217,61 @@
    "pt-BR": "Não mostrar",
    "ru": "Не показывать",
    "id": "Jangan tampilkan"
+  },
+  "⬇ Save": {
+   "zh-Hans": "⬇ 保存",
+   "hi": "⬇ सेव करें",
+   "es": "⬇ Guardar",
+   "ar": "⬇ حفظ",
+   "fr": "⬇ Enregistrer",
+   "bn": "⬇ সেভ",
+   "pt-BR": "⬇ Salvar",
+   "ru": "⬇ Сохранить",
+   "id": "⬇ Simpan"
+  },
+  "Wheel to zoom · drag to move · double-click for 100% · ← → for the others · Esc to close": {
+   "zh-Hans": "滚轮缩放 · 拖动移动 · 双击 100% · ← → 切换 · Esc 关闭",
+   "hi": "व्हील से ज़ूम · खींचकर हिलाएँ · डबल-क्लिक से 100% · ← → बाकी · Esc से बंद",
+   "es": "Rueda para ampliar · arrastra para mover · doble clic para 100 % · ← → las demás · Esc para cerrar",
+   "ar": "العجلة للتكبير · اسحب للتحريك · نقر مزدوج لـ 100% · ← → للأخرى · Esc للإغلاق",
+   "fr": "Molette pour zoomer · glisser pour déplacer · double-clic pour 100 % · ← → les autres · Échap pour fermer",
+   "bn": "হুইলে জুম · টেনে সরান · ডাবল-ক্লিকে 100% · ← → অন্যগুলো · Esc-এ বন্ধ",
+   "pt-BR": "Roda para ampliar · arraste para mover · clique duplo para 100% · ← → as outras · Esc para fechar",
+   "ru": "Колесо — приблизить · тяни мышью · двойной клик — 100% / по размеру · ← → листать · Esc — закрыть",
+   "id": "Roda untuk zoom · seret untuk geser · klik dua kali untuk 100% · ← → lainnya · Esc untuk tutup"
+  },
+  "Fit": {
+   "zh-Hans": "适应窗口",
+   "hi": "फ़िट करें",
+   "es": "Ajustar",
+   "ar": "ملاءمة",
+   "fr": "Ajuster",
+   "bn": "ফিট",
+   "pt-BR": "Ajustar",
+   "ru": "По размеру",
+   "id": "Pas"
+  },
+  "from @{login}": {
+   "zh-Hans": "来自 @{login}",
+   "hi": "@{login} से",
+   "es": "de @{login}",
+   "ar": "من @{login}",
+   "fr": "de @{login}",
+   "bn": "@{login} থেকে",
+   "pt-BR": "de @{login}",
+   "ru": "от @{login}",
+   "id": "dari @{login}"
+  },
+  "{n} of {total}": {
+   "zh-Hans": "{n} / {total}",
+   "hi": "{total} में से {n}",
+   "es": "{n} de {total}",
+   "ar": "{n} من {total}",
+   "fr": "{n} sur {total}",
+   "bn": "{total}-এর মধ্যে {n}",
+   "pt-BR": "{n} de {total}",
+   "ru": "{n} из {total}",
+   "id": "{n} dari {total}"
   }
  }
 }
