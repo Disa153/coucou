@@ -31,7 +31,7 @@ class BetaChatModel(private val context: Context, private val prefs: SharedPrefe
     var owner by mutableStateOf(false); private set
     var page by mutableStateOf(""); private set
     var error by mutableStateOf<String?>(null); private set
-    var unread by mutableStateOf(0); private set
+    var waiting by mutableStateOf(0); private set
     /** The screen is showing the chat: new messages are read, not announced. */
     var onScreen = false
 
@@ -49,7 +49,7 @@ class BetaChatModel(private val context: Context, private val prefs: SharedPrefe
 
     fun offer(on: Boolean) {
         offered = on
-        if (on) refresh(full = true) else { unread = 0 }
+        if (on) refresh(full = true) else { waiting = 0 }
     }
 
     fun refresh(full: Boolean = false) { link()?.betaChatGet(full) }
@@ -109,7 +109,7 @@ class BetaChatModel(private val context: Context, private val prefs: SharedPrefe
         page = p.page
         val all = pages.add(p) ?: return
         messages = all
-        if (onScreen) unread = 0
+        if (onScreen) waiting = 0
     }
 
     fun onSent(key: String, message: BetaMessage?, why: String?) {
@@ -138,7 +138,7 @@ class BetaChatModel(private val context: Context, private val prefs: SharedPrefe
 
     /** Someone else wrote: the sound, and a notification while Coucou is not on screen. */
     fun onNews(count: Int, login: String, text: String, inForeground: Boolean, notifier: Notifications) {
-        unread = if (onScreen) 0 else count
+        waiting = if (onScreen) 0 else count
         ChatChimes.play(sound, volume)
         if (!inForeground) notifier.showBetaChat(login, text)
         if (onScreen) refresh()

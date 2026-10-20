@@ -99,7 +99,7 @@ pub fn page_lines(page: &ChatPage) -> Vec<String> {
 /// What the phone's notification says.
 pub fn news_line(n: &ChatNews) -> String {
     let (login, text) = n.last.as_ref().map(|m| (m.login.clone(), m.text.chars().take(200).collect::<String>())).unwrap_or_default();
-    json!({ "type": "betaChatNews", "unread": n.unread, "login": login, "text": text }).to_string()
+    json!({ "type": "betaChatNews", "count": n.unread, "login": login, "text": text }).to_string()
 }
 
 /// A file as lines of at most PART_CHARS characters.

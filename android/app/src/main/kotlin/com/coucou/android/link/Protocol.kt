@@ -182,7 +182,7 @@ sealed interface ServerMsg {
     /** One part of an attachment's bytes (base64), or why it could not be fetched. */
     data class BetaChatDown(val url: String, val part: Int, val parts: Int, val data: String, val error: String?) : ServerMsg
     /** Someone else wrote in the beta chat. */
-    data class BetaChatNews(val unread: Int, val login: String, val text: String) : ServerMsg
+    data class BetaChatNews(val waiting: Int, val login: String, val text: String) : ServerMsg
     data object BetaChatChanged : ServerMsg
 }
 
@@ -298,7 +298,7 @@ object Wire {
                     o.getString("url"), o.optInt("part", 0), o.optInt("parts", 1), o.optString("data", ""), errorOf(o),
                 )
                 "betaChatNews" -> ServerMsg.BetaChatNews(
-                    o.optInt("unread", 0).coerceAtLeast(0), o.optString("login", "").take(39),
+                    o.optInt("count", 0).coerceAtLeast(0), o.optString("login", "").take(39),
                     o.optString("text", "").filter { !it.isISOControl() || it == '\n' }.take(200),
                 )
                 "betaChatChanged" -> ServerMsg.BetaChatChanged

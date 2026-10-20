@@ -870,8 +870,8 @@ class AppModel(private val context: Context) : LinkListener {
     override fun onBetaChatSent(key: String, message: com.coucou.android.link.BetaMessage?, error: String?) { main.post { betaChat.onSent(key, message, error) } }
     override fun onBetaChatDeleted(id: Long, error: String?) { main.post { betaChat.onDeleted(id, error) } }
     override fun onBetaChatDown(part: com.coucou.android.link.ServerMsg.BetaChatDown) { main.post { betaChat.onDown(part) } }
-    override fun onBetaChatNews(unread: Int, login: String, text: String) {
-        main.post { if (mode == Mode.PAIRED) betaChat.onNews(unread, login, text, inForeground, notifier) }
+    override fun onBetaChatNews(waiting: Int, login: String, text: String) {
+        main.post { if (mode == Mode.PAIRED) betaChat.onNews(waiting, login, text, inForeground, notifier) }
     }
     override fun onBetaChatChanged() { main.post { betaChat.onChanged() } }
 

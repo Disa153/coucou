@@ -88,7 +88,7 @@ fun ChatArea(model: AppModel, onHome: () -> Unit, onSettings: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.padding(horizontal = Gutter, vertical = 6.dp).clip(CircleShape).background(tokens().panel2.c()).padding(3.dp)) {
             Segment(stringResource(R.string.beta_chat_tab_ai), !showBeta) { showBeta = false }
-            val badge = if (beta.unread > 0) " (${beta.unread})" else ""
+            val badge = if (beta.waiting > 0) " (${beta.waiting})" else ""
             Segment(stringResource(R.string.beta_chat_title) + badge, showBeta) { showBeta = true }
         }
         Box(Modifier.weight(1f)) {

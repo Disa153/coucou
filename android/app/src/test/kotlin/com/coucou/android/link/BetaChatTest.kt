@@ -64,8 +64,8 @@ class BetaChatTest {
     }
 
     @Test fun newsAndSizesReadAsShown() {
-        val n = Wire.decodeServer("""{"type":"betaChatNews","unread":2,"login":"anna","text":"67 works"}""") as ServerMsg.BetaChatNews
-        assertEquals(2, n.unread)
+        val n = Wire.decodeServer("""{"type":"betaChatNews","count":2,"login":"anna","text":"67 works"}""") as ServerMsg.BetaChatNews
+        assertEquals(2, n.waiting)
         assertEquals("anna", n.login)
         assertEquals(ServerMsg.BetaChatChanged, Wire.decodeServer("""{"type":"betaChatChanged"}"""))
         assertEquals("1.5 MB", BetaChatText.size(1_572_864))

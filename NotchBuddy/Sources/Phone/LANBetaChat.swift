@@ -162,7 +162,7 @@ final class LANBetaChat {
                 if (try? data.write(to: target)) != nil { saved[url] = target }
             }
         case "betaChatNews":
-            let count = (m["unread"] as? NSNumber)?.intValue ?? 1
+            let count = (m["count"] as? NSNumber)?.intValue ?? 1
             unread = onScreen ? 0 : count
             LANBetaSounds.play(sound, volume: volume)
             if UIApplication.shared.applicationState != .active {

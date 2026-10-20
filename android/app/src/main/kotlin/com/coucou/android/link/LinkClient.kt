@@ -60,7 +60,7 @@ interface LinkListener {
     fun onBetaChatSent(key: String, message: BetaMessage?, error: String?) {}
     fun onBetaChatDeleted(id: Long, error: String?) {}
     fun onBetaChatDown(part: ServerMsg.BetaChatDown) {}
-    fun onBetaChatNews(unread: Int, login: String, text: String) {}
+    fun onBetaChatNews(waiting: Int, login: String, text: String) {}
     fun onBetaChatChanged() {}
 }
 
@@ -421,7 +421,7 @@ class LinkClient(
                 is ServerMsg.BetaChatSent -> if (betaOk()) listener.onBetaChatSent(msg.key, msg.message, msg.error)
                 is ServerMsg.BetaChatDeleted -> if (betaOk()) listener.onBetaChatDeleted(msg.id, msg.error)
                 is ServerMsg.BetaChatDown -> if (betaOk()) listener.onBetaChatDown(msg)
-                is ServerMsg.BetaChatNews -> if (betaOk()) listener.onBetaChatNews(msg.unread, msg.login, msg.text)
+                is ServerMsg.BetaChatNews -> if (betaOk()) listener.onBetaChatNews(msg.waiting, msg.login, msg.text)
                 ServerMsg.BetaChatChanged -> if (betaOk()) listener.onBetaChatChanged()
             }
         }

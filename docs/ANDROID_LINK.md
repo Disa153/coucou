@@ -250,7 +250,7 @@ Phone → computer:
 - `{"type":"betaChatFile","url":"https://gist.githubusercontent.com/…"}` → `betaChatDown` parts
   `{url, part, parts, data}` (or `{url, error}`): the attachment's bytes, base64.
 
-Computer → phone, unasked: `{"type":"betaChatNews","unread":n,"login":"…","text":"…"}` when someone else wrote
+Computer → phone, unasked: `{"type":"betaChatNews","count":n,"login":"…","text":"…"}` when someone else wrote
 (the phone plays its sound and shows a notification), and `{"type":"betaChatChanged"}` after a send or a delete.
 
 ## Admission (what a flood cannot do)
