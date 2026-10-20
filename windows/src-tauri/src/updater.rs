@@ -245,10 +245,16 @@ pub struct UpdateInfo {
     pub token_page: String,
 }
 
+impl Updater {
+    /// The channel picked, as kept beside the settings. The builder keeps it
+    /// (lib.rs) before any window exists: a page may ask for it as it loads.
+    pub fn loaded() -> Updater {
+        let (channel, via) = load_channel();
+        Updater { channel: Mutex::new(channel), via: Mutex::new(via), ..Default::default() }
+    }
+}
+
 pub fn setup(app: &AppHandle) {
-    let (channel, via) = load_channel();
-    let updater = Updater { channel: Mutex::new(channel), via: Mutex::new(via), ..Default::default() };
-    app.manage(updater);
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         tokio::time::sleep(FIRST_CHECK).await;
@@ -260,7 +266,11 @@ pub fn setup(app: &AppHandle) {
 }
 
 fn state(app: &AppHandle) -> &Updater {
-    app.state::<Updater>().inner()
+    static FALLBACK: std::sync::LazyLock<Updater> = std::sync::LazyLock::new(Updater::default);
+    match app.try_state::<Updater>() {
+        Some(s) => s.inner(),
+        None => &FALLBACK,
+    }
 }
 
 fn info(app: &AppHandle) -> UpdateInfo {

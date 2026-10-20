@@ -748,6 +748,9 @@ pub fn run() {
         .manage(Chat::default())
         .manage(shortcuts::Registry::default())
         .manage(recap::load())
+        // Before the windows: their pages ask for the account as soon as they load.
+        .manage(account::Account::loaded())
+        .manage(updater::Updater::loaded())
         .invoke_handler(tauri::generate_handler![
             boot,
             save_settings,
