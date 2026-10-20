@@ -23,6 +23,7 @@ import { agentsSection } from "./agents";
 import { phoneSection } from "./phone";
 import { glowSection } from "./glow";
 import { petSection } from "./pet";
+import { accountSections } from "./account";
 import { colorDot } from "./colors";
 import { renderDiff, statusDot } from "./parts";
 import {
@@ -761,7 +762,10 @@ function updatesSection(): HTMLElement {
       betaRow.append(
         h("label", { text: t("Beta tester") }),
         toggle(beta, (on) => {
-          if (on) {
+          if (on && info?.betaByAccount) {
+            // A tester's account (Settings → Account) opens it: no password.
+            void Bridge.updateSetChannel("beta").then(() => void Bridge.updateInfo().then((i) => draw(i)));
+          } else if (on) {
             passwordRow.style.display = "";
             password.focus();
           } else {
@@ -1744,6 +1748,10 @@ async function render() {
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
     general: () => [generalSection(), glowSection(() => settings, toggle, () => void save()), petSection(() => settings, toggle, () => void save()), updatesSection()],
+    account: () => accountSections(toggle, async (s) => {
+      settings = { ...settings, ...s };
+      await save();
+    }),
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [

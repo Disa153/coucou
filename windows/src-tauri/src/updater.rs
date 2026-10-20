@@ -2,8 +2,9 @@
 // release assets of Disa153/coucou.
 //
 //   * beta: every build of the all-in-one branch, for the owner, behind a
-//     password (its SHA-256 is compiled in from the COUCOU_BETA_PASSWORD secret;
-//     no secret, no beta switch). The password only hides the switch: the beta
+//     password (its SHA-256 is compiled in from the COUCOU_BETA_PASSWORD secret),
+//     or for whoever signed in with a GitHub account the owner put on the
+//     testers list (account.rs). Either only shows the switch: the beta
 //     installers are public files like any release.
 //   * stable: only a beta build the owner promoted by hand (the
 //     "Promote beta to stable" workflow). Everybody else is on it.
@@ -39,7 +40,8 @@ const API: &str = "https://api.github.com/repos/Disa153/coucou";
 const PROMOTE_WORKFLOW: &str = "promote-stable.yml";
 /// A fine-grained token for this repository that may only run workflows,
 /// prefilled on GitHub's page (the repository is picked there).
-pub const TOKEN_PAGE: &str = "https://github.com/settings/personal-access-tokens/new?name=Coucou%20release&description=Runs%20%22Promote%20beta%20to%20stable%22%20from%20Coucou&target_name=Disa153&expires_in=none&actions=write";
+/// Contents: write lets the owner edit the beta testers list (account.rs).
+pub const TOKEN_PAGE: &str = "https://github.com/settings/personal-access-tokens/new?name=Coucou%20release&description=Runs%20%22Promote%20beta%20to%20stable%22%20and%20edits%20the%20beta%20testers%20from%20Coucou&target_name=Disa153&expires_in=none&actions=write&contents=write";
 const MANIFEST_LIMIT: usize = 64 * 1024;
 const INSTALLER_LIMIT: usize = 400 * 1024 * 1024;
 const BETA_SALT: &str = "coucou-beta:";
@@ -145,36 +147,71 @@ fn public_key() -> Option<Vec<u8>> {
 
 // ── The chosen channel, kept beside the settings ──────────────────────────────
 
+/// How the beta channel was opened: the password, or the GitHub account.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum Via {
+    #[default]
+    Password,
+    Account,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct Stored {
     channel: Channel,
+    #[serde(default)]
+    via: Via,
 }
 
 fn stored_path() -> PathBuf {
     crate::settings::local_dir().join("update.json")
 }
 
-fn load_channel() -> Channel {
-    let channel = std::fs::read_to_string(stored_path())
+fn load_channel() -> (Channel, Via) {
+    let stored = std::fs::read_to_string(stored_path())
         .ok()
         .and_then(|t| serde_json::from_str::<Stored>(&t).ok())
-        .map(|s| s.channel)
         .unwrap_or_default();
-    // A build without the beta password cannot stay on beta.
-    if channel == Channel::Beta && beta_hash().is_none() {
-        Channel::Stable
+    // A build without the beta password cannot stay on beta through it. Through
+    // the account, the testers list decides once it is read (account_changed).
+    if stored.channel == Channel::Beta && stored.via == Via::Password && beta_hash().is_none() {
+        (Channel::Stable, Via::Password)
     } else {
-        channel
+        (stored.channel, stored.via)
     }
 }
 
-fn save_channel(channel: Channel) {
+fn save_channel(channel: Channel, via: Via) {
     let path = stored_path();
     if let Some(dir) = path.parent() {
         let _ = std::fs::create_dir_all(dir);
     }
-    if let Ok(text) = serde_json::to_string(&Stored { channel }) {
+    if let Ok(text) = serde_json::to_string(&Stored { channel, via }) {
         let _ = std::fs::write(path, text);
+    }
+}
+
+/// The account or the testers list changed: one who is no longer a tester goes back to stable.
+pub fn account_changed(app: &AppHandle) {
+    let Some(u) = app.try_state::<Updater>() else { return };
+    let back = {
+        let mut channel = u.channel.lock().unwrap();
+        let via = *u.via.lock().unwrap();
+        if *channel == Channel::Beta && via == Via::Account && !crate::account::beta_allowed(app) {
+            *channel = Channel::Stable;
+            true
+        } else {
+            false
+        }
+    };
+    if back {
+        *u.found.lock().unwrap() = None;
+        save_channel(Channel::Stable, Via::Password);
+        crate::log::line("update: no longer on the beta testers list, back to stable");
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move {
+            let _ = check(&app).await;
+        });
     }
 }
 
@@ -183,6 +220,7 @@ fn save_channel(channel: Channel) {
 #[derive(Default)]
 pub struct Updater {
     channel: Mutex<Channel>,
+    via: Mutex<Via>,
     /// The newer build found by the last check.
     found: Mutex<Option<Manifest>>,
     installing: std::sync::atomic::AtomicBool,
@@ -194,8 +232,10 @@ pub struct UpdateInfo {
     pub version: String,
     pub build: u64,
     pub channel: Channel,
-    /// This build has a beta password: the switch can be offered.
+    /// This build has a beta password, or the account is a tester's: the switch can be offered.
     pub beta_available: bool,
+    /// The signed-in account opens the beta: no password asked.
+    pub beta_by_account: bool,
     /// Updates install themselves here (the Windows installer).
     pub can_install: bool,
     pub found: Option<Manifest>,
@@ -206,7 +246,8 @@ pub struct UpdateInfo {
 }
 
 pub fn setup(app: &AppHandle) {
-    let updater = Updater { channel: Mutex::new(load_channel()), ..Default::default() };
+    let (channel, via) = load_channel();
+    let updater = Updater { channel: Mutex::new(channel), via: Mutex::new(via), ..Default::default() };
     app.manage(updater);
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
@@ -225,14 +266,19 @@ fn state(app: &AppHandle) -> &Updater {
 fn info(app: &AppHandle) -> UpdateInfo {
     let u = state(app);
     let channel = *u.channel.lock().unwrap();
+    let via = *u.via.lock().unwrap();
+    let by_account = crate::account::beta_allowed(app);
+    // Releasing to everyone is the owner's: through the password, or signed in as the owner.
+    let releaser = via == Via::Password || crate::account::is_owner(app);
     UpdateInfo {
         version: env!("CARGO_PKG_VERSION").to_string(),
         build: build(),
         channel,
-        beta_available: beta_hash().is_some(),
+        beta_available: beta_hash().is_some() || by_account,
+        beta_by_account: by_account,
         can_install: cfg!(windows),
         found: u.found.lock().unwrap().clone(),
-        promote_page: (channel == Channel::Beta).then(|| PROMOTE_PAGE.to_string()),
+        promote_page: (channel == Channel::Beta && releaser).then(|| PROMOTE_PAGE.to_string()),
         release_connected: crate::secrets::get_internal(RELEASE_TOKEN).is_some(),
         token_page: TOKEN_PAGE.to_string(),
     }
@@ -435,15 +481,22 @@ pub async fn update_check(app: AppHandle) -> CheckResult {
     CheckResult { info: info(&app), refusal }
 }
 
-/// Beta needs the password; stable never does. False when the password is wrong.
+/// Beta needs the password, or a tester's account; stable never does. False when refused.
 #[tauri::command]
 pub async fn update_set_channel(app: AppHandle, channel: Channel, password: Option<String>) -> bool {
-    if channel == Channel::Beta && !password_ok(password.as_deref().unwrap_or(""), beta_hash()) {
+    let via = if channel != Channel::Beta {
+        Via::Password
+    } else if password_ok(password.as_deref().unwrap_or(""), beta_hash()) {
+        Via::Password
+    } else if crate::account::beta_allowed(&app) {
+        Via::Account
+    } else {
         return false;
-    }
+    };
     *state(&app).channel.lock().unwrap() = channel;
+    *state(&app).via.lock().unwrap() = via;
     *state(&app).found.lock().unwrap() = None;
-    save_channel(channel);
+    save_channel(channel, via);
     let _ = check(&app).await;
     true
 }

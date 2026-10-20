@@ -38,6 +38,8 @@ export interface UpdateInfo {
   build: number;
   channel: UpdateChannel;
   betaAvailable: boolean;
+  /** The signed-in GitHub account opens the beta: no password asked. */
+  betaByAccount: boolean;
   canInstall: boolean;
   found: UpdateManifest | null;
   promotePage: string | null;
@@ -47,6 +49,38 @@ export interface UpdateInfo {
 }
 
 export type ReleaseRefusal = "notConnected" | "badToken" | "wrongPassword" | "notBeta" | "network";
+
+/** Settings → Account (src-tauri/src/account.rs). */
+export type AccountError =
+  | "notConfigured" | "denied" | "expired" | "network" | "notSignedIn" | "signedOut" | "notOwner"
+  | "noReleaseToken" | "needsContents" | "noSaves" | "badLogin";
+
+export interface AccountState {
+  configured: boolean;
+  signedIn: boolean;
+  login: string;
+  name: string;
+  owner: boolean;
+  tester: boolean;
+  sync: boolean;
+  parts: string[];
+  lastSync: number;
+}
+
+export interface DeviceCode {
+  userCode: string;
+  verificationUri: string;
+}
+
+export interface AccountSaved {
+  savedAt: number;
+  parts: string[];
+}
+
+export interface Person {
+  login: string;
+  name: string;
+}
 
 export interface ReleaseRun {
   status: string;
@@ -239,6 +273,21 @@ export const Bridge = {
   listMonitors: () => call<{ key: string; label: string }[]>("list_monitors"),
 
   openUrl: (url: string) => call<void>("open_url", { url }),
+
+  /** Settings → Account (src-tauri/src/account.rs). The throwing ones reject with an AccountError. */
+  accountState: () => call<AccountState>("account_state"),
+  accountBegin: () => callOrThrow<DeviceCode>("account_begin"),
+  accountFinish: () => callOrThrow<AccountState>("account_finish"),
+  accountCancel: () => call<void>("account_cancel"),
+  accountSignOut: () => call<AccountState>("account_sign_out"),
+  accountSetSync: (sync: boolean, parts: string[]) => call<AccountState>("account_set_sync", { sync, parts }),
+  accountSyncNow: () => callOrThrow<AccountState>("account_sync_now"),
+  accountSaved: () => callOrThrow<AccountSaved | null>("account_saved"),
+  accountRestore: (parts: string[]) => callOrThrow<Settings>("account_restore", { parts }),
+  accountTesters: () => callOrThrow<Person[]>("account_testers"),
+  accountTesterAdd: (login: string, name: string) => callOrThrow<Person[]>("account_tester_add", { login, name }),
+  accountTesterRemove: (login: string) => callOrThrow<Person[]>("account_tester_remove", { login }),
+  accountSearch: (query: string) => callOrThrow<Person[]>("account_search", { query }),
 
   /** In-app updates (src-tauri/src/updater.rs). */
   updateInfo: () => call<UpdateInfo>("update_info"),

@@ -64,4 +64,14 @@ jobs:
         run: cargo build --release -p coucou-hook
 
       - name: Rust tests
-        run: cargo test --workspace --locked
+        shell: bash
+        run: cargo test --workspace --locked 2>&1 | tee rust.log; exit ${PIPESTATUS[0]}
+
+      - name: Show what failed
+        if: failure()
+        shell: bash
+        run: |
+          # The log can't be read from outside: what failed goes into one annotation.
+          [ -f rust.log ] || exit 0
+          msg=$(grep -E -A6 "^error(\[E[0-9]+\])?:|^---- .* stdout ----|panicked at|^failures:" rust.log | head -120 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Rust tests::${msg:0:60000}"
