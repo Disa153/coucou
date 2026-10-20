@@ -193,6 +193,10 @@ class MainActivity : ComponentActivity() {
                                 alert = model.approvals.isNotEmpty(), modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
                             )
                         }
+                        // "Update available" floats above the bar on Home and Settings.
+                        if (barVisible && (screen == Screen.HOME || screen == Screen.SETTINGS)) {
+                            com.coucou.android.ui.UpdateBanner(model.updater, Modifier.align(Alignment.BottomCenter).padding(bottom = com.coucou.android.ui.BarClearance))
+                        }
                         // A request for permission rises over whatever is on screen until it is decided or closed.
                         val pending = ApprovalSheetPlan.next(model.approvals, closedApproval)
                         if (pending != null && screen != Screen.SCAN) ApprovalSheet(model, pending, onAllow = ::approve, onDismiss = { closedApproval = pending.fingerprint })
@@ -220,6 +224,7 @@ class MainActivity : ComponentActivity() {
         model.inForeground = true
         model.refreshOverlayPermission() // maybe granted meanwhile, from this app's switch or Android's settings
         model.refreshBattery() // the battery setting may have been changed in Android's screen
+        model.updater.check() // at most every few hours
     }
 
     override fun onStop() {

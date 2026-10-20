@@ -271,6 +271,8 @@ class AppModel(private val context: Context) : LinkListener {
 
     /** The beta chat of the owner and the testers, through the computer (cap `betachat`). */
     val betaChat = BetaChatModel(context, prefs) { link }
+    /** "Update available" from the fork's releases. */
+    val updater = AppUpdater(context, prefs)
 
     private fun chatLinkLost() {
         betaChat.onLinkLost()

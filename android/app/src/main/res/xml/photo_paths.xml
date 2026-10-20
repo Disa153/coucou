@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The chat's camera pictures, in this app's cache. -->
+<!-- The chat's camera pictures and a downloaded update, in this app's cache. -->
 <paths>
     <cache-path name="camera" path="camera/" />
+    <cache-path name="updates" path="updates/" />
 </paths>
