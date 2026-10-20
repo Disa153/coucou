@@ -3379,8 +3379,6 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   flex: 1 1 0;
   min-height: 0;
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
 }
 
 .pr-text {
@@ -3391,21 +3389,36 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   flex-direction: column;
 }
 
+/* The screenshot sits in the top right corner, level with the icon; the words keep clear of it. */
+.pr-head,
+.pr-text {
+  padding-right: 184px;
+}
+
 .pr-shot {
+  position: absolute;
+  top: 12px;
+  right: 14px;
   width: 170px;
-  flex: 0 0 170px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: zoom-in;
+  z-index: 1;
 }
 
-.pr-panel.big .pr-text {
-  display: none;
+.pr-panel.big .pr-text,
+.pr-panel.big .pr-head {
+  visibility: hidden;
 }
 
 .pr-panel.big .pr-shot {
-  width: 100%;
-  flex-basis: 100%;
+  left: 14px;
+  right: 14px;
+  width: auto;
+  bottom: 48px;
+  height: calc(100% - 60px);
+  object-fit: contain;
+  background: #0b0c0e;
   cursor: zoom-out;
 }
 
