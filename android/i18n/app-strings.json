@@ -421,6 +421,6 @@
     "channel_approvals_quiet": "Approvals (quiet)",
     "channel_approvals_quiet_desc": "A waiting request, kept in the shade while the pill shows it",
     "channel_approvals": "Approvals",
-    "channel_approvals_desc": "An agent is waiting for your permission"
+    "channel_approvals_desc": "An agent needs your permission"
   }
 }

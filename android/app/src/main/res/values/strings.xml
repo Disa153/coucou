@@ -421,5 +421,5 @@
     <string name="channel_approvals_quiet">Approvals (quiet)</string>
     <string name="channel_approvals_quiet_desc">A waiting request, kept in the shade while the pill shows it</string>
     <string name="channel_approvals">Approvals</string>
-    <string name="channel_approvals_desc">An agent is waiting for your permission</string>
+    <string name="channel_approvals_desc">An agent needs your permission</string>
 </resources>
