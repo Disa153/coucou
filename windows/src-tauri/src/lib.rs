@@ -1,5 +1,6 @@
 // Coucou for Windows — app wiring and the commands the island calls.
 
+mod account;
 mod agent_hooks;
 mod agents;
 mod chat;
@@ -136,6 +137,7 @@ fn save_settings(app: AppHandle, shared: State<Shared>, settings: Settings) {
     integrations::settings_saved(&app, &settings.active_integrations);
     spotify::sync(&app, &settings.active_integrations);
     transcripts::configure(&settings);
+    account::settings_saved(&app, &settings);
     if shortcuts_changed {
         shortcuts::apply(&app, &settings.shortcuts);
     }
@@ -874,6 +876,19 @@ pub fn run() {
             flow::pill_hover,
             flow::pill_drag_begin,
             island_drag_begin,
+            account::account_state,
+            account::account_begin,
+            account::account_finish,
+            account::account_cancel,
+            account::account_sign_out,
+            account::account_testers,
+            account::account_tester_add,
+            account::account_tester_remove,
+            account::account_search,
+            account::account_set_sync,
+            account::account_sync_now,
+            account::account_saved,
+            account::account_restore,
             updater::update_info,
             updater::update_check,
             updater::update_set_channel,
@@ -938,6 +953,7 @@ pub fn run() {
             integrations::start(handle.clone());
             spotify::sync(&handle, &loaded.active_integrations);
             transcripts::configure(&loaded);
+            account::setup(&handle);
             updater::setup(&handle);
             shortcuts::apply(&handle, &loaded.shortcuts);
             if loaded.autostart {

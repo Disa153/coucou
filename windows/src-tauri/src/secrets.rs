@@ -74,6 +74,8 @@ pub const INTERNAL_KEYS: &[&str] = &[
     "phone-relay-access",
     // The owner's GitHub token that runs "Promote beta to stable" (updater.rs).
     "release-token",
+    // The GitHub sign-in of Settings → Account (account.rs), scope `gist` only.
+    "account-token",
 ];
 
 /// Whether the keystore would accept this key through `get_internal` / `set_internal`.
