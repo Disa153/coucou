@@ -8,6 +8,10 @@ import { Bridge, IS_TAURI } from "../core/bridge";
 import type { IslandViewName } from "../core/layout";
 import { t, tl } from "../i18n/i18n";
 import type { ViewActions, ViewHost } from "./views";
+// Custom UI's own icon (its assets/icon.ico, MIT), bundled: nothing is fetched.
+import iconUrl from "./customui.png";
+// What it looks like (a screenshot from sergey1029's desktop, the news feed blurred), bundled too.
+import shotUrl from "./customui-shot.jpg";
 
 export const PROMO_URL = "https://github.com/sergey1029/custom-ui";
 
@@ -38,19 +42,23 @@ export function buildPromo(actions: ViewActions): ViewHost {
   const more = h("div", { class: "pr-more" });
   const moreBtn = h("button", { class: "btn secondary" }, h("span", { text: tl("More") }));
   const open = h("button", { class: "btn primary" }, h("span", { text: tl("Open on GitHub") }));
-  const later = h("button", { class: "btn secondary" }, h("span", { text: tl("Not now") }));
-  const never = h("button", { class: "pr-never", text: tl("Don't show again") });
+  const later = h("button", { class: "btn secondary" }, h("span", { text: tl("Later") }));
+  const never = h("button", { class: "pr-never", text: tl("Don't show") });
+  // What it looks like, always beside the words; a click makes it fill the card.
+  const shot = h("img", { class: "pr-shot", src: shotUrl, alt: "Custom UI" });
   const panel = h(
     "div",
     { class: "rv-panel pr-panel" },
-    h("div", { class: "pr-tag", text: tl("A friend's project") }),
-    title,
-    line,
-    more,
+    h("div", { class: "pr-head" },
+      h("img", { class: "pr-icon", src: iconUrl, alt: "" }),
+      h("div", {}, h("div", { class: "pr-tag", text: tl("A friend's project") }), title),
+    ),
+    h("div", { class: "pr-body" }, h("div", { class: "pr-text" }, line, more), shot),
     h("div", { class: "rv-row" }, never, h("span", { class: "rv-grow" }), moreBtn, later, open),
   );
   const el = h("div", { class: "view review promo" }, panel);
   let expanded = false;
+  shot.addEventListener("click", () => panel.classList.toggle("big"));
 
   function paint() {
     clear(more);
@@ -60,6 +68,8 @@ export function buildPromo(actions: ViewActions): ViewHost {
       const list = h("ul", {});
       for (const d of DETAILS) list.append(h("li", { text: d() }));
       more.append(list);
+    } else {
+      panel.classList.remove("big");
     }
     moreBtn.style.display = expanded ? "none" : "";
   }

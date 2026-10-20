@@ -7196,17 +7196,6 @@
    "ru": "Подробнее",
    "id": "Selengkapnya"
   },
-  "Don't show again": {
-   "zh-Hans": "不再显示",
-   "hi": "फिर न दिखाएँ",
-   "es": "No volver a mostrar",
-   "ar": "لا تعرض مجددًا",
-   "fr": "Ne plus afficher",
-   "bn": "আর দেখাবেন না",
-   "pt-BR": "Não mostrar de novo",
-   "ru": "Больше не показывать",
-   "id": "Jangan tampilkan lagi"
-  },
   "A friend's project": {
    "zh-Hans": "朋友的项目",
    "hi": "एक दोस्त का प्रोजेक्ट",
@@ -7217,6 +7206,17 @@
    "pt-BR": "O projeto de um amigo",
    "ru": "Проект друга",
    "id": "Proyek seorang teman"
+  },
+  "Don't show": {
+   "zh-Hans": "不再显示",
+   "hi": "न दिखाएँ",
+   "es": "No mostrar",
+   "ar": "لا تعرض",
+   "fr": "Ne plus afficher",
+   "bn": "দেখাবেন না",
+   "pt-BR": "Não mostrar",
+   "ru": "Не показывать",
+   "id": "Jangan tampilkan"
   }
  }
 }

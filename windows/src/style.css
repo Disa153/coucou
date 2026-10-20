@@ -3338,6 +3338,19 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   gap: 6px;
 }
 
+.pr-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pr-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex: 0 0 40px;
+}
+
 .pr-tag {
   font: 600 10px var(--font);
   color: var(--amber);
@@ -3352,7 +3365,6 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
 .pr-line {
   font: 400 12px var(--font);
   color: var(--dim);
-  flex: 1 1 auto;
 }
 
 .pr-more {
@@ -3361,6 +3373,45 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   overflow-y: auto;
   font: 400 11.5px/1.4 var(--font);
   color: var(--ink-2);
+}
+
+.pr-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pr-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pr-shot {
+  width: 170px;
+  flex: 0 0 170px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: zoom-in;
+}
+
+.pr-panel.big .pr-text {
+  display: none;
+}
+
+.pr-panel.big .pr-shot {
+  width: 100%;
+  flex-basis: 100%;
+  cursor: zoom-out;
+}
+
+.pr-panel .btn,
+.pr-never {
+  white-space: nowrap;
 }
 
 .pr-more ul {
