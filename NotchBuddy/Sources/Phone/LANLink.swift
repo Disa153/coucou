@@ -771,8 +771,8 @@ final class LANLink {
         let content = UNMutableNotificationContent()
         content.title = pillName
         content.body = approval.command.isEmpty
-            ? "An agent is waiting for your OK"
-            : "Waiting for your OK: \(approval.command.prefix(140))"
+            ? String(localized: "An agent is waiting for your OK")
+            : String(localized: "Waiting for your OK: \(String(approval.command.prefix(140)))")
         content.sound = PhoneSettings.sound("approval")
         content.categoryIdentifier = NotificationActions.approvalCategory
         content.userInfo = ["fingerprint": approval.fingerprint, "pillId": approval.pillId]

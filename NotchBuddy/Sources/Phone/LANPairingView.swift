@@ -134,7 +134,7 @@ struct LANPairingView: View {
         switch lan.state {
         case .unpaired: "Not paired yet"
         case .connecting: "Connecting…"
-        case .connected: "Connected to \(lan.desktopName.isEmpty ? (lan.pairing?.name ?? "your computer") : lan.desktopName)"
+        case .connected: String(localized: "Connected to \(lan.desktopName.isEmpty ? (lan.pairing?.name ?? String(localized: "your computer")) : lan.desktopName)")
         case .offline(let reason): reason
         case .rejected: "The computer refused this iPhone's code. Pair again."
         }

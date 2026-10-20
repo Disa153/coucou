@@ -136,7 +136,7 @@ struct SessionDetailView: View {
                             }
                             Spacer(minLength: 6)
                             if !past.files.isEmpty {
-                                Text("\(past.files.count) file\(past.files.count == 1 ? "" : "s")")
+                                Text(past.files.count == 1 ? "1 file" : "\(past.files.count) files")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }

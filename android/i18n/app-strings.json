@@ -411,6 +411,16 @@
     "promo_more": "More",
     "promo_later": "Later",
     "promo_open": "GitHub",
-    "promo_never": "Don't show"
+    "promo_never": "Don't show",
+    "channel_link": "Connection",
+    "channel_link_desc": "Shows that Coucou is connected to your computer",
+    "channel_updates": "Updates",
+    "channel_updates_desc": "An agent finished, failed or has a question",
+    "channel_beta_chat": "Beta chat",
+    "channel_beta_chat_desc": "A new message from Coucou's beta testers",
+    "channel_approvals_quiet": "Approvals (quiet)",
+    "channel_approvals_quiet_desc": "A waiting request, kept in the shade while the pill shows it",
+    "channel_approvals": "Approvals",
+    "channel_approvals_desc": "An agent is waiting for your permission"
   }
 }

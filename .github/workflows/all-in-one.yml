@@ -244,7 +244,10 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate project
-        run: cd NotchBuddy && xcodegen
+        run: |
+          cd NotchBuddy && xcodegen
+          # The fork's build number, for the card after an update (LANPromo.swift); CFBundleVersion stays as it is.
+          /usr/libexec/PlistBuddy -c "Add :CoucouForkBuild integer $GITHUB_RUN_NUMBER" Resources/InfoPhone.plist
       - name: Build iPhone app (LAN link, unsigned)
         run: |
           set -o pipefail

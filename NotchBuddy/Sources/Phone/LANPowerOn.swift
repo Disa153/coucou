@@ -357,9 +357,9 @@ final class LANPowerOn {
         RouterStore.save(router)
         do {
             let address = try await Keenetic.test(router)
-            var note = "The router accepted this login (\(address))."
+            var note = String(localized: "The router accepted this login (\(address)).")
             if target == nil {
-                note += await learnFromRouter() ? " It also told Coucou the computer's network card." : ""
+                note += await learnFromRouter() ? " " + String(localized: "It also told Coucou the computer's network card.") : ""
             }
             return note
         } catch {
@@ -416,12 +416,12 @@ final class LANPowerOn {
                 }
             }
             if routerOK || direct.sent > 0 {
-                let how = routerOK ? "The router sent the signal." : "Signal sent from this iPhone."
+                let how = routerOK ? String(localized: "The router sent the signal.") : String(localized: "Signal sent from this iPhone.")
                 BackgroundLog.add("Wake: \(how)")
                 phase = .waiting(how + (routerResult.map { " \($0)" } ?? ""))
                 waitForComputer()
             } else {
-                phase = .failed(routerResult ?? "iOS did not let the signal out (\(direct.error ?? "no network")). Set up the router below.")
+                phase = .failed(routerResult ?? String(localized: "iOS did not let the signal out (\(direct.error ?? String(localized: "no network"))). Set up the router below."))
             }
         }
     }

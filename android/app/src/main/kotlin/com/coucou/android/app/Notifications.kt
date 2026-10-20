@@ -34,14 +34,14 @@ class Notifications(private val context: Context) {
         nm.deleteNotificationChannel("approvals")
         nm.deleteNotificationChannel("approvals_v2")
         nm.createNotificationChannel(
-            NotificationChannel(CH_LINK, "Connection", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Shows that Coucou is connected to your computer"
+            NotificationChannel(CH_LINK, context.getString(R.string.channel_link), NotificationManager.IMPORTANCE_LOW).apply {
+                description = context.getString(R.string.channel_link_desc)
                 setShowBadge(false)
             },
         )
         nm.createNotificationChannel(
-            NotificationChannel(CH_UPDATES, "Updates", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "An agent finished, failed or has a question"
+            NotificationChannel(CH_UPDATES, context.getString(R.string.channel_updates), NotificationManager.IMPORTANCE_LOW).apply {
+                description = context.getString(R.string.channel_updates_desc)
                 setShowBadge(false)
             },
         )
@@ -49,20 +49,20 @@ class Notifications(private val context: Context) {
         // so the pill and the notification never overlap at the top of the screen.
         // Silent: the beta chat plays the sound the user picked itself (ChatChimes).
         nm.createNotificationChannel(
-            NotificationChannel(CH_BETA_CHAT, "Beta chat", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "A new message from Coucou's beta testers"
+            NotificationChannel(CH_BETA_CHAT, context.getString(R.string.channel_beta_chat), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = context.getString(R.string.channel_beta_chat_desc)
                 setSound(null, null)
             },
         )
         nm.createNotificationChannel(
-            NotificationChannel(CH_APPROVAL_QUIET, "Approvals (quiet)", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "A waiting request, kept in the shade while the pill shows it"
+            NotificationChannel(CH_APPROVAL_QUIET, context.getString(R.string.channel_approvals_quiet), NotificationManager.IMPORTANCE_LOW).apply {
+                description = context.getString(R.string.channel_approvals_quiet_desc)
                 setShowBadge(false)
             },
         )
         nm.createNotificationChannel(
-            NotificationChannel(CH_APPROVAL, "Approvals", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "An agent is waiting for your permission"
+            NotificationChannel(CH_APPROVAL, context.getString(R.string.channel_approvals), NotificationManager.IMPORTANCE_HIGH).apply {
+                description = context.getString(R.string.channel_approvals_desc)
                 // A short buzz, so a request is felt even when the notification volume is 0 (a channel cannot change
                 // later, which is why this one has a new id).
                 enableVibration(true)

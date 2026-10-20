@@ -295,6 +295,9 @@ targets:
       # The card after an update (LANPromo.swift), in Russian too.
       - path: Resources/Promo.xcstrings
         buildPhase: resources
+      # The iPhone app's own words in Russian (PhoneLocalized.swift); the Mac keeps Resources/Localizable.xcstrings.
+      - path: Resources/Phone/Localizable.xcstrings
+        buildPhase: resources
     info:
       path: Resources/InfoPhone.plist
       properties:
@@ -305,6 +308,10 @@ targets:
           - INAlternativeAppName: Куку
         CFBundleName: Coucou
         CFBundleDisplayName: Coucou
+        # English, and Russian where the phone's language is Russian.
+        CFBundleLocalizations:
+          - en
+          - ru
         CFBundleIdentifier: fr.louisraille.Coucou
         CFBundleVersion: "14"
         CFBundleShortVersionString: "1.0"

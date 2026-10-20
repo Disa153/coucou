@@ -412,4 +412,14 @@
     <string name="promo_later">Later</string>
     <string name="promo_open">GitHub</string>
     <string name="promo_never">Don\'t show</string>
+    <string name="channel_link">Connection</string>
+    <string name="channel_link_desc">Shows that Coucou is connected to your computer</string>
+    <string name="channel_updates">Updates</string>
+    <string name="channel_updates_desc">An agent finished, failed or has a question</string>
+    <string name="channel_beta_chat">Beta chat</string>
+    <string name="channel_beta_chat_desc">A new message from Coucou\'s beta testers</string>
+    <string name="channel_approvals_quiet">Approvals (quiet)</string>
+    <string name="channel_approvals_quiet_desc">A waiting request, kept in the shade while the pill shows it</string>
+    <string name="channel_approvals">Approvals</string>
+    <string name="channel_approvals_desc">An agent is waiting for your permission</string>
 </resources>

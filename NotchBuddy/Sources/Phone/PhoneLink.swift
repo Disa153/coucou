@@ -356,8 +356,8 @@ final class PhoneLink {
             let content = UNMutableNotificationContent()
             content.title = "\(session.pillName) · \(session.title)"
             content.body = session.approvalCommand.isEmpty
-                ? "An agent is waiting for your OK"
-                : "Waiting for your OK: \(session.approvalCommand.prefix(140))"
+                ? String(localized: "An agent is waiting for your OK")
+                : String(localized: "Waiting for your OK: \(String(session.approvalCommand.prefix(140)))")
             content.sound = PhoneSettings.sound("approval")
             content.categoryIdentifier = NotificationActions.approvalCategory
             content.userInfo = ["fingerprint": session.approvalFingerprint, "pillId": session.id]

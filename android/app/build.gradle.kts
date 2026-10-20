@@ -25,8 +25,8 @@ android {
         // The fork's all-in-one build numbers its APKs (COUCOU_VERSION_CODE), so each one installs over the one before.
         versionCode = System.getenv("COUCOU_VERSION_CODE")?.toIntOrNull() ?: 2
         versionName = System.getenv("COUCOU_VERSION_NAME") ?: "0.2.0"
-        // English only: libraries' other languages are left out of the app too.
-        resourceConfigurations += listOf("en")
+        // English and Russian: libraries' other languages are left out of the app.
+        resourceConfigurations += listOf("en", "ru")
     }
     signingConfigs {
         val keystore = releaseKeystore
