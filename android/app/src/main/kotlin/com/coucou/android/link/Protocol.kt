@@ -18,7 +18,7 @@ object Protocol {
     /** One message never exceeds this; a longer line is a protocol error. */
     const val MAX_LINE_BYTES = 64 * 1024
     /** Optional features this app understands; the desktop offers back the ones it has switched on. */
-    val CAPABILITIES = listOf("chat", "details", "answers", "prefs", "diffs", "usage", "services", "relay", "wake")
+    val CAPABILITIES = listOf("chat", "details", "answers", "prefs", "diffs", "usage", "services", "relay", "wake", "betachat")
     const val CAP_CHAT = "chat"
     /** Steps, last line, project folder name and colour of each session. */
     const val CAP_DETAILS = "details"
@@ -36,6 +36,14 @@ object Protocol {
     const val CAP_RELAY = "relay"
     /** This computer's wired card and network, kept for "Turn on computer" (Wake-on-LAN) when it is off. */
     const val CAP_WAKE = "wake"
+    /** The beta chat of the owner and the testers, read and written as the computer's GitHub account (docs/ANDROID_LINK.md). */
+    const val CAP_BETA_CHAT = "betachat"
+    /** As on the computer (betachat.rs): at most this many attachments of this size in one message. */
+    const val BETA_MAX_FILES = 4
+    const val BETA_MAX_FILE_BYTES = 7 * 1024 * 1024
+    /** Raw bytes in one part of a file sent to the computer (40 000 base64 characters). */
+    const val BETA_PART_BYTES = 30_000
+    const val BETA_MAX_TEXT = 2000
     /** Photos in the chat: at most this many per message, each a JPEG cut in parts of [CHAT_IMAGE_PART_BYTES]. */
     const val CHAT_MAX_IMAGES = 4
     const val CHAT_IMAGE_PART_BYTES = 36_000
@@ -123,6 +131,15 @@ data class AskedQuestion(val question: String, val options: List<AskedOption>, v
 /** A question waiting for an answer (cap `answers`). */
 data class QuestionRequest(val pillId: String, val fingerprint: String, val questions: List<AskedQuestion>, val createdAtMs: Long)
 
+/** An attachment of a beta chat message: a file the computer fetches from the sender's Gist at [url] when asked. */
+data class BetaFile(val name: String, val mime: String, val size: Long, val url: String)
+
+/** One message of the beta chat; [mine]: written by the GitHub account signed in on the computer. */
+data class BetaMessage(
+    val id: Long, val login: String, val text: String, val build: Long?, val files: List<BetaFile>,
+    val atSec: Long, val owner: Boolean, val mine: Boolean,
+)
+
 /** What the computer said about itself for Wake-on-LAN: its card's MAC ("aa:bb:..."), its address and its network's broadcast address. */
 data class WakeTarget(val mac: String, val ip: String, val broadcast: String)
 
@@ -158,6 +175,15 @@ sealed interface ServerMsg {
     /** [reason] is a fixed code (off, busy, rate, auth...); [message] a fixed sentence written by the computer. */
     data class ChatError(val id: String, val reason: String, val message: String) : ServerMsg
     data class Error(val code: String, val message: String) : ServerMsg
+    /** One part of the beta chat; [error] instead when it could not be read. */
+    data class BetaChatPage(val part: Int, val parts: Int, val owner: Boolean, val page: String, val messages: List<BetaMessage>, val error: String?) : ServerMsg
+    data class BetaChatSent(val key: String, val message: BetaMessage?, val error: String?) : ServerMsg
+    data class BetaChatDeleted(val id: Long, val error: String?) : ServerMsg
+    /** One part of an attachment's bytes (base64), or why it could not be fetched. */
+    data class BetaChatDown(val url: String, val part: Int, val parts: Int, val data: String, val error: String?) : ServerMsg
+    /** Someone else wrote in the beta chat. */
+    data class BetaChatNews(val unread: Int, val login: String, val text: String) : ServerMsg
+    data object BetaChatChanged : ServerMsg
 }
 
 sealed interface ClientMsg {
@@ -178,7 +204,16 @@ sealed interface ClientMsg {
     data class ChatCancel(val id: String) : ClientMsg
     /** New chat: the computer forgets its side of the conversation and stops a running answer. */
     data object ChatReset : ClientMsg
+    data class BetaChatGet(val full: Boolean) : ClientMsg
+    /** One part of a file for the next [BetaChatSend]: base64 [data], part [part] of [parts]. */
+    data class BetaChatUp(val fid: String, val part: Int, val parts: Int, val data: String) : ClientMsg
+    data class BetaChatSend(val key: String, val text: String, val files: List<BetaOutFile>) : ClientMsg
+    data class BetaChatDelete(val id: Long) : ClientMsg
+    data class BetaChatFile(val url: String) : ClientMsg
 }
+
+/** A file sent just before as [ClientMsg.BetaChatUp] parts under [fid]. */
+data class BetaOutFile(val fid: String, val name: String, val mime: String)
 
 object Wire {
     fun encode(m: ClientMsg): String {
@@ -204,6 +239,12 @@ object Wire {
             is ClientMsg.ChatImage -> o.put("type", "chatImage").put("id", m.id).put("part", m.part).put("parts", m.parts).put("data", m.data)
             is ClientMsg.ChatCancel -> o.put("type", "chatCancel").put("id", m.id)
             ClientMsg.ChatReset -> o.put("type", "chatReset")
+            is ClientMsg.BetaChatGet -> o.put("type", "betaChatGet").put("full", m.full)
+            is ClientMsg.BetaChatUp -> o.put("type", "betaChatUp").put("fid", m.fid).put("part", m.part).put("parts", m.parts).put("data", m.data)
+            is ClientMsg.BetaChatSend -> o.put("type", "betaChatSend").put("key", m.key).put("text", m.text)
+                .put("files", JSONArray(m.files.map { JSONObject().put("fid", it.fid).put("name", it.name).put("mime", it.mime) }))
+            is ClientMsg.BetaChatDelete -> o.put("type", "betaChatDelete").put("id", m.id)
+            is ClientMsg.BetaChatFile -> o.put("type", "betaChatFile").put("url", m.url)
         }
         return o.toString()
     }
@@ -246,6 +287,21 @@ object Wire {
                 "chatDone" -> ServerMsg.ChatDone(chatId(o), if (o.has("text")) o.getString("text") else null)
                 "chatError" -> ServerMsg.ChatError(chatId(o), o.optString("reason", "internal"), o.optString("message", ""))
                 "error" -> ServerMsg.Error(o.optString("code", ""), o.optString("message", ""))
+                "betaChatPage" -> ServerMsg.BetaChatPage(
+                    o.optInt("part", 0), o.optInt("parts", 1).coerceIn(1, 64), o.optBoolean("owner", false),
+                    o.optString("page", "").takeIf { it.startsWith("https://github.com/") }.orEmpty(),
+                    o.optJSONArray("messages")?.objects()?.mapNotNull(::betaMessage).orEmpty(), errorOf(o),
+                )
+                "betaChatSent" -> ServerMsg.BetaChatSent(o.getString("key"), o.optJSONObject("message")?.let(::betaMessage), errorOf(o))
+                "betaChatDeleted" -> ServerMsg.BetaChatDeleted(o.getLong("id"), errorOf(o))
+                "betaChatDown" -> ServerMsg.BetaChatDown(
+                    o.getString("url"), o.optInt("part", 0), o.optInt("parts", 1), o.optString("data", ""), errorOf(o),
+                )
+                "betaChatNews" -> ServerMsg.BetaChatNews(
+                    o.optInt("unread", 0).coerceAtLeast(0), o.optString("login", "").take(39),
+                    o.optString("text", "").filter { !it.isISOControl() || it == '\n' }.take(200),
+                )
+                "betaChatChanged" -> ServerMsg.BetaChatChanged
                 else -> null
             }
         } catch (_: JSONException) {
@@ -253,6 +309,23 @@ object Wire {
         } catch (_: IllegalArgumentException) {
             null
         }
+    }
+
+    private fun errorOf(o: JSONObject): String? = o.opt("error")?.let { if (it is String && it.isNotBlank()) it.take(40) else null }
+
+    /** A beta chat message, or null if it lacks an id; its files only from a Gist (the computer checks it too). */
+    fun betaMessage(o: JSONObject): BetaMessage? {
+        val id = o.optLong("id", -1).takeIf { it > 0 } ?: return null
+        val files = o.optJSONArray("files")?.objects()?.mapNotNull { f ->
+            val url = f.optString("url", "")
+            if (!url.startsWith("https://gist.githubusercontent.com/") || ".." in url) return@mapNotNull null
+            BetaFile(fileNameOf(f.optString("name", "")) ?: "file", f.optString("mime", "application/octet-stream").take(80), f.optLong("size", 0).coerceAtLeast(0), url)
+        }.orEmpty().take(Protocol.BETA_MAX_FILES)
+        return BetaMessage(
+            id = id, login = o.optString("login", "").take(39), text = o.optString("text", "").take(Protocol.BETA_MAX_TEXT),
+            build = if (o.isNull("build")) null else o.optLong("build", 0).takeIf { it > 0 }, files = files,
+            atSec = o.optLong("at", 0), owner = o.optBoolean("owner", false), mine = o.optBoolean("mine", false),
+        )
     }
 
     private fun session(o: JSONObject) = SessionInfo(

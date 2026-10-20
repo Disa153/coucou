@@ -269,7 +269,11 @@ class AppModel(private val context: Context) : LinkListener {
         chatChanged(save = false)
     }
 
+    /** The beta chat of the owner and the testers, through the computer (cap `betachat`). */
+    val betaChat = BetaChatModel(context, prefs) { link }
+
     private fun chatLinkLost() {
+        betaChat.onLinkLost()
         detailsOffered = false
         chatOffered = false
         chatModels = emptyList()
@@ -813,6 +817,7 @@ class AppModel(private val context: Context) : LinkListener {
     override fun onCaps(caps: Set<String>) {
         main.post {
             chatOffered = Protocol.CAP_CHAT in caps
+            betaChat.setOffered(Protocol.CAP_BETA_CHAT in caps)
             detailsOffered = Protocol.CAP_DETAILS in caps
             diffsOffered = Protocol.CAP_DIFFS in caps
             if (Protocol.CAP_USAGE !in caps) usage = null
@@ -860,6 +865,15 @@ class AppModel(private val context: Context) : LinkListener {
     override fun onChatError(id: String, reason: String, message: String) {
         main.post { chatSession.onError(id, reason); chatChanged(save = true) }
     }
+
+    override fun onBetaChatPage(part: com.coucou.android.link.ServerMsg.BetaChatPage) { main.post { betaChat.onPage(part) } }
+    override fun onBetaChatSent(key: String, message: com.coucou.android.link.BetaMessage?, error: String?) { main.post { betaChat.onSent(key, message, error) } }
+    override fun onBetaChatDeleted(id: Long, error: String?) { main.post { betaChat.onDeleted(id, error) } }
+    override fun onBetaChatDown(part: com.coucou.android.link.ServerMsg.BetaChatDown) { main.post { betaChat.onDown(part) } }
+    override fun onBetaChatNews(unread: Int, login: String, text: String) {
+        main.post { if (mode == Mode.PAIRED) betaChat.onNews(unread, login, text, inForeground, notifier) }
+    }
+    override fun onBetaChatChanged() { main.post { betaChat.onChanged() } }
 
     override fun onSessions(sessions: List<SessionInfo>) {
         main.post {

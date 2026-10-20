@@ -47,6 +47,13 @@ class Notifications(private val context: Context) {
         )
         // The same request while the pill is on screen: in the shade only, no heads-up and no sound,
         // so the pill and the notification never overlap at the top of the screen.
+        // Silent: the beta chat plays the sound the user picked itself (ChatChimes).
+        nm.createNotificationChannel(
+            NotificationChannel(CH_BETA_CHAT, "Beta chat", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "A new message from Coucou's beta testers"
+                setSound(null, null)
+            },
+        )
         nm.createNotificationChannel(
             NotificationChannel(CH_APPROVAL_QUIET, "Approvals (quiet)", NotificationManager.IMPORTANCE_LOW).apply {
                 description = "A waiting request, kept in the shade while the pill shows it"
@@ -188,6 +195,27 @@ class Notifications(private val context: Context) {
 
     fun cancelStatus(pillId: String) = runCatching { nm.cancel(STATUS_TAG, statusId(pillId)) }
 
+    /** Someone wrote in the beta chat; the text stays off the lock screen. */
+    fun showBetaChat(login: String, text: String) {
+        val title = context.getString(R.string.beta_chat_title)
+        val n = Notification.Builder(context, CH_BETA_CHAT)
+            .setSmallIcon(R.drawable.ic_stat_mochi)
+            .setContentTitle(if (login.isBlank()) title else "@$login")
+            .setContentText(text.filter { !it.isISOControl() }.take(200).ifBlank { context.getString(R.string.beta_chat_new) })
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setVisibility(Notification.VISIBILITY_PRIVATE)
+            .setPublicVersion(
+                Notification.Builder(context, CH_BETA_CHAT).setSmallIcon(R.drawable.ic_stat_mochi)
+                    .setContentTitle(title).setContentText(context.getString(R.string.beta_chat_new)).build(),
+            )
+            .setAutoCancel(true)
+            .setContentIntent(open(null, false, 0))
+            .build()
+        runCatching { nm.notify(BETA_TAG, 1, n) }
+    }
+
+    fun cancelBetaChat() = runCatching { nm.cancel(BETA_TAG, 1) }
+
     /** Coucou is on screen: the notices are redundant. */
     fun cancelAllStatus() {
         runCatching { nm.activeNotifications.filter { it.tag == STATUS_TAG }.forEach { nm.cancel(it.tag, it.id) } }
@@ -212,6 +240,8 @@ class Notifications(private val context: Context) {
         const val CH_APPROVAL = "approvals_v3"
         const val CH_APPROVAL_QUIET = "approvals_quiet"
         const val CH_UPDATES = "updates"
+        const val CH_BETA_CHAT = "beta_chat"
+        private const val BETA_TAG = "betachat"
         private const val STATUS_TAG = "status"
         const val ONGOING_ID = 1
         const val ACTION_DENY = "com.coucou.android.DENY"
