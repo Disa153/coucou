@@ -8,6 +8,8 @@ import { Bridge, IS_TAURI } from "../core/bridge";
 import type { IslandViewName } from "../core/layout";
 import { t, tl } from "../i18n/i18n";
 import type { ViewActions, ViewHost } from "./views";
+// Custom UI's own icon (its assets/icon.ico, MIT), bundled: nothing is fetched.
+import iconUrl from "./customui.png";
 
 export const PROMO_URL = "https://github.com/sergey1029/custom-ui";
 
@@ -43,8 +45,10 @@ export function buildPromo(actions: ViewActions): ViewHost {
   const panel = h(
     "div",
     { class: "rv-panel pr-panel" },
-    h("div", { class: "pr-tag", text: tl("A friend's project") }),
-    title,
+    h("div", { class: "pr-head" },
+      h("img", { class: "pr-icon", src: iconUrl, alt: "" }),
+      h("div", {}, h("div", { class: "pr-tag", text: tl("A friend's project") }), title),
+    ),
     line,
     more,
     h("div", { class: "rv-row" }, never, h("span", { class: "rv-grow" }), moreBtn, later, open),

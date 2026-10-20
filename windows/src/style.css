@@ -3338,6 +3338,19 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   gap: 6px;
 }
 
+.pr-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pr-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex: 0 0 40px;
+}
+
 .pr-tag {
   font: 600 10px var(--font);
   color: var(--amber);
