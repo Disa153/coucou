@@ -33,7 +33,7 @@ pub const OWNER: &str = "Disa153";
 /// The "Coucou" OAuth app of the owner (Device Flow on). Not a secret: GitHub
 /// shows it on every sign-in page. Empty: this build has no sign-in.
 const CLIENT_ID: &str = "";
-const TOKEN_KEY: &str = "account-token";
+pub const TOKEN_KEY: &str = "account-token";
 const TESTERS_RAW: &str = "https://raw.githubusercontent.com/Disa153/coucou/beta-access/testers.json";
 const TESTERS_API: &str = "https://api.github.com/repos/Disa153/coucou/contents/testers.json";
 const TESTERS_BRANCH: &str = "beta-access";
