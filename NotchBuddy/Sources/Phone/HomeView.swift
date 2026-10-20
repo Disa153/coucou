@@ -27,7 +27,7 @@ struct HomeView: View {
             #if LAN_LINK
             // Chat through Coucou on the computer (Claude Code: no API key).
             Tab("Chat", systemImage: "bubble.left.and.text.bubble.right", value: CoucouTab.chat) {
-                NavigationStack { LANChatView() }
+                NavigationStack { LANChatTab() }
             }
             #endif
             Tab(value: CoucouTab.search, role: .search) {

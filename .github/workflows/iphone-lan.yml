@@ -42,7 +42,11 @@ jobs:
 
       - name: Show errors
         if: failure()
-        run: grep -E "error:" -A3 build.log | head -150 || true
+        run: |
+          grep -E "error:" -A3 build.log | head -150 || true
+          # The log can't be read from outside: the errors go into one annotation too.
+          msg=$(grep -E "error:" build.log | sort -u | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=iPhone build::${msg:0:60000}"
 
       - name: Package .ipa
         run: |

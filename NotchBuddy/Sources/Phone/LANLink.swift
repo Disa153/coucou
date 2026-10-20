@@ -280,7 +280,7 @@ final class LANLink {
     @ObservationIgnored private var notified: Set<String> = []
 
     static let protocolVersion = 1
-    private static let askedCaps = ["details", "answers", "chat", "wake"]
+    private static let askedCaps = ["details", "answers", "chat", "wake", "betachat"]
 
     // MARK: Pairing
 
@@ -441,6 +441,7 @@ final class LANLink {
             questions = [:]
             rebuild()
             LANChat.shared.linkClosed()
+            LANBetaChat.shared.linkClosed()
             guard state != .rejected, pairing != nil else { return }
             if UIApplication.shared.applicationState == .background, !LANKeepAlive.shared.running {
                 state = .offline("Paused while Coucou is in the background")
@@ -574,6 +575,7 @@ final class LANLink {
             startPinging()
             publish()
             if offeredCaps.contains("chat") { send(["type": "chatModels"]) }
+            if offeredCaps.contains("betachat") { send(["type": "betaChatGet", "full": true]) }
         case "error":
             if message["code"] as? String == "auth" {
                 state = .rejected
@@ -612,6 +614,9 @@ final class LANLink {
         case "chatError":
             guard let id = message["id"] as? String else { return }
             LANChat.shared.failed(id: id, message: message["message"] as? String ?? "The computer could not answer.")
+        case let t where t.hasPrefix("betaChat"):
+            guard offeredCaps.contains("betachat") else { return }
+            LANBetaChat.shared.receive(t, message)
         default:
             break   // pong, prefs and anything newer
         }
@@ -684,6 +689,12 @@ final class LANLink {
         }
         guard state == .connected else { return false }
         return send(message)
+    }
+
+    /// A beta chat message, only to a computer that offered `betachat` on this connection.
+    func sendBetaChat(_ message: [String: Any]) {
+        guard state == .connected, offeredCaps.contains("betachat") else { return }
+        send(message)
     }
 
     /// A chat message, only to a computer that offered chat on this connection.

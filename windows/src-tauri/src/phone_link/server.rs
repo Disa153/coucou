@@ -74,6 +74,10 @@ pub trait Features: Send + Sync {
     fn usage(&self) -> bool {
         false
     }
+    /// This computer's GitHub account may see the beta chat (betachat.rs): the phone reads and writes it through here.
+    fn beta_chat(&self) -> bool {
+        false
+    }
     /// The relay is switched on (the phone then follows an access key rotation).
     fn relay(&self) -> bool {
         false
@@ -291,6 +295,7 @@ where
     let diffs = asked("diffs") && shared.features.diffs();
     let usage = asked("usage") && shared.features.usage();
     let relay = asked("relay") && shared.features.relay();
+    let beta_chat = asked("betachat") && shared.features.beta_chat();
     let services: Vec<String> = if asked("services") { shared.features.services() } else { Vec::new() };
     let mut offered: Vec<&str> = Vec::new();
     if chat.is_some() {
@@ -314,6 +319,9 @@ where
     if relay {
         offered.push("relay");
     }
+    if beta_chat {
+        offered.push("betachat");
+    }
     if !services.is_empty() {
         offered.push("services");
     }
@@ -328,7 +336,9 @@ where
         }
     }
     let _ = say(welcome).await;
-    let (id, evicted) = shared.hub.subscribe_with(tx.clone(), (shared.clock)(), crate::phone_link::hub::Caps { details, answers, prefs, diffs, usage, relay, services });
+    let (id, evicted) = shared.hub.subscribe_with(tx.clone(), (shared.clock)(), crate::phone_link::hub::Caps { details, answers, prefs, diffs, usage, relay, beta_chat, services });
+    // Files the phone is sending for its next beta chat message (betachat.rs), by the phone's id for each.
+    let mut uploads = super::beta_chat::Uploads::default();
 
     // 2. the conversation
     loop {
@@ -371,6 +381,9 @@ where
                 if let (false, true, Some(file)) = (pill.is_empty(), pill.len() <= 64, msg["fileId"].as_u64()) {
                     shared.hub.request_diff(id, pill, file, (shared.clock)());
                 }
+            }
+            Some(t) if beta_chat && t.starts_with("betaChat") => {
+                super::beta_chat::handle(&tx, &msg, &mut uploads);
             }
             Some("bye") => break,
             Some(t) if t.starts_with("chat") => {

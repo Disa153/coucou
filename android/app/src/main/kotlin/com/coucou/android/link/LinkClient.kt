@@ -55,6 +55,13 @@ interface LinkListener {
     fun onChatError(id: String, reason: String, message: String) {}
     /** The computer's card for Wake-on-LAN, in the welcome of a computer that could read it. */
     fun onWake(target: WakeTarget) {}
+    // The beta chat through the computer (cap `betachat`).
+    fun onBetaChatPage(part: ServerMsg.BetaChatPage) {}
+    fun onBetaChatSent(key: String, message: BetaMessage?, error: String?) {}
+    fun onBetaChatDeleted(id: Long, error: String?) {}
+    fun onBetaChatDown(part: ServerMsg.BetaChatDown) {}
+    fun onBetaChatNews(waiting: Int, login: String, text: String) {}
+    fun onBetaChatChanged() {}
 }
 
 /** What the UI talks to: the real [LinkClient] or the offline [DemoLink]. */
@@ -86,6 +93,13 @@ interface DesktopLink {
     fun chatSendWithImages(id: String, model: String, text: String, images: List<Pair<String, ByteArray>>): Boolean = false
     fun chatCancel(id: String) {}
     fun chatReset() {}
+
+    // The beta chat through the computer (cap `betachat`); false when the link is down or the computer did not offer it.
+    fun betaChatGet(full: Boolean): Boolean = false
+    /** [files]: name, type and bytes of each; their parts go first, then the message naming them. */
+    fun betaChatSend(key: String, text: String, files: List<Triple<String, String, ByteArray>>): Boolean = false
+    fun betaChatDelete(id: Long): Boolean = false
+    fun betaChatFile(url: String): Boolean = false
 }
 
 /** Opens the (TLS) connection to the desktop. Swappable so tests can use plain sockets. */
@@ -146,6 +160,8 @@ class LinkClient(
     @Volatile private var servicesOffered = false
     /** The computer's welcome offered `relay` on this connection. */
     @Volatile private var relayOffered = false
+    /** The computer's welcome offered `betachat` on this connection. */
+    @Volatile private var betaChatOffered = false
     @Volatile private var socket: Socket? = null
     /** When the last line arrived (the clock of [clockMs]); a liveness check compares it with the moment it asked. */
     @Volatile private var lastInboundMs = 0L
@@ -260,6 +276,25 @@ class LinkClient(
         return queue(ClientMsg.ChatSend(id, model, text, images.map { it.first }))
     }
     override fun chatCancel(id: String) { queue(ClientMsg.ChatCancel(id)) }
+
+    private fun betaOk() = betaChatOffered && Protocol.CAP_BETA_CHAT in caps
+    override fun betaChatGet(full: Boolean) = betaOk() && queue(ClientMsg.BetaChatGet(full))
+    override fun betaChatDelete(id: Long) = betaOk() && queue(ClientMsg.BetaChatDelete(id))
+    override fun betaChatFile(url: String) = betaOk() && queue(ClientMsg.BetaChatFile(url))
+    override fun betaChatSend(key: String, text: String, files: List<Triple<String, String, ByteArray>>): Boolean {
+        if (!betaOk()) return false
+        val named = files.take(Protocol.BETA_MAX_FILES).mapIndexed { i, (name, mime, bytes) ->
+            val fid = "$key-$i"
+            val parts = maxOf(1, (bytes.size + Protocol.BETA_PART_BYTES - 1) / Protocol.BETA_PART_BYTES)
+            for (part in 0 until parts) {
+                val from = part * Protocol.BETA_PART_BYTES
+                val piece = bytes.copyOfRange(from, minOf(bytes.size, from + Protocol.BETA_PART_BYTES))
+                if (!queue(ClientMsg.BetaChatUp(fid, part, parts, java.util.Base64.getEncoder().encodeToString(piece)))) return false
+            }
+            BetaOutFile(fid, name, mime)
+        }
+        return queue(ClientMsg.BetaChatSend(key, text, named))
+    }
     override fun chatReset() { queue(ClientMsg.ChatReset) }
 
     private fun send(m: ClientMsg) {
@@ -308,6 +343,7 @@ class LinkClient(
                 usageOffered = false
                 servicesOffered = false
                 relayOffered = false
+                betaChatOffered = false
                 runCatching { socket?.close() }
                 socket = null
                 approvals.clear()
@@ -354,6 +390,7 @@ class LinkClient(
                     usageOffered = Protocol.CAP_USAGE in msg.caps
                     servicesOffered = Protocol.CAP_SERVICES in msg.caps
                     relayOffered = Protocol.CAP_RELAY in msg.caps
+                    betaChatOffered = Protocol.CAP_BETA_CHAT in msg.caps
                     listener.onState(LinkState.CONNECTED)
                     listener.onWelcome(msg.desktopName, msg.os)
                     listener.onCaps(msg.caps)
@@ -379,6 +416,13 @@ class LinkClient(
                 is ServerMsg.ChatDone -> listener.onChatDone(msg.id, msg.text)
                 is ServerMsg.ChatError -> listener.onChatError(msg.id, msg.reason, msg.message)
                 is ServerMsg.Error -> { listener.onError(msg.code, msg.message); if (msg.code == "auth") { fatal = true; return } }
+                // Only on a connection that was offered `betachat`.
+                is ServerMsg.BetaChatPage -> if (betaOk()) listener.onBetaChatPage(msg)
+                is ServerMsg.BetaChatSent -> if (betaOk()) listener.onBetaChatSent(msg.key, msg.message, msg.error)
+                is ServerMsg.BetaChatDeleted -> if (betaOk()) listener.onBetaChatDeleted(msg.id, msg.error)
+                is ServerMsg.BetaChatDown -> if (betaOk()) listener.onBetaChatDown(msg)
+                is ServerMsg.BetaChatNews -> if (betaOk()) listener.onBetaChatNews(msg.waiting, msg.login, msg.text)
+                ServerMsg.BetaChatChanged -> if (betaOk()) listener.onBetaChatChanged()
             }
         }
     }

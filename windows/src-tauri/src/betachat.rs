@@ -376,8 +376,37 @@ fn tell_if_new(app: &AppHandle, messages: &[Message]) {
     }
 }
 
+/// The app, for the phone's beta chat (phone_link/beta_chat.rs), which has no handle of its own.
+static APP: std::sync::OnceLock<AppHandle> = std::sync::OnceLock::new();
+
+/// This computer's account may see the chat: a phone may then use it through here.
+pub fn phone_allowed() -> bool {
+    APP.get().is_some_and(|a| allowed(a).is_ok())
+}
+
+fn app() -> Result<&'static AppHandle, ReviewError> {
+    APP.get().ok_or(ReviewError::NotSignedIn)
+}
+
+pub async fn phone_page(full: bool) -> Result<ChatPage, ReviewError> {
+    page(app()?, full).await
+}
+
+pub async fn phone_send(text: &str, files: &[OutFile]) -> Result<Message, ReviewError> {
+    send(app()?, text, false, files).await
+}
+
+pub async fn phone_delete(id: u64) -> Result<(), ReviewError> {
+    delete(app()?, id).await
+}
+
+pub async fn phone_file(url: &str) -> Result<String, ReviewError> {
+    file(app()?, url).await
+}
+
 /// In the background, every 5 minutes.
 pub fn setup(app: &AppHandle) {
+    let _ = APP.set(app.clone());
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         tokio::time::sleep(Duration::from_secs(60)).await;

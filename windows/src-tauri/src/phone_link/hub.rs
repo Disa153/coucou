@@ -420,6 +420,8 @@ struct Sub {
     /// The phone asked for `relay` and the relay switch was on when it connected: it is sent the new access key
     /// when the user rotates it (docs/RELAY_LINK.md section 6).
     relay: bool,
+    /// The phone asked for `betachat` and this computer's account may see the beta chat when it connected.
+    beta_chat: bool,
     /// The services this phone may see (the user's ticks when it connected); empty: none.
     services: Vec<String>,
     /// When this phone asked for a diff lately (ms), to keep it from flooding the island.
@@ -435,6 +437,8 @@ pub struct Caps {
     pub diffs: bool,
     pub usage: bool,
     pub relay: bool,
+    /// The beta chat (betachat.rs) through this computer.
+    pub beta_chat: bool,
     /// The services the user allowed for the phone (empty: the capability is not offered).
     pub services: Vec<String>,
 }
@@ -557,7 +561,7 @@ impl Hub {
 
     /// Like [`subscribe`], for a phone that may also have been offered `answers` and `prefs`.
     pub fn subscribe_with(&self, tx: mpsc::Sender<Out>, now: u64, caps: Caps) -> (u64, Arc<AtomicBool>) {
-        let Caps { details, answers, prefs, diffs, usage, relay, services } = caps;
+        let Caps { details, answers, prefs, diffs, usage, relay, beta_chat, services } = caps;
         let mut inner = self.inner.lock().unwrap();
         expire(&mut inner, now);
         let id = inner.next_sub;
@@ -588,7 +592,7 @@ impl Hub {
             }
         }
         let evicted = Arc::new(AtomicBool::new(false));
-        inner.subs.push(Sub { id, tx, evicted: evicted.clone(), details, answers, prefs, diffs, usage, relay, services, diff_asks: Vec::new() });
+        inner.subs.push(Sub { id, tx, evicted: evicted.clone(), details, answers, prefs, diffs, usage, relay, beta_chat, services, diff_asks: Vec::new() });
         (id, evicted)
     }
 
@@ -603,6 +607,25 @@ impl Hub {
         let mut told = 0;
         self.inner.lock().unwrap().subs.retain(|s| {
             if !s.relay {
+                return true;
+            }
+            let kept = s.tx.try_send(Out::Line(line.clone())).is_ok();
+            if kept {
+                told += 1;
+            } else {
+                s.evicted.store(true, Ordering::SeqCst);
+            }
+            kept
+        });
+        told
+    }
+
+    /// A line of the beta chat (a new message, a change) to the phones that have `betachat`. Returns how many were told.
+    pub fn send_beta_chat(&self, line: &str) -> usize {
+        let line: Arc<str> = line.into();
+        let mut told = 0;
+        self.inner.lock().unwrap().subs.retain(|s| {
+            if !s.beta_chat {
                 return true;
             }
             let kept = s.tx.try_send(Out::Line(line.clone())).is_ok();

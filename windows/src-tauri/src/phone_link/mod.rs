@@ -15,6 +15,7 @@
 // that is still pending (hub.rs). The desktop's own card keeps working all along.
 
 mod admission;
+mod beta_chat;
 mod chat;
 mod chat_backend;
 mod discovery;
@@ -110,6 +111,9 @@ impl server::Features for TauriFeatures {
     }
     fn relay(&self) -> bool {
         self.app.state::<Shared>().settings.lock().unwrap().phone_relay
+    }
+    fn beta_chat(&self) -> bool {
+        crate::betachat::phone_allowed()
     }
     fn services(&self) -> Vec<String> {
         // Only ids the link knows, whatever the file held.
@@ -837,12 +841,19 @@ pub fn phone_link_publish(window: WebviewWindow, link: State<PhoneLink>, session
 }
 
 /// The app is quitting: withdraw the announcement so phones forget this computer at once.
-/// A new message in the beta chat (betachat.rs): the paired phones are told
-/// when they may see the chat. Filled in with the phone's beta chat.
-pub fn beta_chat_news(_app: &AppHandle, _news: &crate::betachat::ChatNews) {}
+/// A new message in the beta chat (betachat.rs): the phones that have `betachat` are told, for their notification.
+pub fn beta_chat_news(app: &AppHandle, news: &crate::betachat::ChatNews) {
+    if let Some(link) = app.try_state::<PhoneLink>() {
+        link.hub.send_beta_chat(&beta_chat::news_line(news));
+    }
+}
 
-/// The beta chat changed (sent or deleted here): phones showing it read it again.
-pub fn beta_chat_changed(_app: &AppHandle) {}
+/// The beta chat changed (sent or deleted here or from a phone): phones showing it read it again.
+pub fn beta_chat_changed(app: &AppHandle) {
+    if let Some(link) = app.try_state::<PhoneLink>() {
+        link.hub.send_beta_chat(&serde_json::json!({ "type": "betaChatChanged" }).to_string());
+    }
+}
 
 pub fn stop_on_exit(app: &AppHandle) {
     if let Some(link) = app.try_state::<PhoneLink>() {

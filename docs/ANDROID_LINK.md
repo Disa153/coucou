@@ -232,6 +232,27 @@ out. A bare `{"type":"usage"}` means the computer has nothing to say any more: t
 `resetsAt` has passed counts as 0 on the phone, as on the PC. Nothing else about the plans (no account, no token, no cost) is
 ever sent, and nothing goes back.
 
+## Beta chat (optional capability `betachat`)
+
+The beta chat of Coucou's owner and testers (windows/src-tauri/src/betachat.rs) lives in an issue of the
+repository; the phone has no GitHub sign-in of its own and reads and writes it **as the account signed in on the
+computer**, through the link. Offered only while that account may see the chat (the owner, or on the testers list).
+
+Phone → computer:
+
+- `{"type":"betaChatGet","full":false}` → one or more `{"type":"betaChatPage","part":i,"parts":n,"owner":bool,"page":"https://github.com/…","messages":[…]}`
+  (messages kept whole, each line under 64 KiB; `error` instead of messages when GitHub could not be read).
+  A message is `{id, login, text, build|null, files:[{name, mime, size, url}], at, owner, mine}`.
+- `{"type":"betaChatUp","fid":"k-0","part":i,"parts":n,"data":"<base64, at most 40 000 characters>"}` for each
+  attachment, then `{"type":"betaChatSend","key":"k","text":"…","files":[{"fid":"k-0","name":"…","mime":"…"}]}`
+  → `{"type":"betaChatSent","key":"k","message":{…}}` or `{…,"error":"tooBig|network|…"}`. At most 4 files of 7 MB.
+- `{"type":"betaChatDelete","id":123}` → `{"type":"betaChatDeleted","id":123}` (with `error` if refused).
+- `{"type":"betaChatFile","url":"https://gist.githubusercontent.com/…"}` → `betaChatDown` parts
+  `{url, part, parts, data}` (or `{url, error}`): the attachment's bytes, base64.
+
+Computer → phone, unasked: `{"type":"betaChatNews","count":n,"login":"…","text":"…"}` when someone else wrote
+(the phone plays its sound and shows a notification), and `{"type":"betaChatChanged"}` after a send or a delete.
+
 ## Admission (what a flood cannot do)
 
 The server answers the local network before it knows who is calling, so it bounds what a caller who has not yet sent

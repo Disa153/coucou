@@ -167,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                 // True if it was a pairing code: the camera is released and the user is asked to confirm.
                                 onText = { text -> model.requestPairing(text).also { if (it) screen = Screen.HOME } },
                             )
-                            Screen.CHAT -> ChatScreen(model, onHome = { screen = Screen.HOME }, onSettings = { screen = Screen.SETTINGS })
+                            Screen.CHAT -> com.coucou.android.ui.ChatArea(model, onHome = { screen = Screen.HOME }, onSettings = { screen = Screen.SETTINGS })
                             Screen.SESSION -> SessionScreen(model, detailPill.orEmpty(), onBack = { screen = Screen.HOME })
                             Screen.GALLERY -> Gallery(onBack = { screen = Screen.SETTINGS })
                             Screen.SETTINGS -> SettingsScreen(
