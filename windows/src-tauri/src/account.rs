@@ -262,8 +262,21 @@ pub struct Account {
     pending: Mutex<Option<Value>>,
 }
 
+/// Kept by the builder (lib.rs) before any window exists, so a page asking
+/// early always finds it; the fallback only guards against that ever changing.
 fn state(app: &AppHandle) -> &Account {
-    app.state::<Account>().inner()
+    static FALLBACK: std::sync::LazyLock<Account> = std::sync::LazyLock::new(Account::default);
+    match app.try_state::<Account>() {
+        Some(s) => s.inner(),
+        None => &FALLBACK,
+    }
+}
+
+impl Account {
+    /// The account as this computer last knew it.
+    pub fn loaded() -> Account {
+        Account { me: Mutex::new(load_stored()), ..Default::default() }
+    }
 }
 
 /// Why something did not happen; the page words it.
@@ -355,7 +368,6 @@ fn changed(app: &AppHandle) {
 }
 
 pub fn setup(app: &AppHandle) {
-    app.manage(Account { me: Mutex::new(load_stored()), ..Default::default() });
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         tokio::time::sleep(Duration::from_secs(20)).await;
