@@ -22,6 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -245,6 +246,8 @@ fun SettingsScreen(model: AppModel, onHistory: () -> Unit, onGallery: () -> Unit
                 }
                 RowDivider()
                 LinkRow(stringResource(R.string.licences_title), onLicences)
+                RowDivider()
+                UpdateRow(model.updater)
             }
         }
         item { Spacer(Modifier.height(Gutter)) }
@@ -336,4 +339,22 @@ private fun RelayCard(model: AppModel) {
         }
         Text(line, Modifier.padding(Spacing.INSIDE.dp), style = TypeScale.SECONDARY.style(t.textDim.c()))
     }
+}
+
+/** Settings → About: asks GitHub now; the banner appears if there is a newer build. */
+@Composable
+private fun UpdateRow(updater: com.coucou.android.app.AppUpdater) {
+    var state by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) } // 0 idle, 1 checking, 2 done, 3 offline
+    val hint = when (state) {
+        1 -> stringResource(R.string.update_checking)
+        2 -> if (updater.available == null) stringResource(R.string.update_none, updater.installedName) else null
+        3 -> stringResource(R.string.update_offline)
+        else -> updater.installedName.ifBlank { null }
+    }
+    ListRow(stringResource(R.string.update_check), hint = hint, onClick = {
+        if (state != 1) {
+            state = 1
+            updater.check(force = true) { ok -> state = if (ok) 2 else 3 }
+        }
+    })
 }

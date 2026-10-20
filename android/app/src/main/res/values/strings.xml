@@ -385,4 +385,17 @@
     <string name="beta_sound_knock">Knock on the door</string>
     <string name="beta_sound_mochi">Mochi</string>
     <string name="beta_sound_none">No sound</string>
+    <string name="update_title">Update available: build %1$s</string>
+    <string name="update_body">A newer Coucou for Android is ready. %1$s</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_verifying">Checking the file…</string>
+    <string name="update_ready">Android\'s installer is open.</string>
+    <string name="update_failed">The download failed or the file did not match. Try again.</string>
+    <string name="update_install">Install</string>
+    <string name="update_open_installer">Open installer</string>
+    <string name="update_later">Later</string>
+    <string name="update_check">Check for updates</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_none">You have the latest build (%1$s).</string>
+    <string name="update_offline">Could not reach GitHub.</string>
 </resources>

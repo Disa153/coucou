@@ -384,6 +384,19 @@
     "beta_sound_quack": "Quack",
     "beta_sound_knock": "Knock on the door",
     "beta_sound_mochi": "Mochi",
-    "beta_sound_none": "No sound"
+    "beta_sound_none": "No sound",
+    "update_title": "Update available: build %1$s",
+    "update_body": "A newer Coucou for Android is ready. %1$s",
+    "update_downloading": "Downloading…",
+    "update_verifying": "Checking the file…",
+    "update_ready": "Android's installer is open.",
+    "update_failed": "The download failed or the file did not match. Try again.",
+    "update_install": "Install",
+    "update_open_installer": "Open installer",
+    "update_later": "Later",
+    "update_check": "Check for updates",
+    "update_checking": "Checking…",
+    "update_none": "You have the latest build (%1$s).",
+    "update_offline": "Could not reach GitHub."
   }
 }

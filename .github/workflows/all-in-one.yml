@@ -212,6 +212,12 @@ jobs:
             export COUCOU_KEYSTORE_FILE="$RUNNER_TEMP/coucou.p12" COUCOU_KEY_ALIAS=coucou
             ./gradlew assembleRelease --console=plain 2>&1 | tee build.log
             cp app/build/outputs/apk/release/app-release.apk Coucou-Android.apk
+            # What the app reads to offer "Update available" (only for signed builds: they install over each other).
+            jq -n --argjson code "$COUCOU_VERSION_CODE" --arg name "$COUCOU_VERSION_NAME" \
+              --arg url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/Coucou-Android.apk" \
+              --arg sha "$(sha256sum Coucou-Android.apk | cut -d' ' -f1)" --argjson size "$(stat -c%s Coucou-Android.apk)" \
+              '{versionCode:$code, versionName:$name, url:$url, sha256:$sha, size:$size}' > android.json
+            cat android.json
           else
             echo "::warning::No Android signing key in the repository's secrets: a debug APK (each one must replace the last by hand)."
             ./gradlew assembleDebug --console=plain 2>&1 | tee build.log
@@ -226,7 +232,9 @@ jobs:
       - name: Add to the pre-release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" Coucou-Android.apk --clobber
+        run: |
+          gh release upload "$TAG" Coucou-Android.apk --clobber
+          if [ -f android.json ]; then gh release upload "$TAG" android.json --clobber; fi
 
   iphone:
     needs: release

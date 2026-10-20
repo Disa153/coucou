@@ -3,6 +3,8 @@
 
     <!-- Only the paired computer is contacted. No ads, no analytics, no billing. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Opens Android's installer on an update the user tapped (Android asks once to allow it). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Finding the computer again after a Wi-Fi change: a multicast lock held only while browsing the local network. -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
