@@ -4,5 +4,9 @@
       "login": "sergey1029",
       "name": ""
     }
-  ]
+  ],
+  "survey": {
+    "days": 3,
+    "who": "testers"
+  }
 }
