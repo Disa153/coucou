@@ -1,0 +1,50 @@
+/* The beta chat's own window (main.ts): the island's palette, the panel filling it. */
+
+:root {
+  color-scheme: dark;
+  --font: system-ui, "Segoe UI Variable Text", "Segoe UI", "Segoe UI Emoji", "Nirmala UI",
+    "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
+    "Noto Sans Arabic", "Noto Sans CJK SC", "Noto Sans SC", "Droid Sans Fallback", sans-serif;
+  --ink: #f5f6f8;
+  --dim: #9398a1;
+  --card: #141518;
+  --hairline: rgba(255, 255, 255, 0.07);
+  --amber: #f5a524;
+  --green: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: #0e0f11;
+  color: var(--ink);
+  font: 400 13px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#chat {
+  height: 100%;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat .bc-head {
+  font-size: 13.5px;
+}
+
+#chat .bc-msg {
+  max-width: 82%;
+}
+
+.cw-pin.on {
+  background: rgba(245, 165, 36, 0.18);
+  color: var(--amber);
+}

@@ -5,6 +5,9 @@
 import { Bridge, IS_TAURI, onEvent, type AccountState, type ChatNews } from "../core/bridge";
 import type { IslandViewName } from "../core/layout";
 import { State } from "../core/state";
+import { agentBusy } from "../core/glow";
+import { Spotify } from "../core/spotify";
+import { playChatSound } from "../core/chatsound";
 
 export const BetaChat = { allowed: false, unread: 0 };
 
@@ -35,6 +38,15 @@ function apply(s: AccountState | null) {
   }
 }
 
+/** The sound picked for a new message, unless "quiet" and the user is busy. */
+async function ring() {
+  const p = await Bridge.betaChatPrefs();
+  if (!p || State.paused) return;
+  const busy = agentBusy(State.tasks.map((t) => t.state)) || !!State.pendingApproval || Spotify.state.playing;
+  if (p.quiet && busy) return;
+  await playChatSound(p.sound, p.volume, p.ownName);
+}
+
 export function registerBetaChat(host: BetaChatHost) {
   if (!IS_TAURI) return;
   void Bridge.accountState().then(apply);
@@ -42,6 +54,7 @@ export function registerBetaChat(host: BetaChatHost) {
   void onEvent<ChatNews>("beta-chat", (n) => {
     if (!BetaChat.allowed) return;
     BetaChat.unread = n.unread;
+    void ring();
     if (State.mode === "expanded" && State.view === "betachat") return;
     if (n.unread > 0 && quiet()) host.alert("betachat");
     else State.notify();

@@ -20,6 +20,7 @@ export function reviewErrorText(e: unknown): string {
     signInAgain: t("Sign in again in Settings → Account so Coucou may send reviews."),
     notAllowed: t("Only the beta testers and Coucou's owner see the reviews."),
     noStars: t("Pick a number of stars first."),
+    tooBig: t("Too big for the chat: at most 4 attachments of 7 MB each."),
     network: t("GitHub could not be reached. Try again later."),
   } as Record<ReviewError, string>)[code] ?? t("GitHub could not be reached. Try again later.");
 }

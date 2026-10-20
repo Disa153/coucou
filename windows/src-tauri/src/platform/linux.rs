@@ -51,6 +51,16 @@ pub fn local_dir() -> PathBuf {
     xdg("XDG_DATA_HOME", ".local/share").join("coucou")
 }
 
+/// Where a file saved from the beta chat goes: the XDG download folder, else ~/Downloads.
+pub fn downloads_dir() -> PathBuf {
+    let home = home_dir();
+    let user_dirs = xdg("XDG_CONFIG_HOME", ".config").join("user-dirs.dirs");
+    std::fs::read_to_string(user_dirs)
+        .ok()
+        .and_then(|text| xdg_user_dir(&text, "XDG_DOWNLOAD_DIR", &home))
+        .unwrap_or_else(|| home.join("Downloads"))
+}
+
 /// Where a saved image goes, best first: the XDG pictures folder named in
 /// ~/.config/user-dirs.dirs, then ~/Pictures, ~/Downloads and the home folder.
 /// The caller takes the first one that exists.

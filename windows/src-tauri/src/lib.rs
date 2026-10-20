@@ -904,6 +904,14 @@ pub fn run() {
             betachat::beta_chat_unread,
             betachat::beta_chat_send,
             betachat::beta_chat_delete,
+            betachat::beta_chat_file,
+            betachat::beta_chat_save,
+            betachat::beta_chat_prefs,
+            betachat::beta_chat_set_prefs,
+            betachat::beta_chat_set_own_sound,
+            betachat::beta_chat_own_sound,
+            betachat::beta_chat_window,
+            betachat::beta_chat_pin,
             updater::update_info,
             updater::update_check,
             updater::update_set_channel,
@@ -933,6 +941,7 @@ pub fn run() {
             tray::build(&handle)?;
             // Before the island: see create_settings_window.
             create_settings_window(&handle);
+            betachat::create_window(&handle);
             // Same rule for Mochi's desktop window and the dictation pill.
             desktop::setup(&handle);
             flow::setup(&handle);

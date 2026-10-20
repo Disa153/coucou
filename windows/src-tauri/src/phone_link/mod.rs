@@ -837,6 +837,13 @@ pub fn phone_link_publish(window: WebviewWindow, link: State<PhoneLink>, session
 }
 
 /// The app is quitting: withdraw the announcement so phones forget this computer at once.
+/// A new message in the beta chat (betachat.rs): the paired phones are told
+/// when they may see the chat. Filled in with the phone's beta chat.
+pub fn beta_chat_news(_app: &AppHandle, _news: &crate::betachat::ChatNews) {}
+
+/// The beta chat changed (sent or deleted here): phones showing it read it again.
+pub fn beta_chat_changed(_app: &AppHandle) {}
+
 pub fn stop_on_exit(app: &AppHandle) {
     if let Some(link) = app.try_state::<PhoneLink>() {
         link.stop();

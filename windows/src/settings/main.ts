@@ -25,6 +25,7 @@ import { glowSection } from "./glow";
 import { petSection } from "./pet";
 import { accountSections } from "./account";
 import { reviewsSections } from "./reviews";
+import { betaChatSection } from "./betachat";
 import { colorDot } from "./colors";
 import { renderDiff, statusDot } from "./parts";
 import {
@@ -1749,10 +1750,13 @@ async function render() {
   clear(root);
   const sections: Partial<Record<PageId, () => HTMLElement[]>> = {
     general: () => [generalSection(), glowSection(() => settings, toggle, () => void save()), petSection(() => settings, toggle, () => void save()), updatesSection()],
-    account: () => accountSections(toggle, async (s) => {
-      settings = { ...settings, ...s };
-      await save();
-    }),
+    account: () => [
+      ...accountSections(toggle, async (s) => {
+        settings = { ...settings, ...s };
+        await save();
+      }),
+      betaChatSection(toggle),
+    ],
     reviews: () => reviewsSections(),
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
