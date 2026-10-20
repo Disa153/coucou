@@ -27,6 +27,7 @@ import { buildMixer } from "./mixer";
 import { buildKitchen } from "./kitchen";
 import { buildLyrics } from "./lyrics";
 import { buildReview } from "./review";
+import { buildPromo } from "./promo";
 import { buildBetaChat } from "./betachat";
 import { BetaChat } from "../island/betachat";
 import { buildSpotifyCard, buildSpotifyPill, type SpotifyPillHost } from "./spotify";
@@ -876,6 +877,7 @@ export function buildViews(
   map.set("kitchen", buildKitchen(actions));
   map.set("lyrics", buildLyrics(actions));
   map.set("review", buildReview(actions));
+  map.set("promo", buildPromo(actions));
   map.set("betachat", buildBetaChat(actions));
   // Not in the Windows v1: sending a file by email, window attach + web result.
   map.set("mail", buildPlaceholder(tl("Sending by email isn't in this version."), ""));

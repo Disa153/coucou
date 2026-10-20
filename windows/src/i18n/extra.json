@@ -7096,6 +7096,127 @@
    "pt-BR": "Grande demais para o chat: no máximo 4 anexos de 7 MB cada.",
    "ru": "Слишком большое для чата: не больше 4 вложений по 7 МБ.",
    "id": "Terlalu besar untuk obrolan: paling banyak 4 lampiran, masing-masing 7 MB."
+  },
+  "A menu bar with the app's menus, tray icons and a clock": {
+   "zh-Hans": "带有应用菜单、托盘图标和时钟的菜单栏",
+   "hi": "ऐप के मेन्यू, ट्रे आइकन और घड़ी वाली मेन्यू बार",
+   "es": "Una barra de menús con los menús de la app, iconos de la bandeja y un reloj",
+   "ar": "شريط قوائم بقوائم التطبيق وأيقونات الدرج وساعة",
+   "fr": "Une barre de menus avec les menus de l'app, les icônes de la zone de notification et une horloge",
+   "bn": "অ্যাপের মেনু, ট্রে আইকন ও ঘড়িসহ মেনু বার",
+   "pt-BR": "Uma barra de menus com os menus do app, ícones da bandeja e um relógio",
+   "ru": "Строка меню с меню программы, значками трея и часами",
+   "id": "Bilah menu dengan menu aplikasi, ikon baki, dan jam"
+  },
+  "A Dock with your apps, growing under the pointer": {
+   "zh-Hans": "放置应用的 Dock，指针下会放大",
+   "hi": "आपके ऐप्स वाला Dock, पॉइंटर के नीचे बड़ा होता है",
+   "es": "Un Dock con tus apps que crece bajo el puntero",
+   "ar": "Dock بتطبيقاتك يكبر تحت المؤشر",
+   "fr": "Un Dock avec vos apps, qui grossit sous le pointeur",
+   "bn": "আপনার অ্যাপসহ Dock, পয়েন্টারের নিচে বড় হয়",
+   "pt-BR": "Um Dock com seus apps, que cresce sob o cursor",
+   "ru": "Dock с вашими программами, увеличивается под курсором",
+   "id": "Dock berisi aplikasi Anda, membesar di bawah penunjuk"
+  },
+  "Spotlight: apps, files, the web and a calculator (Win or Alt+Space)": {
+   "zh-Hans": "Spotlight：应用、文件、网页和计算器（Win 或 Alt+空格）",
+   "hi": "Spotlight: ऐप्स, फ़ाइलें, वेब और कैलकुलेटर (Win या Alt+Space)",
+   "es": "Spotlight: apps, archivos, la web y una calculadora (Win o Alt+Espacio)",
+   "ar": "Spotlight: التطبيقات والملفات والويب وآلة حاسبة (Win أو Alt+Space)",
+   "fr": "Spotlight : apps, fichiers, le web et une calculatrice (Win ou Alt+Espace)",
+   "bn": "Spotlight: অ্যাপ, ফাইল, ওয়েব ও ক্যালকুলেটর (Win বা Alt+Space)",
+   "pt-BR": "Spotlight: apps, arquivos, a web e uma calculadora (Win ou Alt+Espaço)",
+   "ru": "Spotlight: программы, файлы, интернет и калькулятор (Win или Alt+Пробел)",
+   "id": "Spotlight: aplikasi, file, web, dan kalkulator (Win atau Alt+Spasi)"
+  },
+  "Launchpad, a Control Center, a calendar and widgets": {
+   "zh-Hans": "Launchpad、控制中心、日历和小组件",
+   "hi": "Launchpad, कंट्रोल सेंटर, कैलेंडर और विजेट",
+   "es": "Launchpad, un Centro de control, un calendario y widgets",
+   "ar": "Launchpad ومركز تحكم وتقويم وأدوات",
+   "fr": "Launchpad, un centre de contrôle, un calendrier et des widgets",
+   "bn": "Launchpad, কন্ট্রোল সেন্টার, ক্যালেন্ডার ও উইজেট",
+   "pt-BR": "Launchpad, uma Central de Controle, um calendário e widgets",
+   "ru": "Launchpad, пункт управления, календарь и виджеты",
+   "id": "Launchpad, Pusat Kontrol, kalender, dan widget"
+  },
+  "Your windows stay as they are: only what is around them changes": {
+   "zh-Hans": "窗口保持原样：只改变周围的部分",
+   "hi": "आपकी विंडो जैसी हैं वैसी रहती हैं: सिर्फ़ उनके आसपास का बदलता है",
+   "es": "Tus ventanas no cambian: solo cambia lo que las rodea",
+   "ar": "تبقى نوافذك كما هي: يتغير ما حولها فقط",
+   "fr": "Vos fenêtres restent telles quelles : seul ce qui les entoure change",
+   "bn": "আপনার উইন্ডো যেমন আছে তেমনই থাকে: শুধু চারপাশ বদলায়",
+   "pt-BR": "Suas janelas continuam iguais: só o que está em volta muda",
+   "ru": "Окна программ не меняются — только «внешка» вокруг них",
+   "id": "Jendela Anda tetap seperti semula: hanya sekelilingnya yang berubah"
+  },
+  "Free and open source (MIT), no admin rights to install. Not made by or linked to Apple.": {
+   "zh-Hans": "免费开源（MIT），安装无需管理员权限。并非 Apple 制作，也与 Apple 无关。",
+   "hi": "मुफ़्त और ओपन सोर्स (MIT), इंस्टॉल के लिए एडमिन अधिकार नहीं चाहिए। Apple ने नहीं बनाया, न ही उससे जुड़ा है।",
+   "es": "Gratis y de código abierto (MIT), sin derechos de administrador para instalar. No lo hace Apple ni está vinculado a ella.",
+   "ar": "مجاني ومفتوح المصدر (MIT)، ولا يحتاج إلى صلاحيات المسؤول للتثبيت. ليس من صنع Apple ولا مرتبطًا بها.",
+   "fr": "Gratuit et open source (MIT), sans droits d'administrateur pour l'installer. Ni fait par Apple ni lié à Apple.",
+   "bn": "বিনামূল্যে ও ওপেন সোর্স (MIT), ইনস্টলে অ্যাডমিন অধিকার লাগে না। Apple-এর তৈরি নয়, তার সাথে যুক্তও নয়।",
+   "pt-BR": "Gratuito e de código aberto (MIT), sem precisar de administrador para instalar. Não é feito pela Apple nem ligado a ela.",
+   "ru": "Бесплатно и с открытым кодом (MIT), ставится без прав администратора. Не продукт Apple и не связан с ней.",
+   "id": "Gratis dan sumber terbuka (MIT), tanpa hak admin untuk memasang. Bukan buatan Apple dan tidak terkait dengannya."
+  },
+  "Custom UI, by sergey1029": {
+   "zh-Hans": "Custom UI，作者 sergey1029",
+   "hi": "Custom UI, sergey1029 द्वारा",
+   "es": "Custom UI, de sergey1029",
+   "ar": "Custom UI، من sergey1029",
+   "fr": "Custom UI, par sergey1029",
+   "bn": "Custom UI, sergey1029-এর তৈরি",
+   "pt-BR": "Custom UI, de sergey1029",
+   "ru": "Custom UI от sergey1029",
+   "id": "Custom UI, oleh sergey1029"
+  },
+  "Windows 11 in the style of macOS: a menu bar, a Dock, Spotlight and Launchpad.": {
+   "zh-Hans": "macOS 风格的 Windows 11：菜单栏、Dock、Spotlight 和 Launchpad。",
+   "hi": "macOS के अंदाज़ में Windows 11: मेन्यू बार, Dock, Spotlight और Launchpad।",
+   "es": "Windows 11 al estilo de macOS: barra de menús, Dock, Spotlight y Launchpad.",
+   "ar": "Windows 11 بأسلوب macOS: شريط قوائم وDock وSpotlight وLaunchpad.",
+   "fr": "Windows 11 à la manière de macOS : barre de menus, Dock, Spotlight et Launchpad.",
+   "bn": "macOS ধাঁচের Windows 11: মেনু বার, Dock, Spotlight ও Launchpad।",
+   "pt-BR": "Windows 11 no estilo do macOS: barra de menus, Dock, Spotlight e Launchpad.",
+   "ru": "Windows 11 в стиле macOS: строка меню, Dock, Spotlight и Launchpad.",
+   "id": "Windows 11 bergaya macOS: bilah menu, Dock, Spotlight, dan Launchpad."
+  },
+  "More": {
+   "zh-Hans": "更多",
+   "hi": "और",
+   "es": "Más",
+   "ar": "المزيد",
+   "fr": "Plus",
+   "bn": "আরও",
+   "pt-BR": "Mais",
+   "ru": "Подробнее",
+   "id": "Selengkapnya"
+  },
+  "Don't show again": {
+   "zh-Hans": "不再显示",
+   "hi": "फिर न दिखाएँ",
+   "es": "No volver a mostrar",
+   "ar": "لا تعرض مجددًا",
+   "fr": "Ne plus afficher",
+   "bn": "আর দেখাবেন না",
+   "pt-BR": "Não mostrar de novo",
+   "ru": "Больше не показывать",
+   "id": "Jangan tampilkan lagi"
+  },
+  "A friend's project": {
+   "zh-Hans": "朋友的项目",
+   "hi": "एक दोस्त का प्रोजेक्ट",
+   "es": "El proyecto de un amigo",
+   "ar": "مشروع صديق",
+   "fr": "Le projet d'un ami",
+   "bn": "এক বন্ধুর প্রজেক্ট",
+   "pt-BR": "O projeto de um amigo",
+   "ru": "Проект друга",
+   "id": "Proyek seorang teman"
   }
  }
 }

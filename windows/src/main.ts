@@ -14,6 +14,7 @@ import { applySpotify, registerSpotifyHandlers } from "./island/spotify";
 import { SPOTIFY_ID } from "./core/spotify";
 import { Recap } from "./recap/recap";
 import { checkReview, registerReviewChecks } from "./island/reviews";
+import { checkPromo } from "./views/promo";
 import { registerBetaChat } from "./island/betachat";
 import { onLanguageChange, resolveLanguage, setLanguage, systemLanguages } from "./i18n/i18n";
 
@@ -154,6 +155,7 @@ async function main() {
   const checkAll = () => {
     checkRecap();
     window.setTimeout(() => void checkReview(island), 4000);
+    window.setTimeout(() => void checkPromo(island), 2500);
   };
   island.onGreetingDone = checkAll;
   island.onWake = checkAll;
