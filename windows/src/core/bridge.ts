@@ -70,7 +70,7 @@ export interface AccountState {
 }
 
 /** Reviews of a build (src-tauri/src/reviews.rs). */
-export type ReviewError = "notSignedIn" | "signInAgain" | "notAllowed" | "noStars" | "network";
+export type ReviewError = "notSignedIn" | "signInAgain" | "notAllowed" | "noStars" | "tooBig" | "network";
 
 export interface Review {
   login: string;
@@ -82,11 +82,34 @@ export interface Review {
 }
 
 /** The beta chat (src-tauri/src/betachat.rs). */
+export interface ChatFile {
+  name: string;
+  mime: string;
+  size: number;
+  /** The raw Gist file, base64 text of the file. */
+  url: string;
+}
+
+/** A file to send: its bytes as base64. */
+export interface OutFile {
+  name: string;
+  mime: string;
+  data: string;
+}
+
+export interface BetaChatPrefs {
+  sound: "hee" | "chime" | "quack" | "knock" | "mochi" | "own" | "none";
+  volume: number;
+  quiet: boolean;
+  ownName: string;
+}
+
 export interface ChatMessage {
   id: number;
   login: string;
   text: string;
   build: number | null;
+  files: ChatFile[];
   /** Unix seconds. */
   at: number;
   owner: boolean;
@@ -334,10 +357,22 @@ export const Bridge = {
     callOrThrow<void>("review_send", { build, stars, add, remove }),
   reviewList: () => callOrThrow<BuildReviews[]>("review_list"),
   /** The beta chat (src-tauri/src/betachat.rs); rejects with a ReviewError. */
-  betaChatMessages: () => callOrThrow<{ messages: ChatMessage[]; page: string; owner: boolean }>("beta_chat_messages"),
+  betaChatMessages: (full = false) =>
+    callOrThrow<{ messages: ChatMessage[]; page: string; owner: boolean; build: number }>("beta_chat_messages", { full }),
   betaChatUnread: () => callOrThrow<ChatNews>("beta_chat_unread"),
-  betaChatSend: (text: string, withBuild: boolean) => callOrThrow<void>("beta_chat_send", { text, withBuild }),
+  betaChatSend: (text: string, withBuild: boolean, files: OutFile[] = []) =>
+    callOrThrow<ChatMessage>("beta_chat_send", { text, withBuild, files }),
   betaChatDelete: (id: number) => callOrThrow<void>("beta_chat_delete", { id }),
+  /** An attachment's bytes, base64. */
+  betaChatFile: (url: string) => callOrThrow<string>("beta_chat_file", { url }),
+  /** Saves an attachment in Downloads; resolves with where it went. */
+  betaChatSave: (url: string, name: string) => callOrThrow<string>("beta_chat_save", { url, name }),
+  betaChatPrefs: () => call<BetaChatPrefs>("beta_chat_prefs"),
+  betaChatSetPrefs: (prefs: BetaChatPrefs) => call<BetaChatPrefs>("beta_chat_set_prefs", { prefs }),
+  betaChatSetOwnSound: (name: string, data: string) => callOrThrow<BetaChatPrefs>("beta_chat_set_own_sound", { name, data }),
+  betaChatOwnSound: () => call<string | null>("beta_chat_own_sound"),
+  betaChatWindow: () => call<void>("beta_chat_window"),
+  betaChatPin: (on: boolean) => call<void>("beta_chat_pin", { on }),
 
   /** In-app updates (src-tauri/src/updater.rs). */
   updateInfo: () => call<UpdateInfo>("update_info"),

@@ -214,6 +214,8 @@ pub enum ReviewError {
     /// Only the owner and the testers read them.
     NotAllowed,
     NoStars,
+    /// An attachment over the size the chat takes, or too many of them.
+    TooBig,
     Network,
 }
 

@@ -639,3 +639,60 @@ html[dir="rtl"] :is(.diff, .path, .keycap, input[type="password"], input[type="t
   color: #f87171;
   font-weight: 600;
 }
+
+/* Settings → Account → Beta chat (betachat.ts). */
+.bcs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bcs-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.bcs-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bcs-item.on {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bcs-radio {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #555;
+  flex: 0 0 15px;
+}
+
+.bcs-item.on .bcs-radio {
+  border-color: #fff;
+  background: radial-gradient(#fff 40%, transparent 46%);
+}
+
+.bcs-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  flex: 0 0 32px;
+}
+
+.bcs-play {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 0;
+}

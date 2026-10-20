@@ -68,6 +68,11 @@ pub fn local_dir() -> PathBuf {
     base.join("Coucou")
 }
 
+/// Where a file saved from the beta chat goes: the profile's Downloads.
+pub fn downloads_dir() -> PathBuf {
+    std::env::var_os("USERPROFILE").map(PathBuf::from).map(|h| h.join("Downloads")).unwrap_or_else(local_dir)
+}
+
 /// Where a saved image goes, best first: Pictures (also where OneDrive moves
 /// it), then Downloads and the profile folder. The caller takes the first one
 /// that exists. Read from the environment rather than the Known Folders API: a
