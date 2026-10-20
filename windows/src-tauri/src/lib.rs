@@ -32,6 +32,7 @@ mod platform;
 #[cfg(target_os = "linux")]
 mod portal;
 mod recap;
+mod reviews;
 mod secrets;
 mod session_window;
 mod settings;
@@ -889,6 +890,12 @@ pub fn run() {
             account::account_sync_now,
             account::account_saved,
             account::account_restore,
+            account::account_set_survey,
+            reviews::review_due,
+            reviews::review_later,
+            reviews::review_skip,
+            reviews::review_send,
+            reviews::review_list,
             updater::update_info,
             updater::update_check,
             updater::update_set_channel,
@@ -954,6 +961,7 @@ pub fn run() {
             spotify::sync(&handle, &loaded.active_integrations);
             transcripts::configure(&loaded);
             account::setup(&handle);
+            reviews::setup();
             updater::setup(&handle);
             shortcuts::apply(&handle, &loaded.shortcuts);
             if loaded.autostart {

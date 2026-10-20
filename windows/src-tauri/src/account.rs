@@ -30,9 +30,10 @@ use tauri::{AppHandle, Emitter, Manager};
 
 /// The repository's owner: the only one who sees and edits the testers.
 pub const OWNER: &str = "Disa153";
-/// The "Coucou" OAuth app of the owner (Device Flow on). Not a secret: GitHub
-/// shows it on every sign-in page. Empty: this build has no sign-in.
-const CLIENT_ID: &str = "Ov23litDJR0zOMbhWApe";
+/// The owner's "Coucou Mochi" GitHub App (Device Flow on; Gists and this
+/// repository's Issues only). Not a secret: GitHub shows it on every sign-in
+/// page. Empty: this build has no sign-in.
+const CLIENT_ID: &str = "Iv23lic3qaGqtxUYJQK1";
 pub const TOKEN_KEY: &str = "account-token";
 const TESTERS_RAW: &str = "https://raw.githubusercontent.com/Disa153/coucou/beta-access/testers.json";
 const TESTERS_API: &str = "https://api.github.com/repos/Disa153/coucou/contents/testers.json";
@@ -147,8 +148,36 @@ pub fn parse_testers(text: &str) -> Vec<Person> {
     out
 }
 
-pub fn testers_json(testers: &[Person]) -> String {
-    let mut text = serde_json::to_string_pretty(&json!({ "testers": testers })).unwrap_or_default();
+/// When Coucou asks for a review of the build running (reviews.rs), as the owner set it.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Survey {
+    /// Days after the build was first started.
+    pub days: u32,
+    /// "testers" (and the owner) or "everyone" signed in.
+    pub who: String,
+}
+
+impl Default for Survey {
+    fn default() -> Self {
+        Survey { days: 7, who: "testers".into() }
+    }
+}
+
+/// The survey part of testers.json; anything odd reads as the default.
+pub fn parse_survey(text: &str) -> Survey {
+    let v = serde_json::from_str::<Value>(text).unwrap_or(Value::Null);
+    let d = Survey::default();
+    let days = v["survey"]["days"].as_u64().filter(|n| (1..=60).contains(n)).map(|n| n as u32).unwrap_or(d.days);
+    let who = match v["survey"]["who"].as_str() {
+        Some("everyone") => "everyone",
+        _ => "testers",
+    };
+    Survey { days, who: who.into() }
+}
+
+pub fn testers_json(testers: &[Person], survey: &Survey) -> String {
+    let mut text = serde_json::to_string_pretty(&json!({ "testers": testers, "survey": survey })).unwrap_or_default();
     text.push('\n');
     text
 }
@@ -172,6 +201,8 @@ pub fn is_tester(testers: &[Person], login: &str) -> bool {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 struct Stored {
+    /// The app the sign-in was made with; another one (a new build) means signing in again.
+    client: String,
     login: String,
     name: String,
     gist: String,
@@ -183,7 +214,7 @@ struct Stored {
 
 impl Default for Stored {
     fn default() -> Self {
-        Stored { login: String::new(), name: String::new(), gist: String::new(), sync: true, parts: all_parts(), last_sync: 0 }
+        Stored { client: String::new(), login: String::new(), name: String::new(), gist: String::new(), sync: true, parts: all_parts(), last_sync: 0 }
     }
 }
 
@@ -193,7 +224,11 @@ fn stored_path() -> PathBuf {
 
 fn load_stored() -> Option<Stored> {
     let text = std::fs::read_to_string(stored_path()).ok()?;
-    serde_json::from_str::<Stored>(&text).ok().filter(|s| valid_login(&s.login))
+    serde_json::from_str::<Stored>(&text)
+        .ok()
+        .filter(|s| valid_login(&s.login))
+        // A sign-in made with an earlier app cannot do what this build asks (reviews): sign in again.
+        .filter(|s| client_id().is_some_and(|id| s.client == id))
 }
 
 fn write_stored(s: Option<&Stored>) {
@@ -220,6 +255,7 @@ pub struct Account {
     me: Mutex<Option<Stored>>,
     /// The list last read; None until it was.
     testers: Mutex<Option<Vec<Person>>>,
+    survey: Mutex<Survey>,
     cancel: AtomicBool,
     /// Bumped on every settings change; an upload only goes if it is still the last one.
     changes: AtomicU64,
@@ -267,12 +303,14 @@ pub struct AccountState {
     pub sync: bool,
     pub parts: Vec<String>,
     pub last_sync: u64,
+    pub survey: Survey,
 }
 
 fn account_state_of(app: &AppHandle) -> AccountState {
     let a = state(app);
     let me = a.me.lock().unwrap().clone();
     let testers = a.testers.lock().unwrap().clone().unwrap_or_default();
+    let survey = a.survey.lock().unwrap().clone();
     match me {
         Some(me) => AccountState {
             configured: client_id().is_some(),
@@ -284,6 +322,7 @@ fn account_state_of(app: &AppHandle) -> AccountState {
             sync: me.sync,
             parts: me.parts,
             last_sync: me.last_sync,
+            survey,
         },
         None => AccountState {
             configured: client_id().is_some(),
@@ -295,6 +334,7 @@ fn account_state_of(app: &AppHandle) -> AccountState {
             sync: false,
             parts: all_parts(),
             last_sync: 0,
+            survey,
         },
     }
 }
@@ -439,7 +479,7 @@ pub async fn account_finish(app: AppHandle) -> Result<AccountState, AccountError
         return Err(AccountError::Network);
     }
     crate::secrets::set_internal(TOKEN_KEY, &token).map_err(|_| AccountError::Network)?;
-    let me = Stored { login: login.clone(), name: user["name"].as_str().unwrap_or("").to_string(), ..Default::default() };
+    let me = Stored { client: id.to_string(), login: login.clone(), name: user["name"].as_str().unwrap_or("").to_string(), ..Default::default() };
     write_stored(Some(&me));
     *a.me.lock().unwrap() = Some(me);
     crate::log::line("account: signed in with GitHub");
@@ -511,25 +551,29 @@ pub fn account_sign_out(app: AppHandle) -> AccountState {
 
 /// Reads the list everybody sees (the published file) and acts on it.
 async fn refresh_testers(app: &AppHandle) {
-    let list = match call(reqwest::Method::GET, TESTERS_RAW, None, None).await {
-        Ok((200, body)) => Some(parse_testers(&String::from_utf8_lossy(&body))),
-        Ok((404, _)) => Some(Vec::new()),
+    let read = match call(reqwest::Method::GET, TESTERS_RAW, None, None).await {
+        Ok((200, body)) => {
+            let text = String::from_utf8_lossy(&body).to_string();
+            Some((parse_testers(&text), parse_survey(&text)))
+        }
+        Ok((404, _)) => Some((Vec::new(), Survey::default())),
         _ => None,
     };
     // Unreachable: keep what was known, so a bad connection takes nobody's beta away.
-    if let Some(list) = list {
+    if let Some((list, survey)) = read {
         *state(app).testers.lock().unwrap() = Some(list);
+        *state(app).survey.lock().unwrap() = survey;
     }
     changed(app);
 }
 
 /// The owner's view of the list: the file as it is now on the branch, with its version.
-async fn read_list(token: &str) -> Result<(Vec<Person>, Option<String>), AccountError> {
+async fn read_list(token: &str) -> Result<(Vec<Person>, Survey, Option<String>), AccountError> {
     let (status, body) =
         call(reqwest::Method::GET, &format!("{TESTERS_API}?ref={TESTERS_BRANCH}"), Some(token), None).await?;
     match status {
         200 => {}
-        404 => return Ok((Vec::new(), None)),
+        404 => return Ok((Vec::new(), Survey::default(), None)),
         401 => return Err(AccountError::ReleaseTokenRefused),
         403 => return Err(AccountError::NeedsContents),
         _ => return Err(AccountError::Network),
@@ -537,7 +581,8 @@ async fn read_list(token: &str) -> Result<(Vec<Person>, Option<String>), Account
     let v: Value = serde_json::from_slice(&body).map_err(|_| AccountError::Network)?;
     let content: String = v["content"].as_str().unwrap_or("").chars().filter(|c| !c.is_whitespace()).collect();
     let bytes = crate::recap::decode_base64(&content).unwrap_or_default();
-    Ok((parse_testers(&String::from_utf8_lossy(&bytes)), v["sha"].as_str().map(str::to_string)))
+    let text = String::from_utf8_lossy(&bytes);
+    Ok((parse_testers(&text), parse_survey(&text), v["sha"].as_str().map(str::to_string)))
 }
 
 fn owner_token(app: &AppHandle) -> Result<String, AccountError> {
@@ -550,16 +595,17 @@ fn owner_token(app: &AppHandle) -> Result<String, AccountError> {
 #[tauri::command]
 pub async fn account_testers(app: AppHandle) -> Result<Vec<Person>, AccountError> {
     let token = owner_token(&app)?;
-    let (list, _) = read_list(&token).await?;
+    let (list, survey, _) = read_list(&token).await?;
     *state(&app).testers.lock().unwrap() = Some(list.clone());
+    *state(&app).survey.lock().unwrap() = survey;
     Ok(list)
 }
 
-async fn write_list(app: &AppHandle, edit: impl FnOnce(&mut Vec<Person>)) -> Result<Vec<Person>, AccountError> {
+async fn write_list(app: &AppHandle, edit: impl FnOnce(&mut Vec<Person>, &mut Survey)) -> Result<Vec<Person>, AccountError> {
     let token = owner_token(app)?;
-    let (mut list, sha) = read_list(&token).await?;
-    edit(&mut list);
-    let content = crate::claude::base64_for(testers_json(&list).as_bytes());
+    let (mut list, mut survey, sha) = read_list(&token).await?;
+    edit(&mut list, &mut survey);
+    let content = crate::claude::base64_for(testers_json(&list, &survey).as_bytes());
     let mut body = json!({
         "message": "Beta testers: updated from Coucou",
         "content": content,
@@ -576,6 +622,7 @@ async fn write_list(app: &AppHandle, edit: impl FnOnce(&mut Vec<Person>)) -> Res
         _ => return Err(AccountError::Network),
     }
     *state(app).testers.lock().unwrap() = Some(list.clone());
+    *state(app).survey.lock().unwrap() = survey;
     changed(app);
     Ok(list)
 }
@@ -588,7 +635,7 @@ pub async fn account_tester_add(app: AppHandle, login: String, name: String) -> 
     }
     let name: String = name.trim().chars().take(80).collect();
     crate::log::line("account: a beta tester was added");
-    write_list(&app, move |list| {
+    write_list(&app, move |list, _| {
         if !is_tester(list, &login) {
             list.push(Person { login, name });
         }
@@ -599,7 +646,30 @@ pub async fn account_tester_add(app: AppHandle, login: String, name: String) -> 
 #[tauri::command]
 pub async fn account_tester_remove(app: AppHandle, login: String) -> Result<Vec<Person>, AccountError> {
     crate::log::line("account: a beta tester was removed");
-    write_list(&app, move |list| list.retain(|p| !p.login.eq_ignore_ascii_case(login.trim()))).await
+    write_list(&app, move |list, _| list.retain(|p| !p.login.eq_ignore_ascii_case(login.trim()))).await
+}
+
+/// When and whom Coucou asks for a review (owner only); kept in testers.json.
+#[tauri::command]
+pub async fn account_set_survey(app: AppHandle, days: u32, who: String) -> Result<AccountState, AccountError> {
+    let days = days.clamp(1, 60);
+    let who = if who == "everyone" { "everyone" } else { "testers" }.to_string();
+    write_list(&app, move |_, survey| *survey = Survey { days, who }).await?;
+    Ok(account_state_of(&app))
+}
+
+/// What reviews.rs needs: the survey, and whether this account is asked.
+pub fn survey(app: &AppHandle) -> Survey {
+    state(app).survey.lock().unwrap().clone()
+}
+
+pub fn signed_in(app: &AppHandle) -> bool {
+    state(app).me.lock().unwrap().is_some()
+}
+
+/// The sign-in's token, for reviews.rs.
+pub fn user_token() -> Option<String> {
+    token().ok()
 }
 
 /// GitHub's people search, with their display names (owner only).
@@ -880,7 +950,11 @@ mod tests {
         ]);
         assert!(is_tester(&list, "sergey-dev"));
         assert!(!is_tester(&list, "maxim"));
-        assert_eq!(parse_testers(&testers_json(&list)), list);
+        assert_eq!(parse_testers(&testers_json(&list, &Survey::default())), list);
+        let survey = Survey { days: 3, who: "everyone".into() };
+        assert_eq!(parse_survey(&testers_json(&list, &survey)), survey);
+        assert_eq!(parse_survey(r#"{"survey":{"days":0,"who":"all"}}"#), Survey::default());
+        assert_eq!(parse_survey("{}"), Survey::default());
         assert!(parse_testers("not json").is_empty());
         assert!(parse_testers(r#"{"testers":[]}"#).is_empty());
     }

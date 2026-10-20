@@ -24,6 +24,7 @@ import { phoneSection } from "./phone";
 import { glowSection } from "./glow";
 import { petSection } from "./pet";
 import { accountSections } from "./account";
+import { reviewsSections } from "./reviews";
 import { colorDot } from "./colors";
 import { renderDiff, statusDot } from "./parts";
 import {
@@ -1752,6 +1753,7 @@ async function render() {
       settings = { ...settings, ...s };
       await save();
     }),
+    reviews: () => reviewsSections(),
     pills: () => [activePillsSection(connected)],
     agents: () => [claudeSection(status), agentsSection(agents), planSection(status)],
     chat: () => [

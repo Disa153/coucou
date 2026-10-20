@@ -6253,6 +6253,420 @@
    "pt-BR": "O GitHub recusou o token de lançamento. Em Atualizações, desconecte o GitHub e conecte de novo com um token novo.",
    "ru": "GitHub отклонил токен для выпуска. В «Обновлениях» отключите GitHub и подключите снова с новым токеном.",
    "id": "GitHub menolak token rilis. Di Pembaruan, putuskan GitHub lalu hubungkan lagi dengan token baru."
+  },
+  "Saved.": {
+   "zh-Hans": "已保存。",
+   "hi": "सेव हो गया।",
+   "es": "Guardado.",
+   "ar": "تم الحفظ.",
+   "fr": "Enregistré.",
+   "bn": "সেভ হয়েছে।",
+   "pt-BR": "Salvo.",
+   "ru": "Сохранено.",
+   "id": "Tersimpan."
+  },
+  "Survey": {
+   "zh-Hans": "调查",
+   "hi": "सर्वे",
+   "es": "Encuesta",
+   "ar": "الاستطلاع",
+   "fr": "Sondage",
+   "bn": "জরিপ",
+   "pt-BR": "Pesquisa",
+   "ru": "Опрос",
+   "id": "Survei"
+  },
+  "Ask after": {
+   "zh-Hans": "多久后询问",
+   "hi": "कितने समय बाद पूछें",
+   "es": "Preguntar tras",
+   "ar": "اسأل بعد",
+   "fr": "Demander après",
+   "bn": "কত দিন পর জিজ্ঞেস করবে",
+   "pt-BR": "Perguntar após",
+   "ru": "Спрашивать через",
+   "id": "Tanya setelah"
+  },
+  "Everyone signed in": {
+   "zh-Hans": "所有已登录的人",
+   "hi": "साइन इन किए सभी लोग",
+   "es": "Todos con sesión iniciada",
+   "ar": "كل من سجّل الدخول",
+   "fr": "Tous les connectés",
+   "bn": "সাইন ইন করা সবাই",
+   "pt-BR": "Todos que entraram",
+   "ru": "Всех со входом",
+   "id": "Semua yang masuk"
+  },
+  "Each build is asked about once, that long after it first starts. The reviews are comments on the build's issue in your repository.": {
+   "zh-Hans": "每个版本只询问一次，在首次启动后经过这段时间时询问。评价是你仓库中该版本 issue 下的评论。",
+   "hi": "हर बिल्ड के बारे में एक बार पूछा जाता है, पहली बार शुरू होने के इतने समय बाद। रिव्यू आपकी रिपॉज़िटरी में उस बिल्ड के issue पर कमेंट होते हैं।",
+   "es": "Se pregunta una vez por compilación, ese tiempo después de su primer inicio. Las reseñas son comentarios en el issue de la compilación en tu repositorio.",
+   "ar": "يُسأل عن كل إصدار مرة واحدة، بعد هذه المدة من أول تشغيل له. التقييمات تعليقات على issue الإصدار في مستودعك.",
+   "fr": "Chaque version est évaluée une fois, ce délai après son premier lancement. Les avis sont des commentaires sur l'issue de la version dans votre dépôt.",
+   "bn": "প্রতিটি বিল্ড নিয়ে একবারই জিজ্ঞেস করা হয়, প্রথম চালুর এতদিন পর। রিভিউগুলো আপনার রিপোজিটরিতে সেই বিল্ডের issue-তে মন্তব্য।",
+   "pt-BR": "Cada versão é avaliada uma vez, esse tempo depois de abrir pela primeira vez. As avaliações são comentários na issue da versão no seu repositório.",
+   "ru": "О каждой сборке спрашивают один раз, через это время после первого запуска. Отзывы — комментарии к issue этой сборки в вашем репозитории.",
+   "id": "Setiap build ditanyakan sekali, selang waktu itu setelah pertama kali dijalankan. Ulasan adalah komentar di issue build itu di repositori Anda."
+  },
+  "Reviews of the builds": {
+   "zh-Hans": "各版本的评价",
+   "hi": "बिल्ड के रिव्यू",
+   "es": "Reseñas de las compilaciones",
+   "ar": "تقييمات الإصدارات",
+   "fr": "Avis sur les versions",
+   "bn": "বিল্ডের রিভিউ",
+   "pt-BR": "Avaliações das versões",
+   "ru": "Отзывы о сборках",
+   "id": "Ulasan build"
+  },
+  "Sign in with GitHub in Account to see the reviews.": {
+   "zh-Hans": "请在“账户”中用 GitHub 登录以查看评价。",
+   "hi": "रिव्यू देखने के लिए खाता में GitHub से साइन इन करें।",
+   "es": "Inicia sesión con GitHub en Cuenta para ver las reseñas.",
+   "ar": "سجّل الدخول عبر GitHub في الحساب لرؤية التقييمات.",
+   "fr": "Connectez-vous avec GitHub dans Compte pour voir les avis.",
+   "bn": "রিভিউ দেখতে অ্যাকাউন্টে GitHub দিয়ে সাইন ইন করুন।",
+   "pt-BR": "Entre com o GitHub em Conta para ver as avaliações.",
+   "ru": "Войдите через GitHub в разделе «Аккаунт», чтобы видеть отзывы.",
+   "id": "Masuk dengan GitHub di Akun untuk melihat ulasan."
+  },
+  "Only the beta testers and Coucou's owner see the reviews.": {
+   "zh-Hans": "只有测试者和 Coucou 的所有者能看到评价。",
+   "hi": "रिव्यू सिर्फ़ बीटा टेस्टर और Coucou का मालिक देखते हैं।",
+   "es": "Solo los probadores beta y el propietario de Coucou ven las reseñas.",
+   "ar": "لا يرى التقييمات إلا مختبرو النسخة التجريبية ومالك Coucou.",
+   "fr": "Seuls les testeurs bêta et le propriétaire de Coucou voient les avis.",
+   "bn": "রিভিউ শুধু বিটা টেস্টার ও Coucou-র মালিক দেখতে পান।",
+   "pt-BR": "Só os testadores beta e o dono do Coucou veem as avaliações.",
+   "ru": "Отзывы видят только бета-тестеры и владелец Coucou.",
+   "id": "Hanya penguji beta dan pemilik Coucou yang melihat ulasan."
+  },
+  "No reviews yet.": {
+   "zh-Hans": "还没有评价。",
+   "hi": "अभी कोई रिव्यू नहीं।",
+   "es": "Aún no hay reseñas.",
+   "ar": "لا توجد تقييمات بعد.",
+   "fr": "Pas encore d'avis.",
+   "bn": "এখনো কোনো রিভিউ নেই।",
+   "pt-BR": "Ainda não há avaliações.",
+   "ru": "Отзывов пока нет.",
+   "id": "Belum ada ulasan."
+  },
+  "Build": {
+   "zh-Hans": "版本",
+   "hi": "बिल्ड",
+   "es": "Compilación",
+   "ar": "الإصدار",
+   "fr": "Version",
+   "bn": "বিল্ড",
+   "pt-BR": "Versão",
+   "ru": "Сборка",
+   "id": "Build"
+  },
+  "No reviews of build {build} yet.": {
+   "zh-Hans": "版本 {build} 还没有评价。",
+   "hi": "बिल्ड {build} का अभी कोई रिव्यू नहीं।",
+   "es": "Aún no hay reseñas de la compilación {build}.",
+   "ar": "لا توجد تقييمات للإصدار {build} بعد.",
+   "fr": "Pas encore d'avis sur la version {build}.",
+   "bn": "বিল্ড {build}-এর এখনো কোনো রিভিউ নেই।",
+   "pt-BR": "Ainda não há avaliações da versão {build}.",
+   "ru": "О сборке {build} отзывов пока нет.",
+   "id": "Belum ada ulasan untuk build {build}."
+  },
+  "➕ Add:": {
+   "zh-Hans": "➕ 添加：",
+   "hi": "➕ जोड़ें:",
+   "es": "➕ Añadir:",
+   "ar": "➕ إضافة:",
+   "fr": "➕ Ajouter :",
+   "bn": "➕ যোগ করুন:",
+   "pt-BR": "➕ Adicionar:",
+   "ru": "➕ Добавить:",
+   "id": "➕ Tambah:"
+  },
+  "➖ Take away:": {
+   "zh-Hans": "➖ 去掉：",
+   "hi": "➖ हटाएँ:",
+   "es": "➖ Quitar:",
+   "ar": "➖ إزالة:",
+   "fr": "➖ Retirer :",
+   "bn": "➖ সরান:",
+   "pt-BR": "➖ Tirar:",
+   "ru": "➖ Убрать:",
+   "id": "➖ Hapus:"
+  },
+  "{count} days": {
+   "zh-Hans": {
+    "other": "{count} 天"
+   },
+   "hi": {
+    "one": "{count} दिन",
+    "other": "{count} दिन"
+   },
+   "es": {
+    "one": "{count} día",
+    "other": "{count} días"
+   },
+   "ar": {
+    "zero": "{count} يوم",
+    "one": "يوم واحد",
+    "two": "يومان",
+    "few": "{count} أيام",
+    "many": "{count} يومًا",
+    "other": "{count} يوم"
+   },
+   "fr": {
+    "one": "{count} jour",
+    "other": "{count} jours"
+   },
+   "bn": {
+    "one": "{count} দিন",
+    "other": "{count} দিন"
+   },
+   "pt-BR": {
+    "one": "{count} dia",
+    "other": "{count} dias"
+   },
+   "ru": {
+    "one": "{count} день",
+    "few": "{count} дня",
+    "many": "{count} дней",
+    "other": "{count} дня"
+   },
+   "id": {
+    "other": "{count} hari"
+   }
+  },
+  "{count} reviews": {
+   "zh-Hans": {
+    "other": "{count} 条评价"
+   },
+   "hi": {
+    "one": "{count} रिव्यू",
+    "other": "{count} रिव्यू"
+   },
+   "es": {
+    "one": "{count} reseña",
+    "other": "{count} reseñas"
+   },
+   "ar": {
+    "zero": "{count} تقييم",
+    "one": "تقييم واحد",
+    "two": "تقييمان",
+    "few": "{count} تقييمات",
+    "many": "{count} تقييمًا",
+    "other": "{count} تقييم"
+   },
+   "fr": {
+    "one": "{count} avis",
+    "other": "{count} avis"
+   },
+   "bn": {
+    "one": "{count}টি রিভিউ",
+    "other": "{count}টি রিভিউ"
+   },
+   "pt-BR": {
+    "one": "{count} avaliação",
+    "other": "{count} avaliações"
+   },
+   "ru": {
+    "one": "{count} отзыв",
+    "few": "{count} отзыва",
+    "many": "{count} отзывов",
+    "other": "{count} отзыва"
+   },
+   "id": {
+    "other": "{count} ulasan"
+   }
+  },
+  "Poor": {
+   "zh-Hans": "很差",
+   "hi": "खराब",
+   "es": "Malo",
+   "ar": "سيئ",
+   "fr": "Mauvais",
+   "bn": "খারাপ",
+   "pt-BR": "Ruim",
+   "ru": "Плохо",
+   "id": "Buruk"
+  },
+  "Not great": {
+   "zh-Hans": "一般般",
+   "hi": "कुछ खास नहीं",
+   "es": "Regular",
+   "ar": "ليس جيدًا",
+   "fr": "Bof",
+   "bn": "তেমন ভালো না",
+   "pt-BR": "Mais ou menos",
+   "ru": "Так себе",
+   "id": "Kurang"
+  },
+  "Good": {
+   "zh-Hans": "不错",
+   "hi": "अच्छा",
+   "es": "Bueno",
+   "ar": "جيد",
+   "fr": "Bien",
+   "bn": "ভালো",
+   "pt-BR": "Bom",
+   "ru": "Хорошо",
+   "id": "Bagus"
+  },
+  "Great": {
+   "zh-Hans": "很棒",
+   "hi": "बहुत बढ़िया",
+   "es": "Genial",
+   "ar": "رائع",
+   "fr": "Super",
+   "bn": "দারুণ",
+   "pt-BR": "Ótimo",
+   "ru": "Отлично",
+   "id": "Hebat"
+  },
+  "Sign in again in Settings → Account so Coucou may send reviews.": {
+   "zh-Hans": "请在“设置 → 账户”中重新登录，以便 Coucou 发送评价。",
+   "hi": "सेटिंग्स → खाता में फिर से साइन इन करें ताकि Coucou रिव्यू भेज सके।",
+   "es": "Vuelve a iniciar sesión en Ajustes → Cuenta para que Coucou pueda enviar reseñas.",
+   "ar": "سجّل الدخول مجددًا في الإعدادات ← الحساب ليتمكن Coucou من إرسال التقييمات.",
+   "fr": "Reconnectez-vous dans Réglages → Compte pour que Coucou puisse envoyer des avis.",
+   "bn": "Coucou যাতে রিভিউ পাঠাতে পারে, সেটিংস → অ্যাকাউন্টে আবার সাইন ইন করুন।",
+   "pt-BR": "Entre de novo em Ajustes → Conta para o Coucou poder enviar avaliações.",
+   "ru": "Войдите заново в «Настройки → Аккаунт», чтобы Coucou мог отправлять отзывы.",
+   "id": "Masuk lagi di Pengaturan → Akun agar Coucou bisa mengirim ulasan."
+  },
+  "Pick a number of stars first.": {
+   "zh-Hans": "请先选择星级。",
+   "hi": "पहले स्टार चुनें।",
+   "es": "Primero elige las estrellas.",
+   "ar": "اختر عدد النجوم أولًا.",
+   "fr": "Choisissez d'abord un nombre d'étoiles.",
+   "bn": "আগে তারা বাছুন।",
+   "pt-BR": "Escolha as estrelas primeiro.",
+   "ru": "Сначала поставьте оценку.",
+   "id": "Pilih jumlah bintang dulu."
+  },
+  "Stars: {count}": {
+   "zh-Hans": "星级：{count}",
+   "hi": "स्टार: {count}",
+   "es": "Estrellas: {count}",
+   "ar": "النجوم: {count}",
+   "fr": "Étoiles : {count}",
+   "bn": "তারা: {count}",
+   "pt-BR": "Estrelas: {count}",
+   "ru": "Оценка: {count}",
+   "id": "Bintang: {count}"
+  },
+  "➕ What to add: what is missing": {
+   "zh-Hans": "➕ 想添加什么：缺少什么",
+   "hi": "➕ क्या जोड़ें: क्या कमी है",
+   "es": "➕ Qué añadir: qué falta",
+   "ar": "➕ ما الذي يُضاف: ما الذي ينقص",
+   "fr": "➕ Quoi ajouter : ce qui manque",
+   "bn": "➕ কী যোগ করবেন: কী নেই",
+   "pt-BR": "➕ O que adicionar: o que falta",
+   "ru": "➕ Что добавить: чего не хватает",
+   "id": "➕ Apa yang ditambah: apa yang kurang"
+  },
+  "➖ What to take away or change: what gets in the way": {
+   "zh-Hans": "➖ 想去掉或修改什么：什么碍事",
+   "hi": "➖ क्या हटाएँ या बदलें: क्या परेशान करता है",
+   "es": "➖ Qué quitar o cambiar: qué estorba",
+   "ar": "➖ ما الذي يُزال أو يُغيَّر: ما الذي يزعج",
+   "fr": "➖ Quoi retirer ou changer : ce qui gêne",
+   "bn": "➖ কী সরাবেন বা বদলাবেন: কী অসুবিধা করছে",
+   "pt-BR": "➖ O que tirar ou mudar: o que atrapalha",
+   "ru": "➖ Что убрать или поменять: что мешает",
+   "id": "➖ Apa yang dihapus atau diubah: apa yang mengganggu"
+  },
+  "Later": {
+   "zh-Hans": "稍后",
+   "hi": "बाद में",
+   "es": "Más tarde",
+   "ar": "لاحقًا",
+   "fr": "Plus tard",
+   "bn": "পরে",
+   "pt-BR": "Depois",
+   "ru": "Позже",
+   "id": "Nanti"
+  },
+  "Tap a star": {
+   "zh-Hans": "点一颗星",
+   "hi": "किसी स्टार पर टैप करें",
+   "es": "Toca una estrella",
+   "ar": "انقر على نجمة",
+   "fr": "Touchez une étoile",
+   "bn": "একটি তারায় চাপুন",
+   "pt-BR": "Toque numa estrela",
+   "ru": "Нажмите на звезду",
+   "id": "Ketuk bintang"
+  },
+  "Thank you! 🍙": {
+   "zh-Hans": "谢谢！🍙",
+   "hi": "धन्यवाद! 🍙",
+   "es": "¡Gracias! 🍙",
+   "ar": "شكرًا! 🍙",
+   "fr": "Merci ! 🍙",
+   "bn": "ধন্যবাদ! 🍙",
+   "pt-BR": "Obrigado! 🍙",
+   "ru": "Спасибо! 🍙",
+   "id": "Terima kasih! 🍙"
+  },
+  "Mochi passed it on. The reviews are in Settings → Reviews.": {
+   "zh-Hans": "Mochi 已转达。评价在“设置 → 评价”中。",
+   "hi": "Mochi ने इसे आगे पहुँचा दिया। रिव्यू सेटिंग्स → रिव्यू में हैं।",
+   "es": "Mochi lo ha pasado. Las reseñas están en Ajustes → Reseñas.",
+   "ar": "أوصله Mochi. التقييمات في الإعدادات ← التقييمات.",
+   "fr": "Mochi l'a transmis. Les avis sont dans Réglages → Avis.",
+   "bn": "Mochi পৌঁছে দিয়েছে। রিভিউ আছে সেটিংস → রিভিউতে।",
+   "pt-BR": "O Mochi passou adiante. As avaliações estão em Ajustes → Avaliações.",
+   "ru": "Мочи передал отзыв. Отзывы — в «Настройки → Отзывы».",
+   "id": "Mochi sudah meneruskannya. Ulasan ada di Pengaturan → Ulasan."
+  },
+  "How is build {build}?": {
+   "zh-Hans": "版本 {build} 怎么样？",
+   "hi": "बिल्ड {build} कैसी है?",
+   "es": "¿Qué tal la compilación {build}?",
+   "ar": "ما رأيك في الإصدار {build}؟",
+   "fr": "Comment trouvez-vous la version {build} ?",
+   "bn": "বিল্ড {build} কেমন লাগছে?",
+   "pt-BR": "O que achou da versão {build}?",
+   "ru": "Как вам сборка {build}?",
+   "id": "Bagaimana build {build}?"
+  },
+  "Reviews": {
+   "zh-Hans": "评价",
+   "hi": "रिव्यू",
+   "es": "Reseñas",
+   "ar": "التقييمات",
+   "fr": "Avis",
+   "bn": "রিভিউ",
+   "pt-BR": "Avaliações",
+   "ru": "Отзывы",
+   "id": "Ulasan"
+  },
+  "What the beta testers think of each build.": {
+   "zh-Hans": "测试者对每个版本的看法。",
+   "hi": "हर बिल्ड के बारे में बीटा टेस्टर क्या सोचते हैं।",
+   "es": "Lo que opinan los probadores beta de cada compilación.",
+   "ar": "رأي مختبري النسخة التجريبية في كل إصدار.",
+   "fr": "Ce que les testeurs bêta pensent de chaque version.",
+   "bn": "প্রতিটি বিল্ড নিয়ে বিটা টেস্টারদের মতামত।",
+   "pt-BR": "O que os testadores beta acham de cada versão.",
+   "ru": "Что бета-тестеры думают о каждой сборке.",
+   "id": "Pendapat penguji beta tentang setiap build."
+  },
+  "Who is asked": {
+   "zh-Hans": "询问对象",
+   "hi": "किससे पूछें",
+   "es": "A quién preguntar",
+   "ar": "من يُسأل",
+   "fr": "Qui est sollicité",
+   "bn": "কাকে জিজ্ঞেস করা হবে",
+   "pt-BR": "Quem responde",
+   "ru": "Кого спрашивать",
+   "id": "Siapa yang ditanya"
   }
  }
 }

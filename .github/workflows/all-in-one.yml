@@ -13,6 +13,8 @@ on:
 
 permissions:
   contents: write
+  # The build's "Reviews: build N" issue, where Coucou's testers leave their reviews (reviews.rs).
+  issues: write
 
 concurrency:
   group: all-in-one
@@ -170,6 +172,22 @@ jobs:
           gh release view channel-beta >/dev/null 2>&1 || gh release create channel-beta --prerelease \
             --title "Coucou beta channel" --notes "What Coucou's beta testers are offered: update.json names the latest beta build."
           gh release upload channel-beta update.json --clobber
+      - name: Open the build's reviews issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Coucou asks testers about this build after a while; their reviews are comments here.
+          # Issues may be off in the repository settings: then Coucou has nowhere to send them, and says so.
+          n=${{ github.run_number }}
+          title="Reviews: build $n"
+          gh label create reviews --color fbbf24 --description "Coucou build reviews" 2>/dev/null || true
+          if gh issue list --state all --search "\"$title\" in:title" --json title --jq '.[].title' 2>/dev/null | grep -qx "$title"; then
+            exit 0
+          fi
+          gh issue create --title "$title" --label reviews \
+            --body "Reviews of Coucou beta build $n, sent from Coucou (Settings → Reviews). One comment per review." \
+            || echo "::warning::The reviews issue could not be opened (are Issues on in the repository settings?)."
 
   android:
     needs: release

@@ -13,6 +13,7 @@ import { registerVoiceHandlers } from "./island/voice";
 import { applySpotify, registerSpotifyHandlers } from "./island/spotify";
 import { SPOTIFY_ID } from "./core/spotify";
 import { Recap } from "./recap/recap";
+import { checkReview, registerReviewChecks } from "./island/reviews";
 import { onLanguageChange, resolveLanguage, setLanguage, systemLanguages } from "./i18n/i18n";
 
 /** Shows the language Settings asks for ("" = the system's, when Coucou has it). */
@@ -148,8 +149,14 @@ async function main() {
 
   // Monday recap: app start (greeting over), an agent starting work, waking up.
   const checkRecap = () => void Recap.check(island);
-  island.onGreetingDone = checkRecap;
-  island.onWake = checkRecap;
+  // A build's review (island/reviews.ts): after the recap had its chance.
+  const checkAll = () => {
+    checkRecap();
+    window.setTimeout(() => void checkReview(island), 4000);
+  };
+  island.onGreetingDone = checkAll;
+  island.onWake = checkAll;
+  registerReviewChecks(island);
   await onEvent<null>("recap-check", checkRecap);
 
   island.launch();
