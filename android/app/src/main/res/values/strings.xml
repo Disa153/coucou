@@ -398,4 +398,18 @@
     <string name="update_checking">Checking…</string>
     <string name="update_none">You have the latest build (%1$s).</string>
     <string name="update_offline">Could not reach GitHub.</string>
+    <string name="promo_tag">A friend\'s project</string>
+    <string name="promo_title">Custom UI, by sergey1029</string>
+    <string name="promo_shot">What Custom UI looks like</string>
+    <string name="promo_line">Windows 11 in the style of macOS: a menu bar, a Dock, Spotlight and Launchpad. For your computer.</string>
+    <string name="promo_more_1">A menu bar with the app\'s menus, tray icons and a clock</string>
+    <string name="promo_more_2">A Dock with your apps, growing under the pointer</string>
+    <string name="promo_more_3">Spotlight: apps, files, the web and a calculator (Win or Alt+Space)</string>
+    <string name="promo_more_4">Launchpad, a Control Center, a calendar and widgets</string>
+    <string name="promo_more_5">Your windows stay as they are: only what is around them changes</string>
+    <string name="promo_more_6">Free and open source (MIT), no admin rights to install. Not made by or linked to Apple.</string>
+    <string name="promo_more">More</string>
+    <string name="promo_later">Later</string>
+    <string name="promo_open">GitHub</string>
+    <string name="promo_never">Don\'t show</string>
 </resources>

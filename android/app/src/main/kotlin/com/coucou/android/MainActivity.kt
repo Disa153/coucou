@@ -197,6 +197,10 @@ class MainActivity : ComponentActivity() {
                         if (barVisible && (screen == Screen.HOME || screen == Screen.SETTINGS)) {
                             com.coucou.android.ui.UpdateBanner(model.updater, Modifier.align(Alignment.BottomCenter).padding(bottom = com.coucou.android.ui.BarClearance))
                         }
+                        // Once after an update: a friend's project (not over an approval or a question).
+                        if (model.promoShown && screen == Screen.HOME && model.mode != Mode.NONE && model.approvals.isEmpty() && questionPill == null) {
+                            com.coucou.android.ui.PromoSheet(onDone = model::promoDone)
+                        }
                         // A request for permission rises over whatever is on screen until it is decided or closed.
                         val pending = ApprovalSheetPlan.next(model.approvals, closedApproval)
                         if (pending != null && screen != Screen.SCAN) ApprovalSheet(model, pending, onAllow = ::approve, onDismiss = { closedApproval = pending.fingerprint })

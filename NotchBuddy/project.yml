@@ -292,6 +292,9 @@ targets:
       # Siri's phrases for the App Shortcuts (CoucouIntents.swift) in other languages.
       - path: Resources/AppShortcuts.xcstrings
         buildPhase: resources
+      # The card after an update (LANPromo.swift), in Russian too.
+      - path: Resources/Promo.xcstrings
+        buildPhase: resources
     info:
       path: Resources/InfoPhone.plist
       properties:

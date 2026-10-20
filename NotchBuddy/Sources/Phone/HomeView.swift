@@ -66,6 +66,13 @@ struct HomeView: View {
                 ReviewSheet(link: link, fingerprint: fingerprint)
             }
         }
+        #if LAN_LINK
+        // Once after an update: a friend's project (not over the first launch or a review).
+        .sheet(isPresented: Binding(get: { LANPromo.shared.due && onboardingDone && link.reviewFingerprint == nil && LANLink.shared.proposedPairing == nil },
+                                    set: { if !$0 && LANPromo.shared.due { LANPromo.shared.done(never: false) } })) {
+            LANPromoSheet { LANPromo.shared.done(never: $0) }
+        }
+        #endif
         // First launch: how to connect the Mac.
         .fullScreenCover(isPresented: Binding(get: { !onboardingDone }, set: { if !$0 { onboardingDone = true } })) {
             #if LAN_LINK

@@ -273,6 +273,16 @@ class AppModel(private val context: Context) : LinkListener {
     val betaChat = BetaChatModel(context, prefs) { link }
     /** "Update available" from the fork's releases. */
     val updater = AppUpdater(context, prefs)
+    /** The card after an update (Custom UI by sergey1029): due once per new build. */
+    var promoShown by mutableStateOf(false); private set
+    private fun promoLoad() = com.coucou.android.core.PromoSeen(prefs.getLong("promo_build", 0L), prefs.getBoolean("promo_due", false), prefs.getBoolean("promo_never", false))
+    private fun promoSave(s: com.coucou.android.core.PromoSeen) { prefs.edit().putLong("promo_build", s.lastBuild).putBoolean("promo_due", s.due).putBoolean("promo_never", s.never).apply() }
+    init {
+        val s = com.coucou.android.core.Promo.onStart(promoLoad(), updater.installedCode.takeIf { it != Long.MAX_VALUE } ?: 0L)
+        promoSave(s)
+        promoShown = com.coucou.android.core.Promo.shown(s)
+    }
+    fun promoDone(never: Boolean) { promoSave(com.coucou.android.core.Promo.done(promoLoad(), never)); promoShown = false }
 
     private fun chatLinkLost() {
         betaChat.onLinkLost()

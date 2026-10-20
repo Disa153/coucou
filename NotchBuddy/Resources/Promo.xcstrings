@@ -1,0 +1,146 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "A friend's project": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проект друга"
+          }
+        }
+      }
+    },
+    "Custom UI, by sergey1029": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom UI от sergey1029"
+          }
+        }
+      }
+    },
+    "What Custom UI looks like": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как выглядит Custom UI"
+          }
+        }
+      }
+    },
+    "A menu bar with the app's menus, tray icons and a clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Строка меню с меню приложения, значками трея и часами"
+          }
+        }
+      }
+    },
+    "A Dock with your apps, growing under the pointer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock с вашими приложениями, который растёт под курсором"
+          }
+        }
+      }
+    },
+    "Spotlight: apps, files, the web and a calculator (Win or Alt+Space)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotlight: приложения, файлы, интернет и калькулятор (Win или Alt+Space)"
+          }
+        }
+      }
+    },
+    "Launchpad, a Control Center, a calendar and widgets": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launchpad, Пункт управления, календарь и виджеты"
+          }
+        }
+      }
+    },
+    "Your windows stay as they are: only what is around them changes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши окна остаются как есть: меняется только то, что вокруг них"
+          }
+        }
+      }
+    },
+    "Free and open source (MIT), no admin rights to install. Not made by or linked to Apple.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бесплатно и с открытым кодом (MIT), ставится без прав администратора. Не связано с Apple."
+          }
+        }
+      }
+    },
+    "Windows 11 in the style of macOS: a menu bar, a Dock, Spotlight and Launchpad. For your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows 11 в стиле macOS: строка меню, Dock, Spotlight и Launchpad. Для вашего компьютера."
+          }
+        }
+      }
+    },
+    "More": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подробнее"
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позже"
+          }
+        }
+      }
+    },
+    "Open on GitHub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть GitHub"
+          }
+        }
+      }
+    },
+    "Don't show": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не показывать"
+          }
+        }
+      }
+    }
+  }
+}
