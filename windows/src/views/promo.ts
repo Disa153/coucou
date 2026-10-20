@@ -10,6 +10,8 @@ import { t, tl } from "../i18n/i18n";
 import type { ViewActions, ViewHost } from "./views";
 // Custom UI's own icon (its assets/icon.ico, MIT), bundled: nothing is fetched.
 import iconUrl from "./customui.png";
+// What it looks like (a screenshot from sergey1029's desktop, the news feed blurred), bundled too.
+import shotUrl from "./customui-shot.jpg";
 
 export const PROMO_URL = "https://github.com/sergey1029/custom-ui";
 
@@ -61,9 +63,13 @@ export function buildPromo(actions: ViewActions): ViewHost {
     more.style.display = expanded ? "" : "none";
     line.style.display = expanded ? "none" : "";
     if (expanded) {
+      const shot = h("img", { class: "pr-shot", src: shotUrl, alt: "Custom UI" });
+      shot.addEventListener("click", () => more.classList.toggle("big"));
       const list = h("ul", {});
       for (const d of DETAILS) list.append(h("li", { text: d() }));
-      more.append(list);
+      more.append(shot, list);
+    } else {
+      more.classList.remove("big");
     }
     moreBtn.style.display = expanded ? "none" : "";
   }
