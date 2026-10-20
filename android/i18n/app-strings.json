@@ -397,6 +397,20 @@
     "update_check": "Check for updates",
     "update_checking": "Checking…",
     "update_none": "You have the latest build (%1$s).",
-    "update_offline": "Could not reach GitHub."
+    "update_offline": "Could not reach GitHub.",
+    "promo_tag": "A friend's project",
+    "promo_title": "Custom UI, by sergey1029",
+    "promo_shot": "What Custom UI looks like",
+    "promo_line": "Windows 11 in the style of macOS: a menu bar, a Dock, Spotlight and Launchpad. For your computer.",
+    "promo_more_1": "A menu bar with the app's menus, tray icons and a clock",
+    "promo_more_2": "A Dock with your apps, growing under the pointer",
+    "promo_more_3": "Spotlight: apps, files, the web and a calculator (Win or Alt+Space)",
+    "promo_more_4": "Launchpad, a Control Center, a calendar and widgets",
+    "promo_more_5": "Your windows stay as they are: only what is around them changes",
+    "promo_more_6": "Free and open source (MIT), no admin rights to install. Not made by or linked to Apple.",
+    "promo_more": "More",
+    "promo_later": "Later",
+    "promo_open": "GitHub",
+    "promo_never": "Don't show"
   }
 }
