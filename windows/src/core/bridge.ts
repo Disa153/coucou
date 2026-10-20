@@ -356,6 +356,9 @@ export const Bridge = {
   reviewSend: (build: number, stars: number, add: string, remove: string) =>
     callOrThrow<void>("review_send", { build, stars, add, remove }),
   reviewList: () => callOrThrow<BuildReviews[]>("review_list"),
+  /** The card after an update (src-tauri/src/promo.rs). */
+  promoDue: () => call<boolean>("promo_due"),
+  promoDone: (never: boolean) => call<void>("promo_done", { never }),
   /** The beta chat (src-tauri/src/betachat.rs); rejects with a ReviewError. */
   betaChatMessages: (full = false) =>
     callOrThrow<{ messages: ChatMessage[]; page: string; owner: boolean; build: number }>("beta_chat_messages", { full }),

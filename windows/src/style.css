@@ -3326,3 +3326,55 @@ html[data-dir="rtl"] #views :is(.bubble, .reply .md-p, .reply .md-h, .reply .md-
   padding: 8px 12px 10px 64px;
 }
 
+
+/* The card after an update (views/promo.ts), in the review card's panel. */
+.view.promo.on .pr-panel {
+  pointer-events: auto;
+}
+
+.pr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pr-tag {
+  font: 600 10px var(--font);
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pr-title {
+  font: 600 14px var(--font);
+}
+
+.pr-line {
+  font: 400 12px var(--font);
+  color: var(--dim);
+  flex: 1 1 auto;
+}
+
+.pr-more {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  font: 400 11.5px/1.4 var(--font);
+  color: var(--ink-2);
+}
+
+.pr-more ul {
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pr-never {
+  border: 0;
+  background: none;
+  color: var(--dim-3);
+  font: 500 10.5px var(--font);
+  cursor: pointer;
+  padding: 0;
+}

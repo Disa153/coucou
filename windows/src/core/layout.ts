@@ -28,7 +28,8 @@ export type IslandViewName =
   | "kitchen"
   | "lyrics"
   | "review"
-  | "betachat";
+  | "betachat"
+  | "promo";
 
 export type BotStateName =
   | "idle"
@@ -106,6 +107,8 @@ export const VIEW_LAYOUTS: Record<IslandViewName, ViewLayout> = {
   lyrics: { height: 300, botX: 40, botY: 62, botDiameter: 30, agentMode: "none" },
   // Rating a build: Mochi on the left asking, the stars and two fields on the right.
   // The beta chat: Mochi small in the corner, the messages take the island.
+  // A friend's project after an update: Mochi on the left, the card on the right.
+  promo: { height: 236, botX: 72, botY: 116, botDiameter: 56, agentMode: "none" },
   betachat: { height: 320, botX: 40, botY: 62, botDiameter: 30, agentMode: "none" },
   review: { height: 236, botX: 72, botY: 116, botDiameter: 56, agentMode: "none" },
 };

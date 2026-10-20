@@ -32,6 +32,7 @@ mod pipe;
 mod platform;
 #[cfg(target_os = "linux")]
 mod portal;
+mod promo;
 mod recap;
 mod reviews;
 mod secrets;
@@ -900,6 +901,8 @@ pub fn run() {
             reviews::review_skip,
             reviews::review_send,
             reviews::review_list,
+            promo::promo_due,
+            promo::promo_done,
             betachat::beta_chat_messages,
             betachat::beta_chat_unread,
             betachat::beta_chat_send,
@@ -979,6 +982,7 @@ pub fn run() {
             transcripts::configure(&loaded);
             account::setup(&handle);
             reviews::setup();
+            promo::setup();
             betachat::setup(&handle);
             updater::setup(&handle);
             shortcuts::apply(&handle, &loaded.shortcuts);
