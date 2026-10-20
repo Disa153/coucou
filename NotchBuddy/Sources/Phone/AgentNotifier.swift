@@ -58,20 +58,20 @@ enum NotificationActions {
     @MainActor private static var questionCategories: [UNNotificationCategory] = []
 
     @MainActor static func register() {
-        let allow = UNNotificationAction(identifier: allow, title: "Allow",
+        let allow = UNNotificationAction(identifier: allow, title: String(localized: "Allow"),
                                          options: [.authenticationRequired],
                                          icon: UNNotificationActionIcon(systemImageName: "faceid"))
-        let review = UNNotificationAction(identifier: review, title: "Review",
+        let review = UNNotificationAction(identifier: review, title: String(localized: "Review"),
                                           options: [.foreground, .authenticationRequired])
-        let deny = UNNotificationAction(identifier: deny, title: "Deny",
+        let deny = UNNotificationAction(identifier: deny, title: String(localized: "Deny"),
                                         options: [.destructive, .authenticationRequired])
         let approval = UNNotificationCategory(identifier: approvalCategory, actions: [allow, review, deny],
                                               intentIdentifiers: [], options: [])
-        let reply = UNTextInputNotificationAction(identifier: reply, title: "Reply",
+        let reply = UNTextInputNotificationAction(identifier: reply, title: String(localized: "Reply"),
                                                   options: [.authenticationRequired],
                                                   icon: UNNotificationActionIcon(systemImageName: "arrowshape.turn.up.left"),
-                                                  textInputButtonTitle: "Send",
-                                                  textInputPlaceholder: "Tell Claude what to do next…")
+                                                  textInputButtonTitle: String(localized: "Send"),
+                                                  textInputPlaceholder: String(localized: "Tell Claude what to do next…"))
         let doneReply = UNNotificationCategory(identifier: doneReplyCategory, actions: [reply],
                                                intentIdentifiers: [], options: [])
         let done = UNNotificationCategory(identifier: doneCategory, actions: [], intentIdentifiers: [], options: [])
@@ -148,7 +148,7 @@ enum AgentNotifier {
             guard PhoneSettings.notifyDone, !PhoneSettings.focusOnlyWaiting else { return }
             content.title = "\(session.pillName) · \(session.title)"
             let answer = turn.map(\.finalMessage).flatMap { $0.isEmpty ? nil : $0 } ?? session.finalLine
-            content.body = answer.isEmpty ? "Done. What's next?" : "✓ " + String(answer.prefix(220))
+            content.body = answer.isEmpty ? String(localized: "Done. What's next?") : "✓ " + String(answer.prefix(220))
             content.sound = quiet ? nil : PhoneSettings.sound("finish")
             content.categoryIdentifier = session.acceptsInstructions
                 ? NotificationActions.doneReplyCategory : NotificationActions.doneCategory
@@ -157,7 +157,7 @@ enum AgentNotifier {
         case .failed(let session):
             guard PhoneSettings.notifyDone, !PhoneSettings.focusOnlyWaiting else { return }
             content.title = "\(session.pillName) · \(session.title)"
-            content.body = session.finalLine.isEmpty ? "Something went wrong." : String(session.finalLine.prefix(220))
+            content.body = session.finalLine.isEmpty ? String(localized: "Something went wrong.") : String(session.finalLine.prefix(220))
             content.sound = quiet ? nil : PhoneSettings.sound("error")
             content.categoryIdentifier = session.acceptsInstructions
                 ? NotificationActions.doneReplyCategory : NotificationActions.doneCategory
@@ -165,7 +165,7 @@ enum AgentNotifier {
             if quiet { content.interruptionLevel = .passive }
         case .question(let session, let payload):
             // A question blocks the agent like an approval: it rings in the quiet hours too.
-            content.title = "\(session.pillName) has a question"
+            content.title = String(localized: "\(session.pillName) has a question")
             let first = payload.items.first
             content.body = first.map { item in
                 item.question + "\n" + item.options.map { "• \($0.label)" }.joined(separator: "\n")

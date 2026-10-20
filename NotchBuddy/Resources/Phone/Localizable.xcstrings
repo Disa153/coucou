@@ -1,0 +1,4426 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ Sign in to iCloud with the same account as your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ Войдите в iCloud под тем же аккаунтом, что и на Mac."
+          }
+        }
+      }
+    },
+    "%@ Waiting for the computer…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ Ждём компьютер…"
+          }
+        }
+      }
+    },
+    "%@ asks to run": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ просит выполнить"
+          }
+        }
+      }
+    },
+    "%@ files": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлов: %1$@"
+          }
+        }
+      }
+    },
+    "%@ has a question": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У %1$@ вопрос"
+          }
+        }
+      }
+    },
+    "%@ waiting": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждут: %1$@"
+          }
+        }
+      }
+    },
+    "%@ wants to run %@. Allow it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ хочет выполнить %2$@. Разрешить?"
+          }
+        }
+      }
+    },
+    "%@ wants to run %lld. Allow it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ хочет выполнить %2$lld. Разрешить?"
+          }
+        }
+      }
+    },
+    "%@ working": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работают: %1$@"
+          }
+        }
+      }
+    },
+    "%@. %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. %2$@"
+          }
+        }
+      }
+    },
+    "%@. %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. %2$lld"
+          }
+        }
+      }
+    },
+    "%lld Sign in to iCloud with the same account as your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Войдите в iCloud под тем же аккаунтом, что и на Mac."
+          }
+        }
+      }
+    },
+    "%lld Waiting for the computer…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld Ждём компьютер…"
+          }
+        }
+      }
+    },
+    "%lld asks to run": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld просит выполнить"
+          }
+        }
+      }
+    },
+    "%lld files": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлов: %1$lld"
+          }
+        }
+      }
+    },
+    "%lld has a question": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У %1$lld вопрос"
+          }
+        }
+      }
+    },
+    "%lld waiting": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждут: %1$lld"
+          }
+        }
+      }
+    },
+    "%lld wants to run %@. Allow it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld хочет выполнить %2$@. Разрешить?"
+          }
+        }
+      }
+    },
+    "%lld wants to run %lld. Allow it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld хочет выполнить %2$lld. Разрешить?"
+          }
+        }
+      }
+    },
+    "%lld working": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работают: %1$lld"
+          }
+        }
+      }
+    },
+    "%lld. %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld. %2$@"
+          }
+        }
+      }
+    },
+    "%lld. %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld. %2$lld"
+          }
+        }
+      }
+    },
+    "1 file": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 файл"
+          }
+        }
+      }
+    },
+    "A background task finished": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фоновая задача завершена"
+          }
+        }
+      }
+    },
+    "A different computer answered at the saved address": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По сохранённому адресу ответил другой компьютер"
+          }
+        }
+      }
+    },
+    "A permission": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешение"
+          }
+        }
+      }
+    },
+    "AI chat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ИИ-чат"
+          }
+        }
+      }
+    },
+    "Activity · %@/%@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность · %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "Activity · %@/%lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность · %1$@/%2$lld"
+          }
+        }
+      }
+    },
+    "Activity · %lld/%@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность · %1$lld/%2$@"
+          }
+        }
+      }
+    },
+    "Activity · %lld/%lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность · %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Add a photo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить фото"
+          }
+        }
+      }
+    },
+    "Add its key in Coucou's Settings on your Mac and keep the iPhone switch on (Settings → General → iPhone). What the Mac sees shows up here: no key is stored on your iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте его ключ в настройках Coucou на Mac и не выключайте переключатель iPhone (Настройки → Основные → iPhone). Здесь появится то, что видит Mac: на iPhone ключ не хранится."
+          }
+        }
+      }
+    },
+    "Address": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адрес"
+          }
+        }
+      }
+    },
+    "Agent": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Агент"
+          }
+        }
+      }
+    },
+    "Agent status": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статус агентов"
+          }
+        }
+      }
+    },
+    "Agents": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Агенты"
+          }
+        }
+      }
+    },
+    "All quiet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё спокойно"
+          }
+        }
+      }
+    },
+    "All quiet: no agent session on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё спокойно: на Mac нет сессий агентов."
+          }
+        }
+      }
+    },
+    "Allow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить"
+          }
+        }
+      }
+    },
+    "Allow asks for Face ID. The request expires after 2 minutes.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Разрешить» запросит Face ID. Запрос истекает через 2 минуты."
+          }
+        }
+      }
+    },
+    "Allow the command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить команду"
+          }
+        }
+      }
+    },
+    "Allow the waiting command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить ожидающую команду"
+          }
+        }
+      }
+    },
+    "Allow this command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить эту команду"
+          }
+        }
+      }
+    },
+    "Allow this command on %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить эту команду на %1$@"
+          }
+        }
+      }
+    },
+    "Allow this command on %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить эту команду на %1$lld"
+          }
+        }
+      }
+    },
+    "Allow this command on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить эту команду на Mac"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено"
+          }
+        }
+      }
+    },
+    "Allowed from %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено: %1$@"
+          }
+        }
+      }
+    },
+    "Allowed from %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено: %1$lld"
+          }
+        }
+      }
+    },
+    "Allowed, sent to %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено, отправлено на %1$@"
+          }
+        }
+      }
+    },
+    "Allowed, sent to %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено, отправлено на %1$lld"
+          }
+        }
+      }
+    },
+    "Allowed.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено."
+          }
+        }
+      }
+    },
+    "Allows the command an agent is waiting for your OK on, after you confirm it.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешает команду, которую агент ждёт, после вашего подтверждения."
+          }
+        }
+      }
+    },
+    "An agent is waiting for your OK": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Агент ждёт вашего ОК"
+          }
+        }
+      }
+    },
+    "Answer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответить"
+          }
+        }
+      }
+    },
+    "Answer failed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ не удался: %1$@"
+          }
+        }
+      }
+    },
+    "Answer failed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ не удался: %1$lld"
+          }
+        }
+      }
+    },
+    "Answer not sent: the computer isn't connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ не отправлен: компьютер не подключён"
+          }
+        }
+      }
+    },
+    "Answer on %@. This request can't be answered from the iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответьте на %1$@. На этот запрос нельзя ответить с iPhone."
+          }
+        }
+      }
+    },
+    "Answer on %lld. This request can't be answered from the iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответьте на %1$lld. На этот запрос нельзя ответить с iPhone."
+          }
+        }
+      }
+    },
+    "Answer on your Mac: this question can't be answered from the iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответьте на Mac: на этот вопрос нельзя ответить с iPhone."
+          }
+        }
+      }
+    },
+    "Answer sent to your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ отправлен на Mac"
+          }
+        }
+      }
+    },
+    "Approval notifications": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления о разрешениях"
+          }
+        }
+      }
+    },
+    "Approvals and questions always notify you. Mochi's sounds are the ones he makes in your Mac's notch.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "О разрешениях и вопросах вы узнаете всегда. Звуки Mochi — те же, что он издаёт в «чёлке» Mac."
+          }
+        }
+      }
+    },
+    "Approvals then arrive as notifications with Allow and Deny, without opening Coucou (press and hold the notification). Uses some battery.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тогда запросы приходят уведомлениями с кнопками «Разрешить» и «Отклонить», без открытия Coucou (нажмите и удерживайте уведомление). Немного расходует батарею."
+          }
+        }
+      }
+    },
+    "Ask Claude": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спросить Claude"
+          }
+        }
+      }
+    },
+    "Ask anything. The answer comes from %@, through your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спрашивайте что угодно. Ответит %1$@ через ваш компьютер."
+          }
+        }
+      }
+    },
+    "Ask anything. The answer comes from %lld, through your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спрашивайте что угодно. Ответит %1$lld через ваш компьютер."
+          }
+        }
+      }
+    },
+    "Asking your Mac for everything %@ has…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрашиваем у Mac всё, что есть у %1$@…"
+          }
+        }
+      }
+    },
+    "Asking your Mac for everything %lld has…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрашиваем у Mac всё, что есть у %1$lld…"
+          }
+        }
+      }
+    },
+    "Attach": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прикрепить"
+          }
+        }
+      }
+    },
+    "Auto (seasons)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Авто (по сезону)"
+          }
+        }
+      }
+    },
+    "Away from home": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вне дома"
+          }
+        }
+      }
+    },
+    "Away from home: name.keenetic.link": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вне дома: name.keenetic.link"
+          }
+        }
+      }
+    },
+    "Beanie": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шапка"
+          }
+        }
+      }
+    },
+    "Beta chat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бета-чат"
+          }
+        }
+      }
+    },
+    "Beta chat (%@)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бета-чат (%1$@)"
+          }
+        }
+      }
+    },
+    "Beta chat (%lld)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бета-чат (%1$lld)"
+          }
+        }
+      }
+    },
+    "Blue": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синяя"
+          }
+        }
+      }
+    },
+    "Bow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бантик"
+          }
+        }
+      }
+    },
+    "Bunny ears": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заячьи ушки"
+          }
+        }
+      }
+    },
+    "Can't reach iCloud": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud недоступен"
+          }
+        }
+      }
+    },
+    "Can't reach the computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер недоступен"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отмена"
+          }
+        }
+      }
+    },
+    "Chat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чат"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверяем…"
+          }
+        }
+      }
+    },
+    "Choose what Coucou notifies during this Focus.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите, о чём Coucou уведомляет в этом режиме фокусирования."
+          }
+        }
+      }
+    },
+    "Claude waits about 2 minutes, then asks in the terminal.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude ждёт около 2 минут, потом спрашивает в терминале."
+          }
+        }
+      }
+    },
+    "Claude's answer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ Claude"
+          }
+        }
+      }
+    },
+    "Click \"Show pairing code\".": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите «Показать код подключения»."
+          }
+        }
+      }
+    },
+    "Commands you allow or deny from your iPhone show up here. They stay on this iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь появятся команды, которые вы разрешили или отклонили с iPhone. Они хранятся только на этом iPhone."
+          }
+        }
+      }
+    },
+    "Commit the changes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закоммить изменения"
+          }
+        }
+      }
+    },
+    "Computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер"
+          }
+        }
+      }
+    },
+    "Computer settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки компьютера"
+          }
+        }
+      }
+    },
+    "Connect %@ on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключите %1$@ на Mac"
+          }
+        }
+      }
+    },
+    "Connect %lld on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключите %1$lld на Mac"
+          }
+        }
+      }
+    },
+    "Connect once while the computer is on, so Coucou learns its network card.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключитесь один раз, пока компьютер включён, чтобы Coucou узнал его сетевую карту."
+          }
+        }
+      }
+    },
+    "Connect to Coucou on your computer first.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала подключитесь к Coucou на компьютере."
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено"
+          }
+        }
+      }
+    },
+    "Connected to %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено к %1$@"
+          }
+        }
+      }
+    },
+    "Connected to %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено к %1$lld"
+          }
+        }
+      }
+    },
+    "Connecting to iCloud…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключение к iCloud…"
+          }
+        }
+      }
+    },
+    "Connecting to your computer…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключение к компьютеру…"
+          }
+        }
+      }
+    },
+    "Connecting…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключение…"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связь"
+          }
+        }
+      }
+    },
+    "Connection refused": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В подключении отказано"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить"
+          }
+        }
+      }
+    },
+    "Copy Claude's answer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать ответ Claude"
+          }
+        }
+      }
+    },
+    "Copy link": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать ссылку"
+          }
+        }
+      }
+    },
+    "Copy the command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать команду"
+          }
+        }
+      }
+    },
+    "Coucou on iPhone shows what Claude Code, Cursor, Codex and your services are doing on your Mac. Three things to set up, once.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucou на iPhone показывает, что делают Claude Code, Cursor, Codex и ваши сервисы на Mac. Нужно один раз настроить три вещи."
+          }
+        }
+      }
+    },
+    "Coucou on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coucou на Mac"
+          }
+        }
+      }
+    },
+    "Couldn't check the iCloud account.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось проверить аккаунт iCloud."
+          }
+        }
+      }
+    },
+    "Couldn't reach iCloud.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud недоступен."
+          }
+        }
+      }
+    },
+    "Couldn't reach iCloud. Nothing was sent.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud недоступен. Ничего не отправлено."
+          }
+        }
+      }
+    },
+    "Crown": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Корона"
+          }
+        }
+      }
+    },
+    "Decision": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решение"
+          }
+        }
+      }
+    },
+    "Decision failed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решение не отправлено: %1$@"
+          }
+        }
+      }
+    },
+    "Decision failed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решение не отправлено: %1$lld"
+          }
+        }
+      }
+    },
+    "Decision not sent: the computer isn't connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решение не отправлено: компьютер не подключён"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить"
+          }
+        }
+      }
+    },
+    "Denied": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено"
+          }
+        }
+      }
+    },
+    "Denied from the Lock Screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено с экрана блокировки"
+          }
+        }
+      }
+    },
+    "Denied from the notification": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено из уведомления"
+          }
+        }
+      }
+    },
+    "Denied with Siri": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено через Siri"
+          }
+        }
+      }
+    },
+    "Denied, sent to %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено, отправлено на %1$@"
+          }
+        }
+      }
+    },
+    "Denied, sent to %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено, отправлено на %1$lld"
+          }
+        }
+      }
+    },
+    "Denied.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонено."
+          }
+        }
+      }
+    },
+    "Denies the command an agent is waiting for your OK on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклоняет команду, которую агент ждёт."
+          }
+        }
+      }
+    },
+    "Deny": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонить"
+          }
+        }
+      }
+    },
+    "Deny the command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонить команду"
+          }
+        }
+      }
+    },
+    "Deny the waiting command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отклонить ожидающую команду"
+          }
+        }
+      }
+    },
+    "Dictate": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диктовка"
+          }
+        }
+      }
+    },
+    "Dictation language": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык диктовки"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
+          }
+        }
+      }
+    },
+    "Done in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово за %1$@"
+          }
+        }
+      }
+    },
+    "Done in %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово за %1$lld"
+          }
+        }
+      }
+    },
+    "Done. What's next?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово. Что дальше?"
+          }
+        }
+      }
+    },
+    "Earlier turns": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ранние ходы"
+          }
+        }
+      }
+    },
+    "Edit": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить"
+          }
+        }
+      }
+    },
+    "Everything": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё"
+          }
+        }
+      }
+    },
+    "Explain what you changed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Объясни, что ты изменил"
+          }
+        }
+      }
+    },
+    "Face ID didn't confirm. Nothing was sent.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID не подтвердил. Ничего не отправлено."
+          }
+        }
+      }
+    },
+    "Failed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка: %1$@"
+          }
+        }
+      }
+    },
+    "Failed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка: %1$lld"
+          }
+        }
+      }
+    },
+    "File": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файл"
+          }
+        }
+      }
+    },
+    "Files changed · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменённые файлы · %1$@"
+          }
+        }
+      }
+    },
+    "Files changed · %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменённые файлы · %1$lld"
+          }
+        }
+      }
+    },
+    "Find my turns in Spotlight": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать мои ходы в Spotlight"
+          }
+        }
+      }
+    },
+    "Fix the errors": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исправь ошибки"
+          }
+        }
+      }
+    },
+    "From": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С"
+          }
+        }
+      }
+    },
+    "Full screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На весь экран"
+          }
+        }
+      }
+    },
+    "GitHub could not be reached. Coucou tries again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub недоступен. Coucou попробует ещё раз."
+          }
+        }
+      }
+    },
+    "Got it": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Понятно"
+          }
+        }
+      }
+    },
+    "Graphite": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Графит"
+          }
+        }
+      }
+    },
+    "Green": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зелёная"
+          }
+        }
+      }
+    },
+    "Hide keyboard": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть клавиатуру"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История"
+          }
+        }
+      }
+    },
+    "How to connect your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как подключить Mac"
+          }
+        }
+      }
+    },
+    "How to pair": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как подключить"
+          }
+        }
+      }
+    },
+    "In the quiet hours, only what waits on you (a command to allow, a question) makes a sound. The rest arrives silently.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В тихие часы звучит только то, что ждёт вас (команда на разрешение, вопрос). Остальное приходит беззвучно."
+          }
+        }
+      }
+    },
+    "Install Coucou for Mac (Mac App Store or the website) and set up its Claude Code hooks.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установите Coucou для Mac (Mac App Store или сайт) и настройте его хуки Claude Code."
+          }
+        }
+      }
+    },
+    "Install Tailscale on the computer and on this iPhone, signed in to the same account, and enter the computer's Tailscale address (100.…). When the home address does not answer, Coucou tries this one.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установите Tailscale на компьютер и на этот iPhone под одним аккаунтом и введите Tailscale-адрес компьютера (100.…). Когда домашний адрес не отвечает, Coucou пробует этот."
+          }
+        }
+      }
+    },
+    "Instruction": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указание"
+          }
+        }
+      }
+    },
+    "Instruction failed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указание не отправлено: %1$@"
+          }
+        }
+      }
+    },
+    "Instruction failed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указание не отправлено: %1$lld"
+          }
+        }
+      }
+    },
+    "Instructions can't be sent to a Windows computer yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Указания на компьютер с Windows пока не отправляются"
+          }
+        }
+      }
+    },
+    "It also told Coucou the computer's network card.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Он также сообщил Coucou сетевую карту компьютера."
+          }
+        }
+      }
+    },
+    "Keenetic router": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер Keenetic"
+          }
+        }
+      }
+    },
+    "Keep": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оставить"
+          }
+        }
+      }
+    },
+    "Keep-alive off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фоновая связь выключена"
+          }
+        }
+      }
+    },
+    "Keep-alive on": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фоновая связь включена"
+          }
+        }
+      }
+    },
+    "Knock on the door": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стук в дверь"
+          }
+        }
+      }
+    },
+    "Last message": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последнее сообщение"
+          }
+        }
+      }
+    },
+    "Link back": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обратная связь"
+          }
+        }
+      }
+    },
+    "Link closed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связь закрыта: %1$@"
+          }
+        }
+      }
+    },
+    "Link closed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связь закрыта: %1$lld"
+          }
+        }
+      }
+    },
+    "Linked": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связано"
+          }
+        }
+      }
+    },
+    "Linked to iCloud": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связано с iCloud"
+          }
+        }
+      }
+    },
+    "Listening…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слушаю…"
+          }
+        }
+      }
+    },
+    "Live Activities": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Activities"
+          }
+        }
+      }
+    },
+    "Loading…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка…"
+          }
+        }
+      }
+    },
+    "Login": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Логин"
+          }
+        }
+      }
+    },
+    "Look": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вид"
+          }
+        }
+      }
+    },
+    "Message": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщение"
+          }
+        }
+      }
+    },
+    "Mochi update": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновление Mochi"
+          }
+        }
+      }
+    },
+    "Mochi's sounds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звуки Mochi"
+          }
+        }
+      }
+    },
+    "Mochi: waiting for your OK, sent without the alert (background)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi: ждёт вашего ОК, отправлено без оповещения (фон)"
+          }
+        }
+      }
+    },
+    "Model": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имя"
+          }
+        }
+      }
+    },
+    "Neither the computer nor the router told Coucou the network card yet. Enter it by hand below.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни компьютер, ни роутер пока не сообщили Coucou сетевую карту. Введите её вручную ниже."
+          }
+        }
+      }
+    },
+    "Network card": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сетевая карта"
+          }
+        }
+      }
+    },
+    "Network card by hand": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сетевая карта вручную"
+          }
+        }
+      }
+    },
+    "New chat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новый чат"
+          }
+        }
+      }
+    },
+    "New message in the beta chat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новое сообщение в бета-чате"
+          }
+        }
+      }
+    },
+    "No Claude Code session takes instructions. Turn it on in Coucou's Settings on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни одна сессия Claude Code не принимает указания. Включите это в настройках Coucou на Mac."
+          }
+        }
+      }
+    },
+    "No account, no analytics, no ads. Your sessions travel through your own private iCloud, encrypted with your keys.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без аккаунта, аналитики и рекламы. Ваши сессии идут через ваш личный iCloud, зашифрованные вашими ключами."
+          }
+        }
+      }
+    },
+    "No answer from the computer. Same Wi-Fi? Is it awake?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер не отвечает. Та же Wi-Fi-сеть? Он не спит?"
+          }
+        }
+      }
+    },
+    "No decision yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Решений пока нет"
+          }
+        }
+      }
+    },
+    "No iCloud account on this iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом iPhone нет аккаунта iCloud."
+          }
+        }
+      }
+    },
+    "No messages yet. Say hello to the testers!": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщений пока нет. Поздоровайтесь с тестерами!"
+          }
+        }
+      }
+    },
+    "No model is allowed yet. On your computer, tick one under Settings → Phone → Models the phone may use (Claude Code needs no API key).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока не разрешено ни одной модели. На компьютере отметьте модель в Настройки → Телефон → Модели для телефона (Claude Code не нужен API-ключ)."
+          }
+        }
+      }
+    },
+    "No session yet. Open Coucou on your Mac (NotchBuddyCloud).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессий пока нет. Откройте Coucou на Mac (NotchBuddyCloud)."
+          }
+        }
+      }
+    },
+    "No session yet. Start Claude Code on your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессий пока нет. Запустите Claude Code на компьютере."
+          }
+        }
+      }
+    },
+    "No session yet. Start Claude Code, Cursor or Codex on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессий пока нет. Запустите Claude Code, Cursor или Codex на Mac."
+          }
+        }
+      }
+    },
+    "No sound": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без звука"
+          }
+        }
+      }
+    },
+    "No turn yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ходов пока нет"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет связи"
+          }
+        }
+      }
+    },
+    "Not connected on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не подключено на Mac"
+          }
+        }
+      }
+    },
+    "Not connected to your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет связи с компьютером."
+          }
+        }
+      }
+    },
+    "Not known yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока неизвестна"
+          }
+        }
+      }
+    },
+    "Not paired yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не подключено"
+          }
+        }
+      }
+    },
+    "Not sent. Tap to retry": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не отправлено. Нажмите, чтобы повторить"
+          }
+        }
+      }
+    },
+    "Not sent: the computer isn't connected.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не отправлено: компьютер не подключён."
+          }
+        }
+      }
+    },
+    "Not set up yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не настроено"
+          }
+        }
+      }
+    },
+    "Not shown: this install has no widgets extension (lite .ipa, or the signing tool removed it)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не показано: в этой установке нет расширения виджетов (lite .ipa, или инструмент подписи его удалил)"
+          }
+        }
+      }
+    },
+    "Not signed in": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вход не выполнен"
+          }
+        }
+      }
+    },
+    "Not started yet: open Coucou with the computer linked": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не запущено: откройте Coucou, когда компьютер подключён"
+          }
+        }
+      }
+    },
+    "Nothing is waiting for your OK.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничто не ждёт вашего ОК."
+          }
+        }
+      }
+    },
+    "Nothing to send.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нечего отправлять."
+          }
+        }
+      }
+    },
+    "Nothing yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока ничего"
+          }
+        }
+      }
+    },
+    "Nothing yet.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока ничего."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления"
+          }
+        }
+      }
+    },
+    "Notifications are off: the \"Ping from your Mac\" banner won't show.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления выключены: баннер «Пинг с Mac» не появится."
+          }
+        }
+      }
+    },
+    "OK given": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ОК дан"
+          }
+        }
+      }
+    },
+    "OKs given": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ОК дано"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено"
+          }
+        }
+      }
+    },
+    "Off in Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено в Настройках"
+          }
+        }
+      }
+    },
+    "Off: turn Live Activities on for Coucou in iPhone Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено: включите Live Activities для Coucou в Настройках iPhone"
+          }
+        }
+      }
+    },
+    "On (record type created)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включено (тип записи создан)"
+          }
+        }
+      }
+    },
+    "On the Mac: Coucou Settings → General → iPhone → \"Show my agent sessions on my iPhone\".": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На Mac: Настройки Coucou → Основные → iPhone → «Показывать мои сессии агентов на iPhone»."
+          }
+        }
+      }
+    },
+    "On the computer, open Coucou's Settings → Android phone and turn the phone link on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На компьютере откройте Настройки Coucou → Телефон Android и включите связь с телефоном."
+          }
+        }
+      }
+    },
+    "On your computer, open Coucou Settings → Phone, turn on \"Let the phone chat with my AI providers\" and tick a Claude Code model (no API key needed).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На компьютере откройте Настройки Coucou → Телефон, включите «Разрешить телефону общаться с моими ИИ-провайдерами» и отметьте модель Claude Code (API-ключ не нужен)."
+          }
+        }
+      }
+    },
+    "Only approvals and questions": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только разрешения и вопросы"
+          }
+        }
+      }
+    },
+    "Only if Coucou couldn't read it: on the computer, run getmac /v and copy the wired card's physical address.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только если Coucou не смог её прочитать: на компьютере выполните getmac /v и скопируйте физический адрес проводной карты."
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть"
+          }
+        }
+      }
+    },
+    "Open Coucou on your Mac: your sessions will show up here.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте Coucou на Mac: ваши сессии появятся здесь."
+          }
+        }
+      }
+    },
+    "Open iPhone Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Настройки iPhone"
+          }
+        }
+      }
+    },
+    "Open terminal": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть терминал"
+          }
+        }
+      }
+    },
+    "Open the agent that needs you": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть агента, которому вы нужны"
+          }
+        }
+      }
+    },
+    "Orange": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оранжевая"
+          }
+        }
+      }
+    },
+    "Pair": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключить"
+          }
+        }
+      }
+    },
+    "Pair again": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключить снова"
+          }
+        }
+      }
+    },
+    "Pair this iPhone with Coucou on your computer to see your agents here.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключите этот iPhone к Coucou на компьютере, чтобы видеть здесь агентов."
+          }
+        }
+      }
+    },
+    "Pair with this computer?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключиться к этому компьютеру?"
+          }
+        }
+      }
+    },
+    "Pair with your computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключиться к компьютеру"
+          }
+        }
+      }
+    },
+    "Paired": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключено"
+          }
+        }
+      }
+    },
+    "Party hat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Праздничный колпак"
+          }
+        }
+      }
+    },
+    "Password": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пароль"
+          }
+        }
+      }
+    },
+    "Paste Photo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставить фото"
+          }
+        }
+      }
+    },
+    "Paused while Coucou is in the background": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На паузе, пока Coucou в фоне"
+          }
+        }
+      }
+    },
+    "Permission": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешение"
+          }
+        }
+      }
+    },
+    "Photo Library": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фотопоток"
+          }
+        }
+      }
+    },
+    "Photo or Video": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото или видео"
+          }
+        }
+      }
+    },
+    "Photos work only with Claude Code or Gemini CLI. Pick one of them above.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото работают только с Claude Code или Gemini CLI. Выберите одну из них выше."
+          }
+        }
+      }
+    },
+    "Pick one or more": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите один или несколько"
+          }
+        }
+      }
+    },
+    "Pings from your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пинги с Mac"
+          }
+        }
+      }
+    },
+    "Pink": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розовая"
+          }
+        }
+      }
+    },
+    "Privacy Policy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Политика конфиденциальности"
+          }
+        }
+      }
+    },
+    "Prompts, answers, files": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запросы, ответы, файлы"
+          }
+        }
+      }
+    },
+    "Pumpkin": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тыква"
+          }
+        }
+      }
+    },
+    "Purple": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фиолетовая"
+          }
+        }
+      }
+    },
+    "Quack": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кря"
+          }
+        }
+      }
+    },
+    "Question": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вопрос"
+          }
+        }
+      }
+    },
+    "Quiet hours": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тихие часы"
+          }
+        }
+      }
+    },
+    "Read from your Mac · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Получено с Mac · %1$@"
+          }
+        }
+      }
+    },
+    "Read from your Mac · %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Получено с Mac · %1$lld"
+          }
+        }
+      }
+    },
+    "Recent turns": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недавние ходы"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать"
+          }
+        }
+      }
+    },
+    "Remove photo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать фото"
+          }
+        }
+      }
+    },
+    "Reply": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответить"
+          }
+        }
+      }
+    },
+    "Request": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрос"
+          }
+        }
+      }
+    },
+    "Request failed: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрос не удался: %1$@"
+          }
+        }
+      }
+    },
+    "Request failed: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрос не удался: %1$lld"
+          }
+        }
+      }
+    },
+    "Results": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Результаты"
+          }
+        }
+      }
+    },
+    "Review": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посмотреть"
+          }
+        }
+      }
+    },
+    "Round glasses": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Круглые очки"
+          }
+        }
+      }
+    },
+    "Router address": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адрес роутера"
+          }
+        }
+      }
+    },
+    "Run the tests": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запусти тесты"
+          }
+        }
+      }
+    },
+    "Same Apple Account": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тот же Apple ID"
+          }
+        }
+      }
+    },
+    "Santa hat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шапка Санты"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
+          }
+        }
+      }
+    },
+    "Save and check": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить и проверить"
+          }
+        }
+      }
+    },
+    "Scan the QR code with the iPhone's Camera and tap \"Open in Coucou\". Or copy the link and paste it below.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отсканируйте QR-код Камерой iPhone и нажмите «Открыть в Coucou». Или скопируйте ссылку и вставьте её ниже."
+          }
+        }
+      }
+    },
+    "Scarf": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шарф"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск"
+          }
+        }
+      }
+    },
+    "Send": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить"
+          }
+        }
+      }
+    },
+    "Send answer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить ответ"
+          }
+        }
+      }
+    },
+    "Send this instruction to Claude Code on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить это указание в Claude Code на Mac"
+          }
+        }
+      }
+    },
+    "Sending ✓": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправляется ✓"
+          }
+        }
+      }
+    },
+    "Sending…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправляем…"
+          }
+        }
+      }
+    },
+    "Sends the next instruction to your Claude Code session on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправляет следующее указание в вашу сессию Claude Code на Mac."
+          }
+        }
+      }
+    },
+    "Sent to Claude in %@. Your Mac picks it up within 15 seconds.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправлено Claude в «%1$@». Mac получит его в течение 15 секунд."
+          }
+        }
+      }
+    },
+    "Sent to Claude in %lld. Your Mac picks it up within 15 seconds.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправлено Claude в «%1$lld». Mac получит его в течение 15 секунд."
+          }
+        }
+      }
+    },
+    "Sent. Your Mac picks it up within 15 s.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправлено. Mac получит его в течение 15 с."
+          }
+        }
+      }
+    },
+    "Service": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервис"
+          }
+        }
+      }
+    },
+    "Services": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервисы"
+          }
+        }
+      }
+    },
+    "Session": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессия"
+          }
+        }
+      }
+    },
+    "Sessions on your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессии на Mac"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки"
+          }
+        }
+      }
+    },
+    "Show all %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать все %1$@"
+          }
+        }
+      }
+    },
+    "Show all %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать все %1$lld"
+          }
+        }
+      }
+    },
+    "Show details": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подробнее"
+          }
+        }
+      }
+    },
+    "Show less": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свернуть"
+          }
+        }
+      }
+    },
+    "Show more": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать ещё"
+          }
+        }
+      }
+    },
+    "Shown (%@ on screen)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показано (на экране: %1$@)"
+          }
+        }
+      }
+    },
+    "Shown (%lld on screen)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показано (на экране: %1$lld)"
+          }
+        }
+      }
+    },
+    "Sign in again in Coucou on your computer (Settings > Account).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Войдите снова в Coucou на компьютере (Настройки > Аккаунт)."
+          }
+        }
+      }
+    },
+    "Sign in to iCloud with the same Apple Account on both. Your sessions go through your private iCloud, encrypted.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Войдите в iCloud под одним Apple ID на обоих устройствах. Сессии идут через ваш личный iCloud в зашифрованном виде."
+          }
+        }
+      }
+    },
+    "Signal sent from this iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сигнал отправлен с этого iPhone."
+          }
+        }
+      }
+    },
+    "Some lines were left out to keep it light.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часть строк опущена, чтобы не перегружать."
+          }
+        }
+      }
+    },
+    "Something went wrong.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что-то пошло не так."
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звук"
+          }
+        }
+      }
+    },
+    "Sound of a new message": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звук нового сообщения"
+          }
+        }
+      }
+    },
+    "Sounds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звуки"
+          }
+        }
+      }
+    },
+    "Stay connected in the background": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оставаться на связи в фоне"
+          }
+        }
+      }
+    },
+    "Still working…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё работает…"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стоп"
+          }
+        }
+      }
+    },
+    "Stop dictation": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановить диктовку"
+          }
+        }
+      }
+    },
+    "Stopped.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Остановлено."
+          }
+        }
+      }
+    },
+    "Sunglasses": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тёмные очки"
+          }
+        }
+      }
+    },
+    "Support": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поддержка"
+          }
+        }
+      }
+    },
+    "TODAY": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "СЕГОДНЯ"
+          }
+        }
+      }
+    },
+    "Take Photo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сделать фото"
+          }
+        }
+      }
+    },
+    "Task": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задача"
+          }
+        }
+      }
+    },
+    "Tell Claude what to do next…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скажите Claude, что делать дальше…"
+          }
+        }
+      }
+    },
+    "Terms": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Условия"
+          }
+        }
+      }
+    },
+    "That address doesn't answer like a Keenetic router.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По этому адресу отвечает не роутер Keenetic."
+          }
+        }
+      }
+    },
+    "That isn't a Coucou pairing link.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это не ссылка для подключения Coucou."
+          }
+        }
+      }
+    },
+    "That isn't a MAC address.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это не MAC-адрес."
+          }
+        }
+      }
+    },
+    "The Coucou zone doesn't exist yet. Launch Coucou on your Mac (NotchBuddyCloud scheme), then pull to refresh.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зона Coucou ещё не создана. Запустите Coucou на Mac (схема NotchBuddyCloud) и потяните вниз, чтобы обновить."
+          }
+        }
+      }
+    },
+    "The Home Screen icon follows your choice; dark and tinted icons follow the Home Screen style. Spotlight's index stays on this iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Иконка на экране «Домой» следует вашему выбору; тёмные и тонированные иконки — стилю экрана «Домой». Индекс Spotlight хранится только на этом iPhone."
+          }
+        }
+      }
+    },
+    "The agent asks for a permission.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Агент просит разрешение."
+          }
+        }
+      }
+    },
+    "The computer could not answer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер не смог ответить."
+          }
+        }
+      }
+    },
+    "The computer didn't come back within 3 minutes. Check Wake-on-LAN in its BIOS and network card.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер не включился за 3 минуты. Проверьте Wake-on-LAN в BIOS и в сетевой карте."
+          }
+        }
+      }
+    },
+    "The computer is on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер включён."
+          }
+        }
+      }
+    },
+    "The computer refused the connection. Is the phone link on in Coucou?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер отклонил подключение. Связь с телефоном в Coucou включена?"
+          }
+        }
+      }
+    },
+    "The computer refused this iPhone's code. Pair again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Компьютер отклонил код этого iPhone. Подключите заново."
+          }
+        }
+      }
+    },
+    "The connection to your computer was lost.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связь с компьютером потеряна."
+          }
+        }
+      }
+    },
+    "The iPhone and the computer must be on the same Wi-Fi.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone и компьютер должны быть в одной Wi-Fi-сети."
+          }
+        }
+      }
+    },
+    "The link holds a secret code: it is kept in this iPhone's Keychain and only sent to that computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В ссылке есть секретный код: он хранится в Связке ключей этого iPhone и отправляется только этому компьютеру."
+          }
+        }
+      }
+    },
+    "The router accepted this login (%@).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер принял этот логин (%1$@)."
+          }
+        }
+      }
+    },
+    "The router accepted this login (%lld).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер принял этот логин (%1$lld)."
+          }
+        }
+      }
+    },
+    "The router did not answer (%@).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер не ответил (%1$@)."
+          }
+        }
+      }
+    },
+    "The router did not answer (%lld).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер не ответил (%1$lld)."
+          }
+        }
+      }
+    },
+    "The router refused this login or password.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер отклонил логин или пароль."
+          }
+        }
+      }
+    },
+    "The router refused: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер отказал: %1$@"
+          }
+        }
+      }
+    },
+    "The router refused: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер отказал: %1$lld"
+          }
+        }
+      }
+    },
+    "The router sent the signal.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Роутер отправил сигнал."
+          }
+        }
+      }
+    },
+    "Then, from here": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Затем отсюда"
+          }
+        }
+      }
+    },
+    "There is no photo in the clipboard.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В буфере обмена нет фото."
+          }
+        }
+      }
+    },
+    "This computer no longer accepts this iPhone. Pair again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот компьютер больше не принимает этот iPhone. Подключите заново."
+          }
+        }
+      }
+    },
+    "This computer speaks a different version of Coucou": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом компьютере другая версия Coucou"
+          }
+        }
+      }
+    },
+    "This request was already answered or has expired.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этот запрос уже ответили, или он истёк."
+          }
+        }
+      }
+    },
+    "This session ended on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта сессия на Mac завершена."
+          }
+        }
+      }
+    },
+    "This session ended on your Mac. Its last turn:": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта сессия на Mac завершена. Её последний ход:"
+          }
+        }
+      }
+    },
+    "Three notes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Три ноты"
+          }
+        }
+      }
+    },
+    "To write to Claude from here, turn on \"Let my iPhone send instructions to Claude Code\" in Coucou's Settings on your Mac (GitHub version).": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы писать Claude отсюда, включите «Разрешить iPhone отправлять указания в Claude Code» в настройках Coucou на Mac (версия с GitHub)."
+          }
+        }
+      }
+    },
+    "To write to Claude, open the Chat tab at the bottom. It answers through Claude Code on your computer.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы написать Claude, откройте вкладку «Чат» внизу. Он отвечает через Claude Code на компьютере."
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня"
+          }
+        }
+      }
+    },
+    "Too big for the chat: at most 4 attachments of 7 MB each.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слишком много для чата: не больше 4 вложений по 7 МБ."
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попробовать снова"
+          }
+        }
+      }
+    },
+    "Turn": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ход"
+          }
+        }
+      }
+    },
+    "Turn on computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить компьютер"
+          }
+        }
+      }
+    },
+    "Turn on the iPhone switch": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите переключатель iPhone"
+          }
+        }
+      }
+    },
+    "Turn without a prompt": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ход без запроса"
+          }
+        }
+      }
+    },
+    "Unknown iCloud status.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неизвестный статус iCloud."
+          }
+        }
+      }
+    },
+    "Unpair": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отключить"
+          }
+        }
+      }
+    },
+    "Use this card": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать эту карту"
+          }
+        }
+      }
+    },
+    "Use this link": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать эту ссылку"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версия %1$@"
+          }
+        }
+      }
+    },
+    "Version %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версия %1$lld"
+          }
+        }
+      }
+    },
+    "Waiting for your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждём ваш Mac"
+          }
+        }
+      }
+    },
+    "Waiting for your OK": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждёт вашего ОК"
+          }
+        }
+      }
+    },
+    "Waiting for your OK: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждёт вашего ОК: %1$@"
+          }
+        }
+      }
+    },
+    "Waiting for your OK: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждёт вашего ОК: %1$lld"
+          }
+        }
+      }
+    },
+    "Waiting for your approval": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждёт вашего одобрения"
+          }
+        }
+      }
+    },
+    "Waiting: open Coucou once to show Mochi again": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидание: откройте Coucou, чтобы снова показать Mochi"
+          }
+        }
+      }
+    },
+    "Wake: network card from the router": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пробуждение: сетевая карта от роутера"
+          }
+        }
+      }
+    },
+    "Website": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сайт"
+          }
+        }
+      }
+    },
+    "What Claude does on your Mac shows up here, ready to search.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь появляется то, что Claude делает на Mac, — с поиском."
+          }
+        }
+      }
+    },
+    "What it did · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что сделано · %1$@"
+          }
+        }
+      }
+    },
+    "What it did · %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что сделано · %1$lld"
+          }
+        }
+      }
+    },
+    "What should Claude do?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что должен сделать Claude?"
+          }
+        }
+      }
+    },
+    "What your agents are doing on your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что делают ваши агенты на Mac."
+          }
+        }
+      }
+    },
+    "When an agent finishes or fails": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда агент закончил или упал"
+          }
+        }
+      }
+    },
+    "While in the background": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В фоне"
+          }
+        }
+      }
+    },
+    "Witch hat": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шляпа ведьмы"
+          }
+        }
+      }
+    },
+    "With the owner and the beta testers, as your computer's GitHub account. The chat is public on GitHub: no passwords or keys here.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С владельцем и бета-тестерами, от GitHub-аккаунта вашего компьютера. Чат публичный на GitHub: не пишите сюда пароли и ключи."
+          }
+        }
+      }
+    },
+    "Works when the computer is wired to the router and Wake-on-LAN is on in its BIOS and network card. Coucou learns the card while the computer is on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Работает, когда компьютер подключён к роутеру кабелем и Wake-on-LAN включён в BIOS и в сетевой карте. Coucou узнаёт карту, пока компьютер включён."
+          }
+        }
+      }
+    },
+    "Write to the testers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напишите тестерам"
+          }
+        }
+      }
+    },
+    "Yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вчера"
+          }
+        }
+      }
+    },
+    "Your Mac didn't answer. Is it awake, with the iPhone switch on? Pull down to try again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac не ответил. Он не спит, переключатель iPhone включён? Потяните вниз, чтобы повторить."
+          }
+        }
+      }
+    },
+    "Your Mac started it": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено с Mac"
+          }
+        }
+      }
+    },
+    "Your agents, in your pocket": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши агенты — в кармане"
+          }
+        }
+      }
+    },
+    "Your computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш компьютер"
+          }
+        }
+      }
+    },
+    "Your computer's GitHub account is not in the beta any more.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub-аккаунт вашего компьютера больше не в бете."
+          }
+        }
+      }
+    },
+    "a notification": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "уведомление"
+          }
+        }
+      }
+    },
+    "all good": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "всё хорошо"
+          }
+        }
+      }
+    },
+    "and %@ more": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и ещё %1$@"
+          }
+        }
+      }
+    },
+    "and %lld more": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "и ещё %1$lld"
+          }
+        }
+      }
+    },
+    "asleep": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "спит"
+          }
+        }
+      }
+    },
+    "closed by the computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "закрыто компьютером"
+          }
+        }
+      }
+    },
+    "dizzy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "кружится голова"
+          }
+        }
+      }
+    },
+    "error": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ошибка"
+          }
+        }
+      }
+    },
+    "has a question": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "есть вопрос"
+          }
+        }
+      }
+    },
+    "iCloud is restricted on this iPhone.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud ограничен на этом iPhone."
+          }
+        }
+      }
+    },
+    "iCloud is temporarily unavailable.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud временно недоступен."
+          }
+        }
+      }
+    },
+    "iCloud not connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud не подключён"
+          }
+        }
+      }
+    },
+    "iCloud not connected. %@ Sign in in Settings, using the same account as your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud не подключён. %1$@ Войдите в Настройках под тем же аккаунтом, что и на Mac."
+          }
+        }
+      }
+    },
+    "iCloud not connected. %lld Sign in in Settings, using the same account as your Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud не подключён. %1$lld Войдите в Настройках под тем же аккаунтом, что и на Mac."
+          }
+        }
+      }
+    },
+    "iOS did not let the signal out (%@). Set up the router below.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS не выпустила сигнал (%1$@). Настройте роутер ниже."
+          }
+        }
+      }
+    },
+    "iOS did not let the signal out (%lld). Set up the router below.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS не выпустила сигнал (%1$lld). Настройте роутер ниже."
+          }
+        }
+      }
+    },
+    "iOS may keep Coucou from sending the signal itself: then the router sends it. At home Coucou uses the first address; away, the router's KeenDNS name (https://….keenetic.link, with web access from the internet allowed). Use a separate router user for Coucou. The password stays in this iPhone's Keychain and only goes to the router.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS может не дать Coucou отправить сигнал самому — тогда его отправит роутер. Дома Coucou использует первый адрес, вне дома — имя KeenDNS роутера (https://….keenetic.link, с разрешённым веб-доступом из интернета). Заведите для Coucou отдельного пользователя роутера. Пароль хранится в Связке ключей iPhone и уходит только на роутер."
+          }
+        }
+      }
+    },
+    "iOS refused to show it: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS не дала показать: %1$@"
+          }
+        }
+      }
+    },
+    "iOS refused to show it: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS не дала показать: %1$lld"
+          }
+        }
+      }
+    },
+    "idle": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "свободен"
+          }
+        }
+      }
+    },
+    "line too long": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "строка слишком длинная"
+          }
+        }
+      }
+    },
+    "needs a look": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "нужно взглянуть"
+          }
+        }
+      }
+    },
+    "no address": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "нет адреса"
+          }
+        }
+      }
+    },
+    "no network": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "нет сети"
+          }
+        }
+      }
+    },
+    "rate limited": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "лимит запросов"
+          }
+        }
+      }
+    },
+    "something failed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "что-то сломалось"
+          }
+        }
+      }
+    },
+    "the Lock Screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "экран блокировки"
+          }
+        }
+      }
+    },
+    "timed out": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "время вышло"
+          }
+        }
+      }
+    },
+    "waiting for your OK": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ждёт вашего ОК"
+          }
+        }
+      }
+    },
+    "working": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "работает"
+          }
+        }
+      }
+    },
+    "working · %@/%@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "работает · %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "working · %@/%lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "работает · %1$@/%2$lld"
+          }
+        }
+      }
+    },
+    "working · %lld/%@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "работает · %1$lld/%2$@"
+          }
+        }
+      }
+    },
+    "working · %lld/%lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "работает · %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "your Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ваш Mac"
+          }
+        }
+      }
+    },
+    "your computer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ваш компьютер"
+          }
+        }
+      }
+    },
+    "· owner": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· владелец"
+          }
+        }
+      }
+    },
+    "“Hee-hee!” (in the spirit of Michael Jackson)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Хи-хи!» (в духе Майкла Джексона)"
+          }
+        }
+      }
+    },
+    "• Allow or deny a command, right from the Lock Screen\n• Answer Claude's questions\n• See what Claude did, file by file\n• Write or dictate the next instruction, or ask Siri (GitHub version on the Mac)\n• Mochi in your Dynamic Island when your Mac is locked": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "• Разрешайте или отклоняйте команды прямо с экрана блокировки\n• Отвечайте на вопросы Claude\n• Смотрите, что сделал Claude, файл за файлом\n• Пишите или диктуйте следующее указание, или попросите Siri (версия с GitHub на Mac)\n• Mochi в Dynamic Island, когда Mac заблокирован"
+          }
+        }
+      }
+    },
+    "…\n(Longer than shown: it can only be allowed on the computer.)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "…\n(Длиннее, чем показано: разрешить можно только на компьютере.)"
+          }
+        }
+      }
+    },
+    "✓ done": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✓ готово"
+          }
+        }
+      }
+    },
+    "🧪 build %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🧪 сборка %1$@"
+          }
+        }
+      }
+    },
+    "🧪 build %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🧪 сборка %1$lld"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

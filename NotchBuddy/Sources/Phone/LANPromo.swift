@@ -29,7 +29,9 @@ final class LANPromo {
     var due = false
 
     private init() {
-        let build = Int(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "") ?? 0
+        // The fork's build number (set by the all-in-one workflow); CFBundleVersion only moves with App Store builds.
+        let info = Bundle.main.infoDictionary
+        let build = (info?["CoucouForkBuild"] as? Int) ?? Int(info?["CFBundleVersion"] as? String ?? "") ?? 0
         let s = load().started(build)
         save(s)
         due = s.shown

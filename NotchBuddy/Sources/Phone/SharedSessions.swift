@@ -79,8 +79,8 @@ extension Array where Element == SharedSession {
         let waiting = filter(\.isWaitingForYou).count
         let working = filter(\.isWorking).count
         var parts: [String] = []
-        if working > 0 { parts.append("\(working) working") }
-        if waiting > 0 { parts.append("\(waiting) waiting") }
+        if working > 0 { parts.append(String(localized: "\(working) working")) }
+        if waiting > 0 { parts.append(String(localized: "\(waiting) waiting")) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

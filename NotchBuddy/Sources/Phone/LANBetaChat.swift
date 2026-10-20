@@ -183,8 +183,8 @@ final class LANBetaChat {
 
     private func notify(login: String, text: String) {
         let content = UNMutableNotificationContent()
-        content.title = login.isEmpty ? "Beta chat" : "@\(login)"
-        content.body = text.isEmpty ? "New message in the beta chat" : String(text.prefix(200))
+        content.title = login.isEmpty ? String(localized: "Beta chat") : "@\(login)"
+        content.body = text.isEmpty ? String(localized: "New message in the beta chat") : String(text.prefix(200))
         content.sound = LANBetaSounds.notificationSound(sound)
         content.threadIdentifier = "betachat"
         let request = UNNotificationRequest(identifier: "betachat-\(UUID().uuidString)", content: content, trigger: nil)

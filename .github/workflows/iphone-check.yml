@@ -1,0 +1,46 @@
+# Builds the iPhone app (Windows link) for every pull request into all-in-one, so a Swift mistake shows
+# before the merge. Publishes nothing: all-in-one.yml makes the .ipa after the merge.
+name: iphone-check
+
+on:
+  pull_request:
+    branches: [all-in-one]
+    paths:
+      - "NotchBuddy/**"
+      - ".github/workflows/iphone-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  iphone:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: cd NotchBuddy && xcodegen
+      - name: Build iPhone app (LAN link, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project NotchBuddy/NotchBuddy.xcodeproj \
+            -scheme CoucouPhone \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            COUCOU_PHONE_LINK=LAN_LINK \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tee build.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+      - name: Show errors
+        if: failure()
+        run: node .github/scripts/annotate-errors.mjs build.log
+      - name: Russian is in the app
+        run: |
+          APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -1)
+          ls "$APP/ru.lproj"
+          plutil -p "$APP/ru.lproj/Localizable.strings" | grep -q "Подключено"

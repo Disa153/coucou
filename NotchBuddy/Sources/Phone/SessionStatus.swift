@@ -38,7 +38,7 @@ extension SessionItem {
         if !question.isEmpty || state == .question { return "has a question" }
         switch state {
         case .working, .thinking, .searching:
-            return steps.isEmpty ? "working" : "working · \(min(stepIndex + 1, steps.count))/\(steps.count)"
+            return steps.isEmpty ? "working" : String(localized: "working · \(min(stepIndex + 1, steps.count))/\(steps.count)")
         case .finished: return "✓ done"
         case .error: return "error"
         case .ratelimit: return "rate limited"
