@@ -3,6 +3,7 @@
 mod account;
 mod agent_hooks;
 mod agents;
+mod betachat;
 mod chat;
 mod claude_code;
 mod gemini_cli;
@@ -896,6 +897,10 @@ pub fn run() {
             reviews::review_skip,
             reviews::review_send,
             reviews::review_list,
+            betachat::beta_chat_messages,
+            betachat::beta_chat_unread,
+            betachat::beta_chat_send,
+            betachat::beta_chat_delete,
             updater::update_info,
             updater::update_check,
             updater::update_set_channel,
@@ -962,6 +967,7 @@ pub fn run() {
             transcripts::configure(&loaded);
             account::setup(&handle);
             reviews::setup();
+            betachat::setup(&handle);
             updater::setup(&handle);
             shortcuts::apply(&handle, &loaded.shortcuts);
             if loaded.autostart {

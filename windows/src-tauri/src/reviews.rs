@@ -217,7 +217,7 @@ pub enum ReviewError {
     Network,
 }
 
-async fn call(method: reqwest::Method, url: &str, token: &str, body: Option<Value>) -> Result<(u16, Vec<u8>), ReviewError> {
+pub(crate) async fn call(method: reqwest::Method, url: &str, token: &str, body: Option<Value>) -> Result<(u16, Vec<u8>), ReviewError> {
     let url = reqwest::Url::parse(url).map_err(|_| ReviewError::Network)?;
     let client = crate::updater::client(Duration::from_secs(30)).map_err(|_| ReviewError::Network)?;
     let mut req = client

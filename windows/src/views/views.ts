@@ -27,6 +27,8 @@ import { buildMixer } from "./mixer";
 import { buildKitchen } from "./kitchen";
 import { buildLyrics } from "./lyrics";
 import { buildReview } from "./review";
+import { buildBetaChat } from "./betachat";
+import { BetaChat } from "../island/betachat";
 import { buildSpotifyCard, buildSpotifyPill, type SpotifyPillHost } from "./spotify";
 import { SPOTIFY_ID } from "../core/spotify";
 import type { Outfit, OutfitSelection } from "../mochi/wardrobe";
@@ -130,6 +132,8 @@ export function buildHeader(actions: ViewActions): ViewHost {
   const tabDrop = h("button", { class: "tab", title: tl("Drop"), onclick: () => go("upload") }, svg(ICONS.plus, 13));
 
   const kitchenBtn = h("button", { title: tl("Feed Mochi"), onclick: () => go(State.view === "kitchen" ? State.defaultView() : "kitchen") }, svg(ICONS.onigiri, 14, { evenOdd: true }));
+  const chatBadge = h("span", { class: "bc-badge" });
+  const betaChatBtn = h("button", { class: "bc-btn", title: tl("Beta chat"), onclick: () => go(State.view === "betachat" ? State.defaultView() : "betachat") }, svg(ICONS.bubble, 14), chatBadge);
   const mixerBtn = h("button", { title: tl("Sound mixer"), onclick: () => go(State.view === "mixer" ? State.defaultView() : "mixer") }, svg(ICONS.sliders, 14, { stroke: 2 }));
   const gearBtn = h("button", { title: tl("Settings"), onclick: () => go("settings") }, svg(ICONS.gear, 14));
   const soundBtn = h("button", { title: tl("Mute"), onclick: () => actions.toggleSound() }, svg(ICONS.speakerOn, 14));
@@ -148,7 +152,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
     "div",
     { id: "header" },
     h("div", { class: "tabs" }, tabHome, tabChat, tabDrop),
-    h("div", { class: "header-actions" }, planPills, kitchenBtn, mixerBtn, gearBtn, soundBtn),
+    h("div", { class: "header-actions" }, planPills, betaChatBtn, kitchenBtn, mixerBtn, gearBtn, soundBtn),
   );
   const headerActions = el.lastElementChild as HTMLElement;
 
@@ -161,6 +165,9 @@ export function buildHeader(actions: ViewActions): ViewHost {
       tabDrop.classList.toggle("on", v === "upload");
       kitchenBtn.classList.toggle("on", v === "kitchen");
       mixerBtn.classList.toggle("on", v === "mixer");
+      betaChatBtn.style.display = BetaChat.allowed ? "" : "none";
+      betaChatBtn.classList.toggle("on", v === "betachat");
+      chatBadge.textContent = BetaChat.unread > 0 ? String(Math.min(BetaChat.unread, 99)) : "";
       gearBtn.classList.toggle("on", v === "settings");
       clear(gearBtn);
       gearBtn.append(svg(v === "settings" ? ICONS.gearFill : ICONS.gear, 14));
@@ -869,6 +876,7 @@ export function buildViews(
   map.set("kitchen", buildKitchen(actions));
   map.set("lyrics", buildLyrics(actions));
   map.set("review", buildReview(actions));
+  map.set("betachat", buildBetaChat(actions));
   // Not in the Windows v1: sending a file by email, window attach + web result.
   map.set("mail", buildPlaceholder(tl("Sending by email isn't in this version."), ""));
   map.set("searching", buildPlaceholder(tl("Claude is searching…"), ""));

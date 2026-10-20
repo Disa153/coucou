@@ -663,6 +663,11 @@ pub fn survey(app: &AppHandle) -> Survey {
     state(app).survey.lock().unwrap().clone()
 }
 
+/// The signed-in login ("" when signed out).
+pub fn login(app: &AppHandle) -> String {
+    state(app).me.lock().unwrap().as_ref().map(|m| m.login.clone()).unwrap_or_default()
+}
+
 pub fn signed_in(app: &AppHandle) -> bool {
     state(app).me.lock().unwrap().is_some()
 }

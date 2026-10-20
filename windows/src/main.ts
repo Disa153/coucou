@@ -14,6 +14,7 @@ import { applySpotify, registerSpotifyHandlers } from "./island/spotify";
 import { SPOTIFY_ID } from "./core/spotify";
 import { Recap } from "./recap/recap";
 import { checkReview, registerReviewChecks } from "./island/reviews";
+import { registerBetaChat } from "./island/betachat";
 import { onLanguageChange, resolveLanguage, setLanguage, systemLanguages } from "./i18n/i18n";
 
 /** Shows the language Settings asks for ("" = the system's, when Coucou has it). */
@@ -157,6 +158,7 @@ async function main() {
   island.onGreetingDone = checkAll;
   island.onWake = checkAll;
   registerReviewChecks(island);
+  registerBetaChat(island);
   await onEvent<null>("recap-check", checkRecap);
 
   island.launch();
