@@ -40,6 +40,59 @@ fn is_coucou_pair(a: &str, b: &str) -> bool {
     matches!((a, b), ("cou", "cou") | ("coo", "coo") | ("ku", "ku") | ("cu", "cu") | ("koo", "koo") | ("cuck", "oo"))
 }
 
+/// « Сяо Чоу Чоу » as Parakeet may hear it, Cyrillic or Latin, in one word
+/// or several: the letters turned to Latin with no spaces, close enough.
+fn translit(word: &str) -> String {
+    word.chars()
+        .map(|c| match c {
+            'а' => "a", 'б' => "b", 'в' => "v", 'г' => "g", 'д' => "d", 'е' | 'ё' | 'э' => "e", 'ж' => "zh", 'з' => "z",
+            'и' | 'й' | 'ы' => "i", 'к' => "k", 'л' => "l", 'м' => "m", 'н' => "n", 'о' => "o", 'п' => "p", 'р' => "r",
+            'с' => "s", 'т' => "t", 'у' => "u", 'ф' => "f", 'х' => "h", 'ц' => "ts", 'ч' => "ch", 'ш' => "sh",
+            'щ' => "sch", 'ъ' | 'ь' => "", 'ю' => "yu", 'я' => "ya",
+            c if c.is_ascii_alphanumeric() => return c.to_string(),
+            _ => "",
+        }
+        .to_string())
+        .collect()
+}
+
+/// The ways « сяо чоу чоу » comes out of Parakeet, glued and in Latin letters.
+fn is_xiao_chou(glued: &str) -> bool {
+    // "сяо" / "xiao" / "сяу" / "сяа" / "шао"…, then "чоу"/"чао"/"чау"/"chou"/"chow" twice.
+    let starts = ["siao", "siau", "siaa", "sya", "xiao", "xiau", "shao", "shiao", "siyao", "syao", "tsao"];
+    let ends = ["chouchou", "chaochao", "chauchau", "chowchow", "chochou", "chouchao", "chouchau", "choucho", "chochau", "chaochou", "choichoi", "tsoutsou"];
+    let g = glued.replace("ya", "ia");
+    starts.iter().any(|st| {
+        let st = st.replace("ya", "ia");
+        g.strip_prefix(st.as_str()).is_some_and(|rest| {
+            let rest = rest.trim_start_matches(['o', 'u']);
+            ends.iter().any(|e| rest == *e || rest.strip_prefix(e).is_some_and(|r| r.is_empty()))
+        })
+    })
+}
+
+/// When `text` starts (or goes on) with « Сяо Чоу Чоу », what was said after it.
+pub fn after_xiao(text: &str) -> Option<String> {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    let latin: Vec<String> = words.iter().map(|w| translit(&normalize(w))).collect();
+    for start in 0..latin.len() {
+        let mut glued = String::new();
+        for end in start..latin.len().min(start + 4) {
+            glued.push_str(&latin[end]);
+            if is_xiao_chou(&glued) {
+                let rest = words[end + 1..].join(" ");
+                return Some(rest.trim_start_matches([',', '.', '!', ' ', '—', '-']).trim().to_string());
+            }
+        }
+    }
+    None
+}
+
+/// Either wake phrase: « Сяо Чоу Чоу » or « OK Coucou ».
+pub fn after_any_wake(text: &str) -> Option<String> {
+    after_xiao(text).or_else(|| after_wake(text))
+}
+
 /// When `text` holds the wake phrase, what was said after it (maybe nothing).
 /// The words keep their case and punctuation, as Parakeet wrote them.
 pub fn after_wake(text: &str) -> Option<String> {
@@ -180,8 +233,13 @@ impl Vad {
     }
 }
 
-/// "fr-FR" for a French answer, else None (the system's language).
+/// "ru-RU" for a Russian answer, "fr-FR" for a French one, else None (the system's language).
 pub fn speech_lang(text: &str) -> Option<&'static str> {
+    let letters = text.chars().filter(|c| c.is_alphabetic()).count();
+    let cyrillic = text.chars().filter(|c| ('\u{0400}'..='\u{04FF}').contains(c)).count();
+    if cyrillic * 2 > letters.max(1) {
+        return Some("ru-RU");
+    }
     let n = normalize(text);
     let words: Vec<&str> = n.split(' ').collect();
     let french = ["le", "la", "les", "est", "tu", "vous", "je", "un", "une", "des", "pour", "pas", "c", "et", "sur", "avec", "ton", "ta"];
@@ -207,6 +265,21 @@ mod tests {
     }
 
     #[test]
+    fn xiao_chou_chou_however_parakeet_writes_it() {
+        assert_eq!(after_xiao("Сяо Чоу Чоу, запусти тесты").as_deref(), Some("запусти тесты"));
+        assert_eq!(after_xiao("сяочоучоу открой чат").as_deref(), Some("открой чат"));
+        assert_eq!(after_xiao("Xiao chou chou, what time is it?").as_deref(), Some("what time is it?"));
+        assert_eq!(after_xiao("Сяо Чао Чао.").as_deref(), Some(""));
+        assert_eq!(after_xiao("Сяо чоу-чоу, привет").as_deref(), Some("привет"));
+        assert_eq!(after_xiao("Ну что, Сяо Чоучоу, сделай коммит").as_deref(), Some("сделай коммит"));
+        assert_eq!(after_xiao("Сяу Чау Чау покажи план").as_deref(), Some("покажи план"));
+        assert_eq!(after_xiao("Сяо Чоу"), None, "the chou twice");
+        assert_eq!(after_xiao("Чоу Чоу Сяо"), None);
+        assert_eq!(after_xiao("сегодня хорошая погода"), None);
+        assert_eq!(after_any_wake("OK Coucou, play music").as_deref(), Some("play music"));
+    }
+
+    #[test]
     fn speech_is_cut_after_a_pause() {
         let mut vad = Vad::default();
         let silence = vec![0.0f32; 16_000];
@@ -225,5 +298,6 @@ mod tests {
     fn french_answers_are_spoken_in_french() {
         assert_eq!(speech_lang("C'est fait, j'ai ajouté Stripe pour toi."), Some("fr-FR"));
         assert_eq!(speech_lang("Done, Stripe is in the island."), None);
+        assert_eq!(speech_lang("Готово, тесты запущены."), Some("ru-RU"));
     }
 }

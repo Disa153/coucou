@@ -142,7 +142,7 @@ async function main() {
   registerPhoneLink(island);
   registerIntegrationHandlers(island);
   registerShortcutHandlers(island, () => setPaused(false));
-  registerVoiceHandlers();
+  registerVoiceHandlers(island);
   registerSpotifyHandlers(island);
   // Rust may have read Spotify before this page listened: ask once.
   if (State.settings.activeIntegrations.includes(SPOTIFY_ID)) {

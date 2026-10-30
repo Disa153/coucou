@@ -629,6 +629,9 @@ export const Bridge = {
   /** Brings the program's window forward, or starts it. */
   appsOpen: (path: string, exe: string) => call<boolean>("apps_open", { path, exe }),
   appsSetWhenIdle: (on: boolean) => call<void>("apps_set_when_idle", { on }),
+
+  /** Settings → Voice → Listen: says `text` with the voice chosen for the answers. */
+  voicePreview: (text: string) => call<void>("voice_preview", { text }),
 };
 
 export interface AppItem {

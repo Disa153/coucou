@@ -53,16 +53,71 @@ fn pending() -> &'static Mutex<HashMap<u64, mpsc::Sender<String>>> {
 }
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
-/// Whether « OK Coucou » can run: the voice model and a Claude key.
-pub fn requirements_met() -> bool {
-    speech::is_ready() && crate::secrets::present(crate::claude::KEY)
+/// Whether the assistant can run: the voice model, and a Claude key unless
+/// what is said goes to the island's chat (Claude Code needs none).
+pub fn requirements_met(app: &AppHandle) -> bool {
+    let to_chat = crate::flow::get(app).is_none_or(|f| f.store.lock().unwrap().prefs.voice_to_chat);
+    speech::is_ready() && (to_chat || crate::secrets::present(crate::claude::KEY))
+}
+
+/// The answer's first words, as they are said: no Markdown, no code, at most
+/// two sentences (the rest stays in the chat).
+pub fn speakable(answer: &str) -> String {
+    let mut text = String::new();
+    let mut in_code = false;
+    for line in answer.lines() {
+        let l = line.trim();
+        if l.starts_with("```") {
+            in_code = !in_code;
+            continue;
+        }
+        if in_code || l.is_empty() || l.starts_with('|') {
+            continue;
+        }
+        let l = l.trim_start_matches(['#', '>', '-', '*', ' ']);
+        let clean: String = l.chars().filter(|c| !matches!(c, '*' | '`' | '_')).collect();
+        if !text.is_empty() {
+            text.push(' ');
+        }
+        text.push_str(clean.trim());
+        if text.len() > 600 {
+            break;
+        }
+    }
+    // Links: keep their words.
+    while let (Some(a), Some(b)) = (text.find("]("), text.find(')')) {
+        if b <= a {
+            break;
+        }
+        let open = text[..a].rfind('[').unwrap_or(a);
+        let words = text[open + 1..a].to_string();
+        text.replace_range(open..=b, &words);
+    }
+    // A sentence ends at . ! ? … followed by a space or the end, not after a
+    // short abbreviation ("см.", "т.е.", "e.g.").
+    let chars: Vec<char> = text.chars().collect();
+    let mut out = String::new();
+    let mut sentences = 0;
+    for (i, &c) in chars.iter().enumerate() {
+        out.push(c);
+        let ends = matches!(c, '.' | '!' | '?' | '…') && chars.get(i + 1).is_none_or(|n| n.is_whitespace());
+        let word: String = out.trim_end_matches(['.', '!', '?', '…']).chars().rev().take_while(|c| c.is_alphanumeric()).collect();
+        let abbreviation = c == '.' && word.chars().count() <= 2 && word.chars().all(|c| c.is_lowercase());
+        if ends && !abbreviation {
+            sentences += 1;
+            if sentences == 2 {
+                break;
+            }
+        }
+    }
+    out.trim().to_string()
 }
 
 /// Starts or stops listening to follow the preference.
 pub fn sync(app: &AppHandle) {
     let wanted = crate::flow::get(app).is_some_and(|f| f.store.lock().unwrap().prefs.voice);
     let mut running = RUNNING.lock().unwrap();
-    match (wanted && requirements_met(), running.is_some()) {
+    match (wanted && requirements_met(app), running.is_some()) {
         (true, false) => {
             let stop = Arc::new(AtomicBool::new(false));
             let app2 = app.clone();
@@ -165,9 +220,9 @@ fn run(app: AppHandle, stop: Arc<AtomicBool>) {
                 continue;
             }
             let question = match &mut mode {
-                Mode::Wake => match wake::after_wake(&heard) {
+                Mode::Wake => match wake::after_any_wake(&heard) {
                     Some(rest) => {
-                        crate::log::line("voice: « OK Coucou » heard");
+                        crate::log::line("voice: wake phrase heard");
                         hide_at = None;
                         if crate::flow::text::word_count(&rest) >= 2 {
                             Some(rest)
@@ -191,6 +246,23 @@ fn run(app: AppHandle, stop: Arc<AtomicBool>) {
             mode = Mode::Wake;
             vad.hangover = 25;
             show(&app, Some(VoiceView { phase: "thinking".into(), heard: question.clone(), answer: String::new() }));
+            let to_chat = crate::flow::get(&app).is_none_or(|f| f.store.lock().unwrap().prefs.voice_to_chat);
+            if to_chat {
+                // Into the island's chat with Claude, like typed there; its answer is said.
+                let full = ask_island_waiting(&app, "chat", json!({ "text": question }), Duration::from_secs(20 * 60)).unwrap_or_default();
+                let said = speakable(&full);
+                if said.is_empty() {
+                    show(&app, Some(VoiceView { phase: "speaking".into(), heard: question, answer: crate::i18n::t("The answer is in the chat.") }));
+                    hide_at = Some(Instant::now() + Duration::from_secs(5));
+                    continue;
+                }
+                show(&app, Some(VoiceView { phase: "speaking".into(), heard: question, answer: said.clone() }));
+                speak(&app, &said);
+                vad.reset();
+                while rx.try_recv().is_ok() {}
+                hide_at = Some(Instant::now() + Duration::from_secs(6));
+                continue;
+            }
             let reply = brain.respond(&app, &question);
             let answer = reply.as_ref().map(|r| r.text.clone()).unwrap_or_default();
             if answer.is_empty() {
@@ -236,17 +308,17 @@ struct Say {
 
 /// Says `text` and returns once it is said (or after a sensible time).
 fn speak(app: &AppHandle, text: &str) {
-    let (output, gender) = crate::flow::get(app)
+    let (output, gender, chosen) = crate::flow::get(app)
         .map(|f| {
             let p = &f.store.lock().unwrap().prefs;
-            (p.voice_output.clone(), p.voice_gender.clone())
+            (p.voice_output.clone(), p.voice_gender.clone(), p.eleven_voice.clone())
         })
-        .unwrap_or_else(|| ("system".into(), "female".into()));
+        .unwrap_or_else(|| ("system".into(), "female".into(), String::new()));
     if output == "off" {
         std::thread::sleep(Duration::from_millis(1500));
         return;
     }
-    let audio = if output == "elevenlabs" { elevenlabs(text, &gender).map(|mp3| base64(&mp3)) } else { None };
+    let audio = if output == "elevenlabs" { elevenlabs(text, &gender, &chosen).map(|mp3| base64(&mp3)) } else { None };
     let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
     let (tx, rx) = mpsc::channel();
     pending().lock().unwrap().insert(id, tx);
@@ -301,17 +373,29 @@ pub async fn voice_say_native(text: String, lang: Option<String>) -> bool {
 }
 
 /// ElevenLabs' MP3 for `text`, with the user's key; None and the system voice speaks.
-fn elevenlabs(text: &str, gender: &str) -> Option<Vec<u8>> {
+/// `chosen`: a voice ID from the Voice Library; empty: one of the user's voices, by gender.
+fn elevenlabs(text: &str, gender: &str, chosen: &str) -> Option<Vec<u8>> {
     let key = crate::secrets::get("elevenlabs-api-key")?;
+    let chosen = valid_voice_id(chosen).map(String::from);
     tauri::async_runtime::block_on(async {
-        let client = reqwest::Client::builder().timeout(Duration::from_secs(10)).build().ok()?;
-        let voices: Value = client.get("https://api.elevenlabs.io/v1/voices").header("xi-api-key", &key).send().await.ok()?.json().await.ok()?;
-        let voice = pick_voice(voices["voices"].as_array()?, gender)?;
+        let client = reqwest::Client::builder().timeout(Duration::from_secs(20)).build().ok()?;
+        let voice = match chosen {
+            Some(v) => v,
+            None => {
+                let voices: Value = client.get("https://api.elevenlabs.io/v1/voices").header("xi-api-key", &key).send().await.ok()?.json().await.ok()?;
+                pick_voice(voices["voices"].as_array()?, gender)?
+            }
+        };
+        // Multilingual v2 reads Russian most naturally; calm and soft, with little acting.
         let response = client
             .post(format!("https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128"))
             .header("xi-api-key", &key)
             .header("accept", "audio/mpeg")
-            .json(&json!({ "text": text, "model_id": "eleven_flash_v2_5" }))
+            .json(&json!({
+                "text": text,
+                "model_id": "eleven_multilingual_v2",
+                "voice_settings": { "stability": 0.55, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": true, "speed": 0.95 }
+            }))
             .send()
             .await
             .ok()?;
@@ -321,6 +405,18 @@ fn elevenlabs(text: &str, gender: &str) -> Option<Vec<u8>> {
         }
         Some(response.bytes().await.ok()?.to_vec())
     })
+}
+
+/// A Voice Library ID ("rQOBu7YxCDxGiFdTm28w"), or a link to its page: the ID, else None.
+pub fn valid_voice_id(text: &str) -> Option<&str> {
+    let id = text.trim().trim_end_matches('/').rsplit('/').next()?.split(['?', '#']).next()?;
+    (id.len() >= 16 && id.len() <= 40 && id.chars().all(|c| c.is_ascii_alphanumeric())).then_some(id)
+}
+
+/// Settings → Voice → Listen: says `text` with the chosen voice.
+#[tauri::command]
+pub async fn voice_preview(app: AppHandle, text: String) {
+    let _ = tauri::async_runtime::spawn_blocking(move || speak(&app, &text)).await;
 }
 
 /// First English voice of the gender (a young one first for a man); else any
@@ -360,11 +456,16 @@ fn base64(bytes: &[u8]) -> String {
 
 /// Asks the island (it knows the pills and the services' data) and waits for its answer.
 pub fn ask_island(app: &AppHandle, kind: &str, input: Value) -> Option<String> {
+    ask_island_waiting(app, kind, input, Duration::from_secs(5))
+}
+
+/// The same, waiting up to `wait` (the chat: as long as Claude works).
+fn ask_island_waiting(app: &AppHandle, kind: &str, input: Value, wait: Duration) -> Option<String> {
     let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
     let (tx, rx) = mpsc::channel();
     pending().lock().unwrap().insert(id, tx);
     let _ = app.emit_to(crate::island::WINDOW_LABEL, "voice-ask", json!({ "id": id, "kind": kind, "input": input }));
-    let answer = rx.recv_timeout(Duration::from_secs(5)).ok();
+    let answer = rx.recv_timeout(wait).ok();
     pending().lock().unwrap().remove(&id);
     answer
 }
@@ -522,6 +623,23 @@ mod tests {
         assert_eq!(base64(b"Ma"), "TWE=");
         assert_eq!(base64(b"M"), "TQ==");
         assert_eq!(base64(b""), "");
+    }
+
+    #[test]
+    fn only_the_beginning_of_an_answer_is_said() {
+        assert_eq!(speakable("Готово. Тесты прошли. Изменено 4 файла."), "Готово. Тесты прошли.");
+        assert_eq!(speakable("## Итог\n\n**Готово**: см. `lib.rs`.\n```rust\nfn main(){}\n```\nЕщё."), "Итог Готово: см. lib.rs. Ещё.");
+        assert_eq!(speakable("Смотри [документацию](https://x.y/z) здесь."), "Смотри документацию здесь.");
+        assert_eq!(speakable("```\ncode only\n```"), "");
+    }
+
+    #[test]
+    fn a_voice_id_or_its_link() {
+        assert_eq!(valid_voice_id("rQOBu7YxCDxGiFdTm28w"), Some("rQOBu7YxCDxGiFdTm28w"));
+        assert_eq!(valid_voice_id("https://elevenlabs.io/voices/rQOBu7YxCDxGiFdTm28w/"), Some("rQOBu7YxCDxGiFdTm28w"));
+        assert_eq!(valid_voice_id("https://elevenlabs.io/voices/rQOBu7YxCDxGiFdTm28w?x=1"), Some("rQOBu7YxCDxGiFdTm28w"));
+        assert_eq!(valid_voice_id(""), None);
+        assert_eq!(valid_voice_id("not a voice"), None);
     }
 
     #[test]

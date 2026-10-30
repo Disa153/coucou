@@ -38,6 +38,10 @@ export interface FlowPrefs {
   voice: boolean;
   voiceOutput: VoiceOutput;
   voiceGender: "female" | "male";
+  /** What is said after the wake phrase goes to the island's chat with Claude. */
+  voiceToChat: boolean;
+  /** An ElevenLabs voice ID from the Voice Library; "" picks one by gender. */
+  elevenVoice: string;
 }
 
 export type ModelState =
