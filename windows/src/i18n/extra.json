@@ -7361,28 +7361,6 @@
    "ru": "Готово. Я передал задачу Клоду, тесты уже запущены. Как только закончатся, я тебе скажу.",
    "id": "Selesai. Tugasnya sudah kuteruskan ke Claude, tes sedang berjalan. Nanti kukabari kalau sudah selesai."
   },
-  "Say « Сяо Чоу Чоу » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.": {
-   "zh-Hans": "说“Сяо Чоу Чоу”（或“OK Coucou”），然后说要做什么：内容会进入与 Claude 的聊天，Coucou 会读出回答。",
-   "hi": "« Сяо Чоу Чоу » (या « OK Coucou ») कहें, फिर क्या करना है: यह Claude के चैट में जाता है और Coucou जवाब बोलता है।",
-   "es": "Di « Сяо Чоу Чоу » (o « OK Coucou ») y luego qué hacer: va al chat con Claude y Coucou dice la respuesta.",
-   "ar": "قل « Сяо Чоу Чоу » (أو « OK Coucou ») ثم ما تريد: يذهب إلى المحادثة مع Claude ويقرأ Coucou الجواب.",
-   "fr": "Dis « Сяо Чоу Чоу » (ou « OK Coucou »), puis quoi faire : ça part dans le chat avec Claude, et Coucou lit la réponse.",
-   "bn": "« Сяо Чоу Чоу » (বা « OK Coucou ») বলুন, তারপর কী করতে হবে: এটা Claude-এর চ্যাটে যায়, আর Coucou উত্তর বলে।",
-   "pt-BR": "Diga « Сяо Чоу Чоу » (ou « OK Coucou ») e depois o que fazer: vai para o chat com o Claude, e o Coucou fala a resposta.",
-   "ru": "Скажи «Сяо Чоу Чоу» (или «OK Coucou»), а потом что сделать: это уйдёт в чат с Claude, а Coucou озвучит ответ.",
-   "id": "Ucapkan « Сяо Чоу Чоу » (atau « OK Coucou »), lalu apa yang harus dilakukan: masuk ke chat dengan Claude, dan Coucou membacakan jawabannya."
-  },
-  "Listen for « Сяо Чоу Чоу »": {
-   "zh-Hans": "监听“Сяо Чоу Чоу”",
-   "hi": "« Сяо Чоу Чоу » के लिए सुनें",
-   "es": "Escuchar « Сяо Чоу Чоу »",
-   "ar": "الاستماع إلى « Сяо Чоу Чоу »",
-   "fr": "Écouter « Сяо Чоу Чоу »",
-   "bn": "« Сяо Чоу Чоу » শুনুন",
-   "pt-BR": "Ouvir « Сяо Чоу Чоу »",
-   "ru": "Слушать «Сяо Чоу Чоу»",
-   "id": "Dengarkan « Сяо Чоу Чоу »"
-  },
   "The microphone stays open; only what follows the wake phrase goes further.": {
    "zh-Hans": "麦克风保持开启；只有唤醒词之后的内容才会被处理。",
    "hi": "माइक्रोफ़ोन खुला रहता है; केवल वेक वाक्यांश के बाद कहा गया आगे जाता है।",
@@ -7448,6 +7426,50 @@
    "pt-BR": "A resposta está no chat.",
    "ru": "Ответ в чате.",
    "id": "Jawabannya ada di chat."
+  },
+  "Say « {phrase} » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.": {
+   "zh-Hans": "说“{phrase}”（或“OK Coucou”），然后说要做什么：内容会进入与 Claude 的聊天，Coucou 会读出回答。",
+   "hi": "« {phrase} » (या « OK Coucou ») कहें, फिर क्या करना है: यह Claude के चैट में जाता है और Coucou जवाब बोलता है।",
+   "es": "Di « {phrase} » (o « OK Coucou ») y luego qué hacer: va al chat con Claude y Coucou dice la respuesta.",
+   "ar": "قل « {phrase} » (أو « OK Coucou ») ثم ما تريد: يذهب إلى المحادثة مع Claude ويقرأ Coucou الجواب.",
+   "fr": "Dis « {phrase} » (ou « OK Coucou »), puis quoi faire : ça part dans le chat avec Claude, et Coucou lit la réponse.",
+   "bn": "« {phrase} » (বা « OK Coucou ») বলুন, তারপর কী করতে হবে: এটা Claude-এর চ্যাটে যায়, আর Coucou উত্তর বলে।",
+   "pt-BR": "Diga « {phrase} » (ou « OK Coucou ») e depois o que fazer: vai para o chat com o Claude, e o Coucou fala a resposta.",
+   "ru": "Скажи «{phrase}» (или «OK Coucou»), а потом что сделать: это уйдёт в чат с Claude, а Coucou озвучит ответ.",
+   "id": "Ucapkan « {phrase} » (atau « OK Coucou »), lalu apa yang harus dilakukan: masuk ke chat dengan Claude, dan Coucou membacakan jawabannya."
+  },
+  "Listen for the wake phrase": {
+   "zh-Hans": "监听唤醒词",
+   "hi": "वेक वाक्यांश के लिए सुनें",
+   "es": "Escuchar la frase de activación",
+   "ar": "الاستماع إلى عبارة التنبيه",
+   "fr": "Écouter la phrase d’appel",
+   "bn": "ডাকার বাক্য শুনুন",
+   "pt-BR": "Ouvir a frase de chamada",
+   "ru": "Слушать фразу вызова",
+   "id": "Dengarkan frasa panggilan"
+  },
+  "Wake phrase": {
+   "zh-Hans": "唤醒词",
+   "hi": "वेक वाक्यांश",
+   "es": "Frase de activación",
+   "ar": "عبارة التنبيه",
+   "fr": "Phrase d’appel",
+   "bn": "ডাকার বাক্য",
+   "pt-BR": "Frase de chamada",
+   "ru": "Фраза вызова",
+   "id": "Frasa panggilan"
+  },
+  "Two or three words, said the same way each time. A letter or two may differ.": {
+   "zh-Hans": "两三个词，每次说法相同。差一两个字母也可以。",
+   "hi": "दो-तीन शब्द, हर बार एक ही तरह बोले गए। एक-दो अक्षर अलग हो सकते हैं।",
+   "es": "Dos o tres palabras, dichas siempre igual. Puede variar una letra o dos.",
+   "ar": "كلمتان أو ثلاث، تُقال بالطريقة نفسها كل مرة. قد يختلف حرف أو حرفان.",
+   "fr": "Deux ou trois mots, dits pareil à chaque fois. Une lettre ou deux peuvent différer.",
+   "bn": "দুই-তিনটি শব্দ, প্রতিবার একইভাবে বলা। এক-দুটি অক্ষর আলাদা হতে পারে।",
+   "pt-BR": "Duas ou três palavras, ditas sempre do mesmo jeito. Uma letra ou duas podem variar.",
+   "ru": "Два-три слова, сказанные каждый раз одинаково. Буква-другая может отличаться.",
+   "id": "Dua atau tiga kata, diucapkan sama setiap kali. Satu-dua huruf boleh berbeda."
   }
  }
 }

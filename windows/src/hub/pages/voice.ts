@@ -57,16 +57,37 @@ function elevenVoice(ctx: HubContext, current: string): HTMLElement {
   return h("div", { style: "display:flex;align-items:center;gap:8px" }, input, listen);
 }
 
+/** Settings → Voice: the phrase that wakes the assistant, saved when the field is left. */
+function wakePhrase(ctx: HubContext, current: string): HTMLElement {
+  const input = h("input", { class: "hub-input", type: "text", value: current, placeholder: "Привет, Диса", spellcheck: "false", style: "width:220px" }) as HTMLInputElement;
+  input.addEventListener("change", () => {
+    const phrase = input.value.trim().replace(/\s+/g, " ");
+    if (phrase.replace(/[^\p{L}\p{N}]/gu, "").length < 4) {
+      input.classList.add("err");
+      return;
+    }
+    input.classList.remove("err");
+    void ctx.setPrefs((p) => (p.wakePhrase = phrase)).then(() => ctx.navigate("voice"));
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") input.blur();
+  });
+  return input;
+}
+
 export async function voicePage(page: HTMLElement, ctx: HubContext) {
   const status = await ctx.refresh();
   const prefs = status.prefs;
-  page.append(ctx.hero("voice", "Сяо Чоу Чоу", t("Say « Сяо Чоу Чоу » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.")));
+  const wake = prefs.wakePhrase || "Привет, Диса";
+  page.append(ctx.hero("voice", wake, t("Say « {phrase} » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.", { phrase: wake })));
 
   const ready = status.models.parakeet.state === "ready";
   page.append(label(t("Listening")));
   const main = card(
-    row(t("Listen for « Сяо Чоу Чоу »"), t("The microphone stays open; only what follows the wake phrase goes further."),
+    row(t("Listen for the wake phrase"), t("The microphone stays open; only what follows the wake phrase goes further."),
       toggle(prefs.voice, (on) => void ctx.setPrefs((p) => (p.voice = on)).then(() => ctx.navigate("voice")))),
+    divider(),
+    row(t("Wake phrase"), t("Two or three words, said the same way each time. A letter or two may differ."), wakePhrase(ctx, wake)),
     divider(),
     row(t("Send it to the chat with Claude"), t("What you say goes into the island's chat, like typed there: Claude Code answers, no key needed. Off: Coucou answers by itself with your Claude key."),
       toggle(prefs.voiceToChat, (on) => void ctx.setPrefs((p) => (p.voiceToChat = on)).then(() => ctx.navigate("voice")))),

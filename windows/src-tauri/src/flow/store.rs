@@ -85,6 +85,9 @@ pub enum SummaryEngine {
 /// "Artem Lebedev – Podcast Pro" in the ElevenLabs Voice Library: a calm Russian male voice.
 pub const DEFAULT_ELEVEN_VOICE: &str = "rQOBu7YxCDxGiFdTm28w";
 
+/// What wakes the assistant unless the user typed another phrase.
+pub const DEFAULT_WAKE_PHRASE: &str = "Привет, Диса";
+
 /// The preferences of dictation and of the window.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
@@ -115,6 +118,8 @@ pub struct Prefs {
     pub voice_to_chat: bool,
     /// An ElevenLabs voice by its ID (from the Voice Library); empty: one picked by `voice_gender`.
     pub eleven_voice: String,
+    /// The phrase that wakes the assistant (« OK Coucou » always works too).
+    pub wake_phrase: String,
 }
 
 impl Default for Prefs {
@@ -134,6 +139,7 @@ impl Default for Prefs {
             voice_gender: "female".into(),
             voice_to_chat: true,
             eleven_voice: DEFAULT_ELEVEN_VOICE.into(),
+            wake_phrase: DEFAULT_WAKE_PHRASE.into(),
         }
     }
 }

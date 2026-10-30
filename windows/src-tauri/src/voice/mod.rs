@@ -113,6 +113,12 @@ pub fn speakable(answer: &str) -> String {
     out.trim().to_string()
 }
 
+/// The user's wake phrase (Settings → Voice), « Привет, Диса » by default.
+fn phrase(app: &AppHandle) -> String {
+    let p = crate::flow::get(app).map(|f| f.store.lock().unwrap().prefs.wake_phrase.clone()).unwrap_or_default();
+    if p.trim().is_empty() { crate::flow::store::DEFAULT_WAKE_PHRASE.to_string() } else { p }
+}
+
 /// Starts or stops listening to follow the preference.
 pub fn sync(app: &AppHandle) {
     let wanted = crate::flow::get(app).is_some_and(|f| f.store.lock().unwrap().prefs.voice);
@@ -220,7 +226,7 @@ fn run(app: AppHandle, stop: Arc<AtomicBool>) {
                 continue;
             }
             let question = match &mut mode {
-                Mode::Wake => match wake::after_any_wake(&heard) {
+                Mode::Wake => match wake::after_any_wake(&heard, &phrase(&app)) {
                     Some(rest) => {
                         crate::log::line("voice: wake phrase heard");
                         hide_at = None;
@@ -234,7 +240,14 @@ fn run(app: AppHandle, stop: Arc<AtomicBool>) {
                             None
                         }
                     }
-                    None => None,
+                    None => {
+                        // A short stretch that was not the phrase: noted (on this computer only),
+                        // so a phrase Parakeet writes oddly can be seen in the log.
+                        if crate::flow::text::word_count(&heard) <= 4 {
+                            crate::log::line(format!("voice: heard « {} », not the wake phrase", heard.chars().take(40).collect::<String>()));
+                        }
+                        None
+                    }
                 },
                 Mode::Command { text, .. } => {
                     let full = format!("{text} {heard}").trim().to_string();
