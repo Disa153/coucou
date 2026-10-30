@@ -7470,6 +7470,28 @@
    "pt-BR": "Duas ou três palavras, ditas sempre do mesmo jeito. Uma letra ou duas podem variar.",
    "ru": "Два-три слова, сказанные каждый раз одинаково. Буква-другая может отличаться.",
    "id": "Dua atau tiga kata, diucapkan sama setiap kali. Satu-dua huruf boleh berbeda."
+  },
+  "Asking ElevenLabs…": {
+   "zh-Hans": "正在请求 ElevenLabs…",
+   "hi": "ElevenLabs से पूछ रहे हैं…",
+   "es": "Consultando a ElevenLabs…",
+   "ar": "جارٍ سؤال ElevenLabs…",
+   "fr": "Demande à ElevenLabs…",
+   "bn": "ElevenLabs-কে জিজ্ঞেস করা হচ্ছে…",
+   "pt-BR": "Consultando a ElevenLabs…",
+   "ru": "Спрашиваю ElevenLabs…",
+   "id": "Menghubungi ElevenLabs…"
+  },
+  "ElevenLabs refused, the system voice spoke: {why}": {
+   "zh-Hans": "ElevenLabs 拒绝了，改用系统语音：{why}",
+   "hi": "ElevenLabs ने मना किया, सिस्टम आवाज़ बोली: {why}",
+   "es": "ElevenLabs se negó, habló la voz del sistema: {why}",
+   "ar": "رفضت ElevenLabs، فتحدث صوت النظام: {why}",
+   "fr": "ElevenLabs a refusé, la voix du système a parlé : {why}",
+   "bn": "ElevenLabs অস্বীকার করেছে, সিস্টেমের কণ্ঠ বলেছে: {why}",
+   "pt-BR": "A ElevenLabs recusou, a voz do sistema falou: {why}",
+   "ru": "ElevenLabs отказал, говорил системный голос: {why}",
+   "id": "ElevenLabs menolak, suara sistem yang berbicara: {why}"
   }
  }
 }

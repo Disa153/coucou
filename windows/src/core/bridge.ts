@@ -631,7 +631,7 @@ export const Bridge = {
   appsSetWhenIdle: (on: boolean) => call<void>("apps_set_when_idle", { on }),
 
   /** Settings → Voice → Listen: says `text` with the voice chosen for the answers. */
-  voicePreview: (text: string) => call<void>("voice_preview", { text }),
+  voicePreview: (text: string) => call<string>("voice_preview", { text }),
 };
 
 export interface AppItem {
