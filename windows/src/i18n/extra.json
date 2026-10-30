@@ -7272,6 +7272,105 @@
    "pt-BR": "{n} de {total}",
    "ru": "{n} из {total}",
    "id": "{n} dari {total}"
+  },
+  "Add a program": {
+   "zh-Hans": "添加程序",
+   "hi": "प्रोग्राम जोड़ें",
+   "es": "Añadir un programa",
+   "ar": "إضافة برنامج",
+   "fr": "Ajouter un programme",
+   "bn": "প্রোগ্রাম যোগ করুন",
+   "pt-BR": "Adicionar um programa",
+   "ru": "Добавить программу",
+   "id": "Tambahkan program"
+  },
+  "App panel": {
+   "zh-Hans": "应用面板",
+   "hi": "ऐप पैनल",
+   "es": "Panel de apps",
+   "ar": "لوحة التطبيقات",
+   "fr": "Panneau d’apps",
+   "bn": "অ্যাপ প্যানেল",
+   "pt-BR": "Painel de apps",
+   "ru": "Панель приложений",
+   "id": "Panel aplikasi"
+  },
+  "No program by that name in the Start menu.": {
+   "zh-Hans": "“开始”菜单中没有这个名称的程序。",
+   "hi": "स्टार्ट मेनू में इस नाम का कोई प्रोग्राम नहीं है।",
+   "es": "No hay ningún programa con ese nombre en el menú Inicio.",
+   "ar": "لا يوجد برنامج بهذا الاسم في قائمة ابدأ.",
+   "fr": "Aucun programme de ce nom dans le menu Démarrer.",
+   "bn": "স্টার্ট মেনুতে এই নামে কোনো প্রোগ্রাম নেই।",
+   "pt-BR": "Nenhum programa com esse nome no menu Iniciar.",
+   "ru": "В меню «Пуск» нет программы с таким названием.",
+   "id": "Tidak ada program dengan nama itu di menu Mulai."
+  },
+  "Nothing pinned yet.": {
+   "zh-Hans": "还没有固定任何程序。",
+   "hi": "अभी कुछ भी पिन नहीं किया गया।",
+   "es": "Aún no hay nada fijado.",
+   "ar": "لم يُثبَّت شيء بعد.",
+   "fr": "Rien d’épinglé pour l’instant.",
+   "bn": "এখনো কিছু পিন করা হয়নি।",
+   "pt-BR": "Nada fixado ainda.",
+   "ru": "Пока ничего не закреплено.",
+   "id": "Belum ada yang disematkan."
+  },
+  "Pin": {
+   "zh-Hans": "固定",
+   "hi": "पिन करें",
+   "es": "Fijar",
+   "ar": "تثبيت",
+   "fr": "Épingler",
+   "bn": "পিন করুন",
+   "pt-BR": "Fixar",
+   "ru": "Закрепить",
+   "id": "Sematkan"
+  },
+  "Pin the programs you use: they open from here.": {
+   "zh-Hans": "固定你常用的程序：从这里打开它们。",
+   "hi": "जो प्रोग्राम आप इस्तेमाल करते हैं उन्हें पिन करें: वे यहीं से खुलेंगे।",
+   "es": "Fija los programas que usas: se abren desde aquí.",
+   "ar": "ثبّت البرامج التي تستخدمها: ستفتح من هنا.",
+   "fr": "Épinglez les programmes que vous utilisez : ils s’ouvrent d’ici.",
+   "bn": "আপনার ব্যবহার করা প্রোগ্রাম পিন করুন: সেগুলো এখান থেকেই খুলবে।",
+   "pt-BR": "Fixe os programas que você usa: eles abrem daqui.",
+   "ru": "Закрепите программы, которыми пользуетесь: они будут открываться отсюда.",
+   "id": "Sematkan program yang Anda pakai: program itu terbuka dari sini."
+  },
+  "Search the Start menu": {
+   "zh-Hans": "搜索“开始”菜单",
+   "hi": "स्टार्ट मेनू में खोजें",
+   "es": "Buscar en el menú Inicio",
+   "ar": "ابحث في قائمة ابدأ",
+   "fr": "Rechercher dans le menu Démarrer",
+   "bn": "স্টার্ট মেনুতে খুঁজুন",
+   "pt-BR": "Pesquisar no menu Iniciar",
+   "ru": "Поиск в меню «Пуск»",
+   "id": "Cari di menu Mulai"
+  },
+  "Show it when no agent is working": {
+   "zh-Hans": "没有代理在工作时显示",
+   "hi": "जब कोई एजेंट काम न कर रहा हो तब दिखाएँ",
+   "es": "Mostrarlo cuando ningún agente trabaja",
+   "ar": "اعرضها عندما لا يعمل أي وكيل",
+   "fr": "L’afficher quand aucun agent ne travaille",
+   "bn": "কোনো এজেন্ট কাজ না করলে দেখান",
+   "pt-BR": "Mostrar quando nenhum agente estiver trabalhando",
+   "ru": "Показывать, когда агенты не работают",
+   "id": "Tampilkan saat tidak ada agen yang bekerja"
+  },
+  "Unpin": {
+   "zh-Hans": "取消固定",
+   "hi": "अनपिन करें",
+   "es": "Desfijar",
+   "ar": "إلغاء التثبيت",
+   "fr": "Désépingler",
+   "bn": "আনপিন করুন",
+   "pt-BR": "Desafixar",
+   "ru": "Открепить",
+   "id": "Lepas sematan"
   }
  }
 }

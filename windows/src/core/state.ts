@@ -550,9 +550,14 @@ class AppState {
    * What the island opens on. A card waiting for an answer comes first, so
    * reopening a folded island shows it again (Mac #117, #290).
    */
+  /** The island opens on the app panel when no agent is at work (src-tauri/src/apps). */
+  appsWhenIdle = false;
+
   defaultView(): IslandViewName {
     if (this.pendingApproval) return this.pendingApproval.questions ? "question" : "approval";
-    return this.tasks.length === 0 ? "empty" : "overview";
+    if (this.tasks.length > 0) return "overview";
+    // Nothing at work: the app panel, when the user keeps it on (views/apps.ts).
+    return this.appsWhenIdle ? "apps" : "empty";
   }
 }
 

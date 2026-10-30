@@ -12,7 +12,7 @@ export interface ReviewHost {
 }
 
 /** Views the card may replace; anything else is the user busy with something. */
-const QUIET_VIEWS: ReadonlySet<IslandViewName> = new Set(["overview", "empty"]);
+const QUIET_VIEWS: ReadonlySet<IslandViewName> = new Set(["overview", "empty", "apps"]);
 const EVERY_MS = 60 * 60 * 1000;
 
 function quiet(): boolean {

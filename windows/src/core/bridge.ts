@@ -615,7 +615,41 @@ export const Bridge = {
   mixerSetDevice: (id: string) => call<boolean>("mixer_set_device", { id }),
   /** Windows' own sound settings. */
   mixerOpenSystem: () => call<boolean>("mixer_open_system"),
+
+  // ── App panel (src-tauri/src/apps) ────────────────────────────────────────
+  /** The pinned programs, the other ones running, and whether the island opens on them. */
+  appsPanel: () => call<AppsPanel>("apps_panel"),
+  /** The Start menu's programs matching the query (all of them for ""). */
+  appsCatalog: (query: string) => call<AppItem[]>("apps_catalog", { query }),
+  /** A program's icon as a data: URL, or null. */
+  appsIcon: (path: string) => call<string | null>("apps_icon", { path }),
+  appsPin: (name: string, path: string, exe: string) => call<boolean>("apps_pin", { name, path, exe }),
+  appsUnpin: (path: string) => call<boolean>("apps_unpin", { path }),
+  appsMove: (path: string, index: number) => call<boolean>("apps_move", { path, index }),
+  /** Brings the program's window forward, or starts it. */
+  appsOpen: (path: string, exe: string) => call<boolean>("apps_open", { path, exe }),
+  appsSetWhenIdle: (on: boolean) => call<void>("apps_set_when_idle", { on }),
 };
+
+export interface AppItem {
+  name: string;
+  /** What a click opens: a Start-menu shortcut or a program. */
+  path: string;
+  /** The program, lower case ("telegram"); "" when unknown. */
+  exe: string;
+  running: boolean;
+  pinned: boolean;
+}
+
+export interface AppsPanel {
+  /** False off Windows: the panel is not offered. */
+  supported: boolean;
+  pinned: AppItem[];
+  /** Running programs that are not pinned. */
+  others: AppItem[];
+  /** The island opens on the panel when no agent is at work. */
+  whenIdle: boolean;
+}
 
 export interface LyricsAnswer {
   /** LRC: "[mm:ss.xx] words" lines. */

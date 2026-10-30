@@ -32,7 +32,7 @@ export interface PromoHost {
 /** After the greeting: the card, once per new build, if nobody is busy with the island. */
 export async function checkPromo(host: PromoHost) {
   if (!IS_TAURI || State.paused || State.pendingApproval) return;
-  if (State.mode === "expanded" && State.view !== "overview" && State.view !== "empty") return;
+  if (State.mode === "expanded" && State.view !== "overview" && State.view !== "empty" && State.view !== "apps") return;
   if (await Bridge.promoDue()) host.alert("promo");
 }
 

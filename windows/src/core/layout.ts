@@ -29,7 +29,9 @@ export type IslandViewName =
   | "lyrics"
   | "review"
   | "betachat"
-  | "promo";
+  | "promo"
+  | "apps"
+  | "appsEdit";
 
 export type BotStateName =
   | "idle"
@@ -111,6 +113,10 @@ export const VIEW_LAYOUTS: Record<IslandViewName, ViewLayout> = {
   promo: { height: 236, botX: 72, botY: 116, botDiameter: 56, agentMode: "none" },
   betachat: { height: 320, botX: 40, botY: 62, botDiameter: 30, agentMode: "none" },
   review: { height: 236, botX: 72, botY: 116, botDiameter: 56, agentMode: "none" },
+  // The app panel: Mochi small on the left, one row of programs beside him.
+  apps: { height: 150, botX: 44, botY: 92, botDiameter: 36, agentMode: "none" },
+  // Pinning programs from the Start menu: a search and a list that scrolls.
+  appsEdit: { height: 300, botX: 40, botY: 62, botDiameter: 30, agentMode: "none" },
 };
 
 // The upload views above are only the fallback geometry. Once a file is actually
