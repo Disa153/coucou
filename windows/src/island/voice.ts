@@ -8,11 +8,17 @@ import { MAX_DECLARED, availablePills, chooseMainPill, pillDefinition, sanitizeD
 import { Spotify } from "../core/spotify";
 import { State } from "../core/state";
 import { serviceCards } from "./phone-services";
+import { VoiceChat } from "../views/chat";
 
 interface Ask {
   id: number;
-  kind: "pills" | "info";
-  input: { action?: string; names?: string[] };
+  kind: "pills" | "info" | "chat";
+  input: { action?: string; names?: string[]; text?: string };
+}
+
+/** What the voice assistant needs from the island to use the chat. */
+export interface VoiceHost {
+  alert(view: "prompt"): void;
 }
 
 const norm = (s: string) =>
@@ -109,9 +115,27 @@ function info(): string {
   });
 }
 
-export function registerVoiceHandlers() {
+/**
+ * « Сяо Чоу Чоу, … »: what was said goes into the island's chat with Claude,
+ * the same chat the user types in, and Rust gets the answer back to say it.
+ */
+async function chat(host: VoiceHost, said: string): Promise<string> {
+  host.alert("prompt");
+  // The chat view is built with the island: wait a moment for it to be on screen.
+  for (let i = 0; i < 20 && !VoiceChat.ask; i++) await new Promise((r) => setTimeout(r, 50));
+  const answer = VoiceChat.ask ? await VoiceChat.ask(said) : null;
+  return answer ?? "";
+}
+
+export function registerVoiceHandlers(host: VoiceHost) {
   if (!IS_TAURI) return;
   void onEvent<Ask>("voice-ask", (ask) => {
+    if (ask.kind === "chat") {
+      void chat(host, ask.input?.text ?? "")
+        .catch(() => "")
+        .then((text) => invoke("voice_done", { id: ask.id, text }).catch(() => {}));
+      return;
+    }
     let text: string;
     try {
       text = ask.kind === "pills" ? pills(ask.input ?? {}) : info();

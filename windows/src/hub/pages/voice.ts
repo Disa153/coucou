@@ -40,20 +40,40 @@ function elevenKey(): HTMLElement {
   return box;
 }
 
+/** Settings → Voice: an ElevenLabs voice from the Voice Library, by its ID or its page's link. */
+function elevenVoice(ctx: HubContext, current: string): HTMLElement {
+  const input = h("input", { class: "hub-input", type: "text", value: current, placeholder: "rQOBu7YxCDxGiFdTm28w", spellcheck: "false", style: "width:220px" }) as HTMLInputElement;
+  const listen = button(t("Listen"), () => void Bridge.voicePreview(t("Done. I passed the task to Claude, the tests are running. I'll tell you when they finish.")), "", true);
+  const keep = () => {
+    const raw = input.value.trim();
+    const id = raw.replace(/\/+$/, "").split("/").pop()?.split(/[?#]/)[0] ?? "";
+    input.value = id;
+    void ctx.setPrefs((p) => (p.elevenVoice = id));
+  };
+  input.addEventListener("change", keep);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") input.blur();
+  });
+  return h("div", { style: "display:flex;align-items:center;gap:8px" }, input, listen);
+}
+
 export async function voicePage(page: HTMLElement, ctx: HubContext) {
   const status = await ctx.refresh();
   const prefs = status.prefs;
-  page.append(ctx.hero("voice", "OK Coucou", t("Say « OK Coucou », then ask anything: add a pill, play music, the weather, an email to prepare.")));
+  page.append(ctx.hero("voice", "Сяо Чоу Чоу", t("Say « Сяо Чоу Чоу » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.")));
 
   const ready = status.models.parakeet.state === "ready";
   page.append(label(t("Listening")));
   const main = card(
-    row(t("Listen for « OK Coucou »"), t("The microphone stays open; only what follows « OK Coucou » goes further."),
+    row(t("Listen for « Сяо Чоу Чоу »"), t("The microphone stays open; only what follows the wake phrase goes further."),
       toggle(prefs.voice, (on) => void ctx.setPrefs((p) => (p.voice = on)).then(() => ctx.navigate("voice")))),
+    divider(),
+    row(t("Send it to the chat with Claude"), t("What you say goes into the island's chat, like typed there: Claude Code answers, no key needed. Off: Coucou answers by itself with your Claude key."),
+      toggle(prefs.voiceToChat, (on) => void ctx.setPrefs((p) => (p.voiceToChat = on)).then(() => ctx.navigate("voice")))),
     divider(),
     row(t("Parakeet, on your computer"), t("Hears « OK Coucou » here, without the internet."), modelsControl(ctx, () => ctx.navigate("voice"))),
   );
-  if (prefs.voice && !status.hasClaudeKey) {
+  if (prefs.voice && !prefs.voiceToChat && !status.hasClaudeKey) {
     main.append(h("div", { class: "hub-warn", text: t("Coucou answers with Claude: add your Claude key in Notch → Chat.") }));
   } else if (prefs.voice && !ready) {
     main.append(h("div", { class: "hub-warn", text: t("Download the voice model so Coucou can hear you.") }));
@@ -68,10 +88,15 @@ export async function voicePage(page: HTMLElement, ctx: HubContext) {
   if (prefs.voiceOutput === "elevenlabs") {
     answers.append(
       divider(),
-      row(t("Voice"), null, segmented([["female", t("Female")], ["male", t("Male")]], prefs.voiceGender, (g) => void ctx.setPrefs((p) => (p.voiceGender = g)))),
-      divider(),
-      row(t("ElevenLabs key"), null, elevenKey()),
+      row(t("Voice from the Voice Library"), t("Its ID or the link to its page on elevenlabs.io. Empty: one of your voices, by gender."), elevenVoice(ctx, prefs.elevenVoice)),
     );
+    if (!prefs.elevenVoice) {
+      answers.append(
+        divider(),
+        row(t("Voice"), null, segmented([["female", t("Female")], ["male", t("Male")]], prefs.voiceGender, (g) => void ctx.setPrefs((p) => (p.voiceGender = g)))),
+      );
+    }
+    answers.append(divider(), row(t("ElevenLabs key"), null, elevenKey()));
   }
   page.append(answers);
 

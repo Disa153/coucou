@@ -4208,17 +4208,6 @@
    "ru": "Ключ ElevenLabs",
    "id": "Kunci ElevenLabs"
   },
-  "Say « OK Coucou », then ask anything: add a pill, play music, the weather, an email to prepare.": {
-   "zh-Hans": "说「OK Coucou」，然后随便问：添加一个胶囊、播放音乐、天气、准备一封邮件。",
-   "hi": "« OK Coucou » कहें, फिर कुछ भी पूछें: एक पिल जोड़ें, संगीत चलाएँ, मौसम, कोई ईमेल तैयार करें।",
-   "es": "Di « OK Coucou » y pide lo que quieras: añadir una píldora, poner música, el tiempo, un correo por preparar.",
-   "ar": "قل « OK Coucou »، ثم اطلب أي شيء: إضافة كبسولة، تشغيل الموسيقى، الطقس، بريد إلكتروني لتجهيزه.",
-   "fr": "Dis « OK Coucou », puis demande ce que tu veux : ajouter une pilule, lancer de la musique, la météo, un e-mail à préparer.",
-   "bn": "« OK Coucou » বলুন, তারপর যা খুশি জিজ্ঞেস করুন: একটি পিল যোগ করা, গান চালানো, আবহাওয়া, একটি ইমেল তৈরি করা।",
-   "pt-BR": "Diga « OK Coucou » e peça o que quiser: adicionar uma pílula, tocar música, o clima, um e-mail para preparar.",
-   "ru": "Скажите « OK Coucou » и просите что угодно: добавить плашку, включить музыку, погоду, подготовить письмо.",
-   "id": "Ucapkan « OK Coucou », lalu minta apa saja: tambah pil, putar musik, cuaca, email yang perlu disiapkan."
-  },
   "Listening": {
    "zh-Hans": "聆听",
    "hi": "सुनना",
@@ -4229,28 +4218,6 @@
    "pt-BR": "Escuta",
    "ru": "Прослушивание",
    "id": "Mendengarkan"
-  },
-  "Listen for « OK Coucou »": {
-   "zh-Hans": "聆听「OK Coucou」",
-   "hi": "« OK Coucou » के लिए सुनें",
-   "es": "Escuchar « OK Coucou »",
-   "ar": "الاستماع إلى « OK Coucou »",
-   "fr": "Écouter « OK Coucou »",
-   "bn": "« OK Coucou »-এর জন্য শুনুন",
-   "pt-BR": "Escutar « OK Coucou »",
-   "ru": "Слушать « OK Coucou »",
-   "id": "Dengarkan « OK Coucou »"
-  },
-  "The microphone stays open; only what follows « OK Coucou » goes further.": {
-   "zh-Hans": "麦克风保持开启；只有「OK Coucou」之后的内容才会被进一步处理。",
-   "hi": "माइक्रोफ़ोन खुला रहता है; केवल « OK Coucou » के बाद कही गई बात ही आगे जाती है।",
-   "es": "El micrófono sigue abierto; solo lo que va después de « OK Coucou » llega más lejos.",
-   "ar": "يبقى الميكروفون مفتوحًا؛ ولا يتجاوز الحاسوب إلا ما يأتي بعد « OK Coucou ».",
-   "fr": "Le micro reste ouvert ; seul ce qui suit « OK Coucou » va plus loin.",
-   "bn": "মাইক্রোফোন খোলা থাকে; কেবল « OK Coucou »-এর পরে যা বলা হয় সেটুকুই আরও এগোয়।",
-   "pt-BR": "O microfone fica aberto; só o que vem depois de « OK Coucou » vai adiante.",
-   "ru": "Микрофон остаётся включённым; дальше уходит только то, что сказано после « OK Coucou ».",
-   "id": "Mikrofon tetap terbuka; hanya yang diucapkan setelah « OK Coucou » yang diteruskan."
   },
   "Hears « OK Coucou » here, without the internet.": {
    "zh-Hans": "在这台电脑上听到「OK Coucou」，无需联网。",
@@ -7371,6 +7338,116 @@
    "pt-BR": "Desafixar",
    "ru": "Открепить",
    "id": "Lepas sematan"
+  },
+  "Listen": {
+   "zh-Hans": "试听",
+   "hi": "सुनें",
+   "es": "Escuchar",
+   "ar": "استمع",
+   "fr": "Écouter",
+   "bn": "শুনুন",
+   "pt-BR": "Ouvir",
+   "ru": "Прослушать",
+   "id": "Dengarkan"
+  },
+  "Done. I passed the task to Claude, the tests are running. I'll tell you when they finish.": {
+   "zh-Hans": "好了。我已把任务交给 Claude，测试正在运行。结束后我会告诉你。",
+   "hi": "हो गया। मैंने काम Claude को दे दिया, टेस्ट चल रहे हैं। खत्म होते ही बताऊँगा।",
+   "es": "Listo. Le pasé la tarea a Claude, las pruebas están en marcha. Te aviso cuando terminen.",
+   "ar": "تم. سلّمت المهمة إلى Claude، والاختبارات قيد التشغيل. سأخبرك عندما تنتهي.",
+   "fr": "C’est fait. J’ai transmis la tâche à Claude, les tests tournent. Je te dis quand ils sont finis.",
+   "bn": "হয়ে গেছে। কাজটা Claude-কে দিয়েছি, টেস্ট চলছে। শেষ হলে জানাব।",
+   "pt-BR": "Pronto. Passei a tarefa para o Claude, os testes estão rodando. Aviso quando terminarem.",
+   "ru": "Готово. Я передал задачу Клоду, тесты уже запущены. Как только закончатся, я тебе скажу.",
+   "id": "Selesai. Tugasnya sudah kuteruskan ke Claude, tes sedang berjalan. Nanti kukabari kalau sudah selesai."
+  },
+  "Say « Сяо Чоу Чоу » (or « OK Coucou »), then what to do: it goes to the chat with Claude, and Coucou says the answer.": {
+   "zh-Hans": "说“Сяо Чоу Чоу”（或“OK Coucou”），然后说要做什么：内容会进入与 Claude 的聊天，Coucou 会读出回答。",
+   "hi": "« Сяо Чоу Чоу » (या « OK Coucou ») कहें, फिर क्या करना है: यह Claude के चैट में जाता है और Coucou जवाब बोलता है।",
+   "es": "Di « Сяо Чоу Чоу » (o « OK Coucou ») y luego qué hacer: va al chat con Claude y Coucou dice la respuesta.",
+   "ar": "قل « Сяо Чоу Чоу » (أو « OK Coucou ») ثم ما تريد: يذهب إلى المحادثة مع Claude ويقرأ Coucou الجواب.",
+   "fr": "Dis « Сяо Чоу Чоу » (ou « OK Coucou »), puis quoi faire : ça part dans le chat avec Claude, et Coucou lit la réponse.",
+   "bn": "« Сяо Чоу Чоу » (বা « OK Coucou ») বলুন, তারপর কী করতে হবে: এটা Claude-এর চ্যাটে যায়, আর Coucou উত্তর বলে।",
+   "pt-BR": "Diga « Сяо Чоу Чоу » (ou « OK Coucou ») e depois o que fazer: vai para o chat com o Claude, e o Coucou fala a resposta.",
+   "ru": "Скажи «Сяо Чоу Чоу» (или «OK Coucou»), а потом что сделать: это уйдёт в чат с Claude, а Coucou озвучит ответ.",
+   "id": "Ucapkan « Сяо Чоу Чоу » (atau « OK Coucou »), lalu apa yang harus dilakukan: masuk ke chat dengan Claude, dan Coucou membacakan jawabannya."
+  },
+  "Listen for « Сяо Чоу Чоу »": {
+   "zh-Hans": "监听“Сяо Чоу Чоу”",
+   "hi": "« Сяо Чоу Чоу » के लिए सुनें",
+   "es": "Escuchar « Сяо Чоу Чоу »",
+   "ar": "الاستماع إلى « Сяо Чоу Чоу »",
+   "fr": "Écouter « Сяо Чоу Чоу »",
+   "bn": "« Сяо Чоу Чоу » শুনুন",
+   "pt-BR": "Ouvir « Сяо Чоу Чоу »",
+   "ru": "Слушать «Сяо Чоу Чоу»",
+   "id": "Dengarkan « Сяо Чоу Чоу »"
+  },
+  "The microphone stays open; only what follows the wake phrase goes further.": {
+   "zh-Hans": "麦克风保持开启；只有唤醒词之后的内容才会被处理。",
+   "hi": "माइक्रोफ़ोन खुला रहता है; केवल वेक वाक्यांश के बाद कहा गया आगे जाता है।",
+   "es": "El micrófono queda abierto; solo lo que sigue a la frase de activación va más allá.",
+   "ar": "يبقى الميكروفون مفتوحًا؛ لا يذهب أبعد إلا ما يلي عبارة التنبيه.",
+   "fr": "Le micro reste ouvert ; seul ce qui suit la phrase d’appel va plus loin.",
+   "bn": "মাইক্রোফোন খোলা থাকে; শুধু ডাকার বাক্যের পরের কথাই আরও এগোয়।",
+   "pt-BR": "O microfone fica aberto; só o que vem depois da frase de chamada segue adiante.",
+   "ru": "Микрофон остаётся включённым; дальше уходит только то, что сказано после фразы вызова.",
+   "id": "Mikrofon tetap terbuka; hanya yang diucapkan setelah frasa panggilan yang diteruskan."
+  },
+  "Send it to the chat with Claude": {
+   "zh-Hans": "发送到与 Claude 的聊天",
+   "hi": "Claude के चैट में भेजें",
+   "es": "Enviarlo al chat con Claude",
+   "ar": "أرسله إلى المحادثة مع Claude",
+   "fr": "L’envoyer dans le chat avec Claude",
+   "bn": "Claude-এর চ্যাটে পাঠান",
+   "pt-BR": "Enviar para o chat com o Claude",
+   "ru": "Отправлять в чат с Claude",
+   "id": "Kirim ke chat dengan Claude"
+  },
+  "What you say goes into the island's chat, like typed there: Claude Code answers, no key needed. Off: Coucou answers by itself with your Claude key.": {
+   "zh-Hans": "你说的话会像手动输入一样进入岛上的聊天：由 Claude Code 回答，无需密钥。关闭时：Coucou 用你的 Claude 密钥自行回答。",
+   "hi": "आप जो कहते हैं वह आइलैंड के चैट में वैसे ही जाता है जैसे टाइप किया हो: Claude Code जवाब देता है, कोई कुंजी नहीं चाहिए। बंद: Coucou आपकी Claude कुंजी से खुद जवाब देता है।",
+   "es": "Lo que dices entra en el chat de la isla como si lo escribieras: responde Claude Code, sin clave. Desactivado: Coucou responde solo con tu clave de Claude.",
+   "ar": "ما تقوله يدخل محادثة الجزيرة كأنك كتبته: يجيب Claude Code دون مفتاح. عند الإيقاف: يجيب Coucou بنفسه بمفتاح Claude الخاص بك.",
+   "fr": "Ce que tu dis arrive dans le chat de l’île comme si tu l’avais tapé : Claude Code répond, sans clé. Désactivé : Coucou répond seul avec ta clé Claude.",
+   "bn": "আপনি যা বলেন তা টাইপ করার মতোই আইল্যান্ডের চ্যাটে যায়: Claude Code উত্তর দেয়, কোনো কী লাগে না। বন্ধ: Coucou আপনার Claude কী দিয়ে নিজেই উত্তর দেয়।",
+   "pt-BR": "O que você diz entra no chat da ilha como se fosse digitado: o Claude Code responde, sem chave. Desligado: o Coucou responde sozinho com sua chave do Claude.",
+   "ru": "Сказанное попадает в чат островка, как будто напечатано там: отвечает Claude Code, ключ не нужен. Выключено: Coucou отвечает сам, с твоим ключом Claude.",
+   "id": "Ucapanmu masuk ke chat pulau seperti diketik di sana: Claude Code yang menjawab, tanpa kunci. Mati: Coucou menjawab sendiri dengan kunci Claude-mu."
+  },
+  "Voice from the Voice Library": {
+   "zh-Hans": "语音库中的声音",
+   "hi": "Voice Library से आवाज़",
+   "es": "Voz de la Voice Library",
+   "ar": "صوت من مكتبة الأصوات",
+   "fr": "Voix de la Voice Library",
+   "bn": "Voice Library থেকে কণ্ঠ",
+   "pt-BR": "Voz da Voice Library",
+   "ru": "Голос из Voice Library",
+   "id": "Suara dari Voice Library"
+  },
+  "Its ID or the link to its page on elevenlabs.io. Empty: one of your voices, by gender.": {
+   "zh-Hans": "它的 ID 或 elevenlabs.io 上页面的链接。留空：按性别从你的声音中选择。",
+   "hi": "इसका ID या elevenlabs.io पर इसके पेज का लिंक। खाली: लिंग के अनुसार आपकी आवाज़ों में से एक।",
+   "es": "Su ID o el enlace a su página en elevenlabs.io. Vacío: una de tus voces, según el género.",
+   "ar": "معرّفه أو رابط صفحته على elevenlabs.io. فارغ: أحد أصواتك حسب الجنس.",
+   "fr": "Son ID ou le lien vers sa page sur elevenlabs.io. Vide : une de tes voix, selon le genre.",
+   "bn": "এর ID বা elevenlabs.io-তে এর পেজের লিংক। খালি: লিঙ্গ অনুযায়ী আপনার একটি কণ্ঠ।",
+   "pt-BR": "O ID ou o link da página dela em elevenlabs.io. Vazio: uma das suas vozes, pelo gênero.",
+   "ru": "Его ID или ссылка на его страницу на elevenlabs.io. Пусто — один из твоих голосов по полу.",
+   "id": "ID-nya atau tautan ke halamannya di elevenlabs.io. Kosong: salah satu suaramu, sesuai gender."
+  },
+  "The answer is in the chat.": {
+   "zh-Hans": "回答在聊天中。",
+   "hi": "जवाब चैट में है।",
+   "es": "La respuesta está en el chat.",
+   "ar": "الجواب في المحادثة.",
+   "fr": "La réponse est dans le chat.",
+   "bn": "উত্তর চ্যাটে আছে।",
+   "pt-BR": "A resposta está no chat.",
+   "ru": "Ответ в чате.",
+   "id": "Jawabannya ada di chat."
   }
  }
 }

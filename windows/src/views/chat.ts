@@ -201,6 +201,13 @@ function buildPicker(onChange: () => void): Picker {
 
 // ── View ──────────────────────────────────────────────────────────────────────
 
+/**
+ * The voice assistant's way in (island/voice.ts): types `query` into this chat,
+ * sends it like the user would, and resolves with the answer (null on an error
+ * or while another answer is being written). Set once the view is built.
+ */
+export const VoiceChat: { ask: ((query: string) => Promise<string | null>) | null } = { ask: null };
+
 export function buildPrompt(onHeightChange: () => void): ViewHost {
   const chipRow = h("div", { class: "chip-row" });
   const log = h("div", { class: "chat-log" });
@@ -264,9 +271,9 @@ export function buildPrompt(onHeightChange: () => void): ViewHost {
     log.scrollTop = log.scrollHeight;
   });
 
-  async function submit() {
+  async function submit(): Promise<string | null> {
     const query = input.value.trim();
-    if (!query || sending) return;
+    if (!query || sending) return null;
     if (picker.isOpen) picker.close();
     input.value = "";
     sending = true;
@@ -287,11 +294,13 @@ export function buildPrompt(onHeightChange: () => void): ViewHost {
       State.chatHistory.push({ id: nextId++, role: "assistant", content: reply.text });
       State.stateOverride = null;
       Sound.play("finish");
+      return reply.text;
     } catch (err) {
       State.stateOverride = null;
       State.noteMessage = String(err).replace(/^Error:\s*/, "");
       State.view = "note";
       Sound.play("error");
+      return null;
     } finally {
       sending = false;
       live = null;
@@ -304,6 +313,11 @@ export function buildPrompt(onHeightChange: () => void): ViewHost {
   }
 
   send.addEventListener("click", () => void submit());
+  VoiceChat.ask = async (query) => {
+    if (sending) return null;
+    input.value = query;
+    return submit();
+  };
   input.addEventListener("keydown", (e) => {
     const key = (e as KeyboardEvent).key;
     if (key === "Enter") {

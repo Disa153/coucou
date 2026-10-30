@@ -945,6 +945,7 @@ pub fn run() {
             notes::notes_markdown,
             notes::notes_export,
             voice::voice_done,
+            voice::voice_preview,
             voice::voice_say_native,
         ])
         .setup(move |app| {

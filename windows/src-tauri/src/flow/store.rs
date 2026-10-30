@@ -82,6 +82,9 @@ pub enum SummaryEngine {
     Off,
 }
 
+/// "Artem Lebedev – Podcast Pro" in the ElevenLabs Voice Library: a calm Russian male voice.
+pub const DEFAULT_ELEVEN_VOICE: &str = "rQOBu7YxCDxGiFdTm28w";
+
 /// The preferences of dictation and of the window.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
@@ -107,6 +110,11 @@ pub struct Prefs {
     pub voice_output: String,
     /// The ElevenLabs voice: "female" or "male".
     pub voice_gender: String,
+    /// What was said after the wake phrase goes to the island's chat with Claude
+    /// (Claude Code, no key needed); off: Coucou answers by itself with the Claude key.
+    pub voice_to_chat: bool,
+    /// An ElevenLabs voice by its ID (from the Voice Library); empty: one picked by `voice_gender`.
+    pub eleven_voice: String,
 }
 
 impl Default for Prefs {
@@ -124,6 +132,8 @@ impl Default for Prefs {
             voice: false,
             voice_output: "system".into(),
             voice_gender: "female".into(),
+            voice_to_chat: true,
+            eleven_voice: DEFAULT_ELEVEN_VOICE.into(),
         }
     }
 }
