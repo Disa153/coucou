@@ -42,6 +42,8 @@ export interface FlowPrefs {
   voiceToChat: boolean;
   /** An ElevenLabs voice ID from the Voice Library; "" picks one by gender. */
   elevenVoice: string;
+  /** What wakes the assistant (« OK Coucou » works too). */
+  wakePhrase: string;
 }
 
 export type ModelState =
