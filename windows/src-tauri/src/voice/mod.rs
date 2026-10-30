@@ -331,7 +331,17 @@ fn speak(app: &AppHandle, text: &str) {
         std::thread::sleep(Duration::from_millis(1500));
         return;
     }
-    let audio = if output == "elevenlabs" { elevenlabs(text, &gender, &chosen).map(|mp3| base64(&mp3)) } else { None };
+    let audio = if output == "elevenlabs" {
+        match elevenlabs(text, &gender, &chosen) {
+            Ok(mp3) => Some(base64(&mp3)),
+            Err(why) => {
+                *LAST_REFUSAL.lock().unwrap() = Some(why);
+                None
+            }
+        }
+    } else {
+        None
+    };
     let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
     let (tx, rx) = mpsc::channel();
     pending().lock().unwrap().insert(id, tx);
@@ -385,38 +395,90 @@ pub async fn voice_say_native(text: String, lang: Option<String>) -> bool {
     .unwrap_or(false)
 }
 
-/// ElevenLabs' MP3 for `text`, with the user's key; None and the system voice speaks.
-/// `chosen`: a voice ID from the Voice Library; empty: one of the user's voices, by gender.
-fn elevenlabs(text: &str, gender: &str, chosen: &str) -> Option<Vec<u8>> {
-    let key = crate::secrets::get("elevenlabs-api-key")?;
+/// What ElevenLabs said last time it refused, for Settings → Voice → Listen.
+static LAST_REFUSAL: Mutex<Option<String>> = Mutex::new(None);
+
+/// ElevenLabs' answer in words: the HTTP status and its own message.
+fn refusal(status: reqwest::StatusCode, body: &str) -> String {
+    let v: Value = serde_json::from_str(body).unwrap_or(Value::Null);
+    let detail = v["detail"]["message"].as_str().or_else(|| v["detail"].as_str()).unwrap_or("").trim().to_string();
+    let code = v["detail"]["status"].as_str().unwrap_or("");
+    let mut out = format!("HTTP {}", status.as_u16());
+    if !code.is_empty() {
+        out.push_str(&format!(" · {code}"));
+    }
+    if !detail.is_empty() {
+        out.push_str(&format!(" · {}", detail.chars().take(240).collect::<String>()));
+    }
+    out
+}
+
+/// One text-to-speech call with `voice`.
+async fn eleven_say(client: &reqwest::Client, key: &str, voice: &str, text: &str) -> Result<Vec<u8>, String> {
+    // Multilingual v2 reads Russian most naturally; calm and soft, with little acting.
+    let response = client
+        .post(format!("https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128"))
+        .header("xi-api-key", key)
+        .header("accept", "audio/mpeg")
+        .json(&json!({
+            "text": text,
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": { "stability": 0.55, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": true, "speed": 0.95 }
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("no answer from ElevenLabs ({e})"))?;
+    let status = response.status();
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        return Err(refusal(status, &body));
+    }
+    response.bytes().await.map(|b| b.to_vec()).map_err(|e| e.to_string())
+}
+
+/// ElevenLabs' MP3 for `text`, with the user's key; Err (why) and the system voice speaks.
+/// `chosen`: a voice ID from the Voice Library; when it is refused (a free plan
+/// cannot use library voices through the API) one of the user's own voices, by gender.
+fn elevenlabs(text: &str, gender: &str, chosen: &str) -> Result<Vec<u8>, String> {
+    let key = crate::secrets::get("elevenlabs-api-key").ok_or_else(|| "no ElevenLabs key saved".to_string())?;
     let chosen = valid_voice_id(chosen).map(String::from);
     tauri::async_runtime::block_on(async {
-        let client = reqwest::Client::builder().timeout(Duration::from_secs(20)).build().ok()?;
-        let voice = match chosen {
-            Some(v) => v,
-            None => {
-                let voices: Value = client.get("https://api.elevenlabs.io/v1/voices").header("xi-api-key", &key).send().await.ok()?.json().await.ok()?;
-                pick_voice(voices["voices"].as_array()?, gender)?
+        let client = reqwest::Client::builder().timeout(Duration::from_secs(25)).build().map_err(|e| e.to_string())?;
+        let mut first_refusal = None;
+        if let Some(v) = &chosen {
+            match eleven_say(&client, &key, v, text).await {
+                Ok(mp3) => return Ok(mp3),
+                Err(why) => {
+                    crate::log::line(format!("voice: ElevenLabs refused the chosen voice: {why}"));
+                    first_refusal = Some(why);
+                }
             }
-        };
-        // Multilingual v2 reads Russian most naturally; calm and soft, with little acting.
-        let response = client
-            .post(format!("https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128"))
+        }
+        let voices: Value = client
+            .get("https://api.elevenlabs.io/v1/voices")
             .header("xi-api-key", &key)
-            .header("accept", "audio/mpeg")
-            .json(&json!({
-                "text": text,
-                "model_id": "eleven_multilingual_v2",
-                "voice_settings": { "stability": 0.55, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": true, "speed": 0.95 }
-            }))
             .send()
             .await
-            .ok()?;
-        if !response.status().is_success() {
-            crate::log::line(format!("voice: ElevenLabs {}", response.status()));
-            return None;
+            .map_err(|e| e.to_string())?
+            .json()
+            .await
+            .map_err(|e| e.to_string())?;
+        let fallback = voices["voices"].as_array().and_then(|list| pick_voice(list, gender));
+        let Some(voice) = fallback else {
+            return Err(first_refusal.unwrap_or_else(|| refusal(reqwest::StatusCode::UNAUTHORIZED, &voices.to_string())));
+        };
+        match eleven_say(&client, &key, &voice, text).await {
+            Ok(mp3) => {
+                if let Some(why) = first_refusal {
+                    *LAST_REFUSAL.lock().unwrap() = Some(format!("chosen voice refused ({why}); one of your voices spoke instead"));
+                }
+                Ok(mp3)
+            }
+            Err(why) => {
+                crate::log::line(format!("voice: ElevenLabs refused: {why}"));
+                Err(first_refusal.unwrap_or(why))
+            }
         }
-        Some(response.bytes().await.ok()?.to_vec())
     })
 }
 
@@ -426,10 +488,13 @@ pub fn valid_voice_id(text: &str) -> Option<&str> {
     (id.len() >= 16 && id.len() <= 40 && id.chars().all(|c| c.is_ascii_alphanumeric())).then_some(id)
 }
 
-/// Settings → Voice → Listen: says `text` with the chosen voice.
+/// Settings → Voice → Listen: says `text` with the chosen voice. "" when
+/// ElevenLabs spoke as asked, else why it did not (the system voice spoke).
 #[tauri::command]
-pub async fn voice_preview(app: AppHandle, text: String) {
+pub async fn voice_preview(app: AppHandle, text: String) -> String {
+    *LAST_REFUSAL.lock().unwrap() = None;
     let _ = tauri::async_runtime::spawn_blocking(move || speak(&app, &text)).await;
+    LAST_REFUSAL.lock().unwrap().take().unwrap_or_default()
 }
 
 /// First English voice of the gender (a young one first for a man); else any
@@ -644,6 +709,16 @@ mod tests {
         assert_eq!(speakable("## Итог\n\n**Готово**: см. `lib.rs`.\n```rust\nfn main(){}\n```\nЕщё."), "Итог Готово: см. lib.rs. Ещё.");
         assert_eq!(speakable("Смотри [документацию](https://x.y/z) здесь."), "Смотри документацию здесь.");
         assert_eq!(speakable("```\ncode only\n```"), "");
+    }
+
+    #[test]
+    fn elevenlabs_refusals_read_as_words() {
+        let body = r#"{"detail":{"status":"payment_required","message":"Free users cannot use library voices via the API."}}"#;
+        assert_eq!(
+            refusal(reqwest::StatusCode::PAYMENT_REQUIRED, body),
+            "HTTP 402 · payment_required · Free users cannot use library voices via the API."
+        );
+        assert_eq!(refusal(reqwest::StatusCode::UNAUTHORIZED, "nope"), "HTTP 401");
     }
 
     #[test]

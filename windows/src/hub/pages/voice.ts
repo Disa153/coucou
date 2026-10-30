@@ -43,7 +43,20 @@ function elevenKey(): HTMLElement {
 /** Settings → Voice: an ElevenLabs voice from the Voice Library, by its ID or its page's link. */
 function elevenVoice(ctx: HubContext, current: string): HTMLElement {
   const input = h("input", { class: "hub-input", type: "text", value: current, placeholder: "rQOBu7YxCDxGiFdTm28w", spellcheck: "false", style: "width:220px" }) as HTMLInputElement;
-  const listen = button(t("Listen"), () => void Bridge.voicePreview(t("Done. I passed the task to Claude, the tests are running. I'll tell you when they finish.")), "", true);
+  const said = h("div", { class: "hub-note", style: "max-width:420px" });
+  const listen = button(t("Listen"), () => {
+    said.textContent = t("Asking ElevenLabs…");
+    said.style.color = "";
+    void Bridge.voicePreview(t("Done. I passed the task to Claude, the tests are running. I'll tell you when they finish.")).then((why) => {
+      if (why) {
+        // ElevenLabs' own words: why its voice did not speak.
+        said.textContent = t("ElevenLabs refused, the system voice spoke: {why}", { why });
+        said.style.color = "var(--hub-orange, #f59e0b)";
+      } else {
+        said.textContent = "";
+      }
+    });
+  }, "", true);
   const keep = () => {
     const raw = input.value.trim();
     const id = raw.replace(/\/+$/, "").split("/").pop()?.split(/[?#]/)[0] ?? "";
@@ -54,7 +67,7 @@ function elevenVoice(ctx: HubContext, current: string): HTMLElement {
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") input.blur();
   });
-  return h("div", { style: "display:flex;align-items:center;gap:8px" }, input, listen);
+  return h("div", { style: "display:flex;flex-direction:column;align-items:flex-end;gap:6px" }, h("div", { style: "display:flex;align-items:center;gap:8px" }, input, listen), said);
 }
 
 /** Settings → Voice: the phrase that wakes the assistant, saved when the field is left. */
