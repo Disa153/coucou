@@ -25,6 +25,7 @@ import { buildRecap } from "./recap";
 import { buildWardrobe } from "./wardrobe";
 import { buildMixer } from "./mixer";
 import { buildKitchen } from "./kitchen";
+import { AppsStore, buildApps, buildAppsEdit } from "./apps";
 import { buildLyrics } from "./lyrics";
 import { buildReview } from "./review";
 import { buildPromo } from "./promo";
@@ -135,6 +136,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
   const kitchenBtn = h("button", { title: tl("Feed Mochi"), onclick: () => go(State.view === "kitchen" ? State.defaultView() : "kitchen") }, svg(ICONS.onigiri, 14, { evenOdd: true }));
   const chatBadge = h("span", { class: "bc-badge" });
   const betaChatBtn = h("button", { class: "bc-btn", title: tl("Beta chat"), onclick: () => go(State.view === "betachat" ? State.defaultView() : "betachat") }, svg(ICONS.bubble, 14), chatBadge);
+  const appsBtn = h("button", { title: tl("App panel"), onclick: () => go(State.view === "apps" || State.view === "appsEdit" ? (State.tasks.length ? "overview" : "empty") : "apps") }, svg(ICONS.grid, 14));
   const mixerBtn = h("button", { title: tl("Sound mixer"), onclick: () => go(State.view === "mixer" ? State.defaultView() : "mixer") }, svg(ICONS.sliders, 14, { stroke: 2 }));
   const gearBtn = h("button", { title: tl("Settings"), onclick: () => go("settings") }, svg(ICONS.gear, 14));
   const soundBtn = h("button", { title: tl("Mute"), onclick: () => actions.toggleSound() }, svg(ICONS.speakerOn, 14));
@@ -153,7 +155,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
     "div",
     { id: "header" },
     h("div", { class: "tabs" }, tabHome, tabChat, tabDrop),
-    h("div", { class: "header-actions" }, planPills, betaChatBtn, kitchenBtn, mixerBtn, gearBtn, soundBtn),
+    h("div", { class: "header-actions" }, planPills, betaChatBtn, appsBtn, kitchenBtn, mixerBtn, gearBtn, soundBtn),
   );
   const headerActions = el.lastElementChild as HTMLElement;
 
@@ -161,11 +163,13 @@ export function buildHeader(actions: ViewActions): ViewHost {
     el,
     sync() {
       const v = State.view;
-      tabHome.classList.toggle("on", v === "overview" || v === "empty");
+      tabHome.classList.toggle("on", v === "overview" || v === "empty" || v === "apps");
       tabChat.classList.toggle("on", v === "prompt");
       tabDrop.classList.toggle("on", v === "upload");
       kitchenBtn.classList.toggle("on", v === "kitchen");
       mixerBtn.classList.toggle("on", v === "mixer");
+      appsBtn.classList.toggle("on", v === "apps" || v === "appsEdit");
+      appsBtn.style.display = AppsStore.panel?.supported ? "" : "none";
       betaChatBtn.style.display = BetaChat.allowed ? "" : "none";
       betaChatBtn.classList.toggle("on", v === "betachat");
       chatBadge.textContent = BetaChat.unread > 0 ? String(Math.min(BetaChat.unread, 99)) : "";
@@ -875,6 +879,8 @@ export function buildViews(
   map.set("wardrobe", buildWardrobe(actions));
   map.set("mixer", buildMixer());
   map.set("kitchen", buildKitchen(actions));
+  map.set("apps", buildApps(actions));
+  map.set("appsEdit", buildAppsEdit(actions));
   map.set("lyrics", buildLyrics(actions));
   map.set("review", buildReview(actions));
   map.set("promo", buildPromo(actions));

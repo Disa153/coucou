@@ -77,5 +77,7 @@ export const ICONS = {
   // an onigiri (the Kitchen's button): the rice, its nori cut out
   onigiri: "M12 3.4c1 0 1.9.6 2.5 1.5l5.9 9.9c1.4 2.3-.3 5.2-3 5.2H6.6c-2.7 0-4.4-2.9-3-5.2l5.9-9.9c.6-.9 1.5-1.5 2.5-1.5zM8.7 14.6v4.4h6.6v-4.4z",
   // slider.vertical.3 (stroked): the sound mixer's button
+  /** The app panel: four rounded squares. */
+  grid: "M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z",
   sliders: "M5 20v-6M5 10V4M12 20v-8M12 8V4M19 20v-4M19 12V4M2.5 14h5M9.5 8h5M16.5 16h5",
 } as const;

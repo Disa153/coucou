@@ -1,6 +1,7 @@
 // Coucou for Windows — app wiring and the commands the island calls.
 
 mod account;
+mod apps;
 mod agent_hooks;
 mod agents;
 mod betachat;
@@ -901,6 +902,14 @@ pub fn run() {
             reviews::review_skip,
             reviews::review_send,
             reviews::review_list,
+            apps::apps_panel,
+            apps::apps_catalog,
+            apps::apps_icon,
+            apps::apps_pin,
+            apps::apps_unpin,
+            apps::apps_move,
+            apps::apps_open,
+            apps::apps_set_when_idle,
             promo::promo_due,
             promo::promo_done,
             betachat::beta_chat_messages,

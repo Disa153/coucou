@@ -34,6 +34,9 @@ import {
 import type { ViewCommand } from "./shortcuts";
 import { DRAG_THRESHOLD } from "../mochi/desktop-logic";
 
+/** The views with a text field: the island takes the keyboard while one is on screen. */
+const KEYBOARD_VIEWS: ReadonlySet<string> = new Set(["prompt", "appsEdit"]);
+
 const BOT_OVERHANG = 40;
 const CLAUDE_DESKTOP_ID = "agent_claude-desktop";
 /** Extra canvas on each side of Mochi, for the witch hat's brim and the Santa hat's tip. */
@@ -1534,15 +1537,16 @@ export class Island {
       if (on) view.sync();
     }
 
-    // The chat is the only view with a text field, so it is the only time the
-    // island is allowed to take keyboard focus.
+    // The chat and the app panel's search are the views with a text field to
+    // type in: only there is the island allowed to take keyboard focus.
     if (this.lastSyncedView !== State.view) {
-      const wasChat = this.lastSyncedView === "prompt";
+      const hadKeys = this.lastSyncedView !== null && KEYBOARD_VIEWS.has(this.lastSyncedView);
       this.lastSyncedView = State.view;
-      if (State.view === "prompt") {
+      if (KEYBOARD_VIEWS.has(State.view)) {
+        const view = State.view;
         void Bridge.focusWindow(true);
-        window.setTimeout(() => this.views.get("prompt")?.focus?.(), 120);
-      } else if (wasChat) {
+        window.setTimeout(() => this.views.get(view)?.focus?.(), 120);
+      } else if (hadKeys) {
         void Bridge.focusWindow(false);
       }
     }

@@ -15,7 +15,7 @@ export interface BetaChatHost {
   alert(view: IslandViewName): void;
 }
 
-const QUIET_VIEWS: ReadonlySet<IslandViewName> = new Set(["overview", "empty"]);
+const QUIET_VIEWS: ReadonlySet<IslandViewName> = new Set(["overview", "empty", "apps"]);
 
 function quiet(): boolean {
   if (State.paused || State.pendingApproval) return false;
