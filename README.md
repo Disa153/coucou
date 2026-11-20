@@ -2,9 +2,11 @@
 
 <img src="NotchBuddy/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="96" alt="Coucou icon">
 
-# Coucou
+# Nook
 
-**A tiny friend that lives in your Mac's notch — or at the top of your screen on Windows and Linux — and keeps an eye on your AI coding agent sessions. And now on your phone too: iPhone and Android.**
+**Nook is a work-in-progress desktop companion for Windows, based on the open-source Coucou project.**
+
+Nook is being developed around a compact top-of-screen island for AI coding-agent activity, battery alerts for connected devices, and permission requests. Battery readings are shown only when the device reports real data. These Nook-specific features are under development; this README also retains upstream Coucou documentation for reference.
 
 Approve permissions, watch your agents work, drop a file, chat with Claude — all without leaving what you're doing. Walk away from your Mac and Mochi follows you to your iPhone: Lock Screen, Dynamic Island, widgets, Siri.
 
@@ -27,6 +29,10 @@ Approve permissions, watch your agents work, drop a file, chat with Claude — a
 </div>
 
 > [!NOTE]
+> **Nook development fork.** This repository is being adapted into **Nook**. Existing sections below document upstream Coucou functionality and may not describe completed Nook features yet.
+>
+> **Форк Nook в разработке.** Мы переделываем Coucou в **Nook**. Разделы ниже частично описывают оригинальный Coucou, а не уже готовые функции Nook.
+>
 > **This is a fork.** Coucou was made by **Louis Raillé** ([@Louis-CFM](https://github.com/Louis-CFM)) — the app, Mochi and everything described below are his work: [Louis-CFM/coucou](https://github.com/Louis-CFM/coucou). This fork, [Disa153/coucou](https://github.com/Disa153/coucou), is where I try to improve it, mostly Coucou for Windows and an iPhone app that pairs with it over Wi-Fi. It is not affiliated with the original project, and its builds are not the official ones.
 >
 > **Это форк.** Coucou создал **Louis Raillé** ([@Louis-CFM](https://github.com/Louis-CFM)): приложение, Mochi и всё, что описано ниже, — его работа ([Louis-CFM/coucou](https://github.com/Louis-CFM/coucou)). Я взял его проект и пробую его улучшать — в основном Coucou для Windows и приложение для iPhone, которое связывается с ним по Wi-Fi. Форк не связан с оригинальным проектом, а его сборки — не официальные.
