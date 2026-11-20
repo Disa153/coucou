@@ -22,6 +22,8 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const SOURCE = resolve(here, "../../NotchBuddy/Resources/Localizable.xcstrings");
 const OUTPUT = resolve(here, "../src/i18n/strings.json");
+const EXTRA = resolve(here, "../src/i18n/extra.json");
+const EXTRA_KEYS = new Set(Object.keys(JSON.parse(readFileSync(EXTRA, "utf8")).strings));
 
 /** The languages Coucou ships, in the Mac's picker order. English is the source. */
 export const LANGUAGES = ["en", "zh-Hans", "hi", "es", "ar", "fr", "bn", "pt-BR", "ru", "id"];
@@ -95,6 +97,12 @@ export function generate(catalog) {
       const value = readLocalization(locs[lang], names);
       if (value !== undefined) out[lang] = value;
     }
+    // Some catalog entries are untranslated identifiers or UI additions.
+    // Keep only the complete translations that Windows exposes in its picker.
+    if (Object.keys(out).length !== LANGUAGES.length - 1) continue;
+    // Hand-maintained Windows strings own their keys, even when a Mac entry
+    // with the same English key appears later in the source catalog.
+    if (EXTRA_KEYS.has(key)) continue;
     // The English plural forms are needed to pick "one" in English too.
     if (typeof en !== "string") out.en = en;
     strings[key] = out;
