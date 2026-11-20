@@ -3,6 +3,7 @@
 // identically.
 
 import { h, svg, clear, dot } from "./dom";
+import { getBatteryAlerts } from "../core/battery-store";
 import { ICONS } from "./icons";
 import { Ticker } from "./ticker";
 import { State, type AgentTask } from "../core/state";
@@ -118,6 +119,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
   const codexPill = buildPlanPill(true);
   const planPills = h("div", { class: "plan-pills" }, claudePill.el, codexPill.el);
   let codexShown = false;
+  const batteryStatus = h("span", { title: "Nook battery alerts" });
 
   function go(v: IslandViewName) {
     actions.blip();
@@ -128,7 +130,7 @@ export function buildHeader(actions: ViewActions): ViewHost {
     "div",
     { id: "header" },
     h("div", { class: "tabs" }, tabHome, tabChat, tabDrop),
-    h("div", { class: "header-actions" }, planPills, gearBtn, soundBtn),
+    h("div", { class: "header-actions" }, batteryStatus, planPills, gearBtn, soundBtn),
   );
   const headerActions = el.lastElementChild as HTMLElement;
 
@@ -144,6 +146,13 @@ export function buildHeader(actions: ViewActions): ViewHost {
       gearBtn.append(svg(v === "settings" ? ICONS.gearFill : ICONS.gear, 14));
       clear(soundBtn);
       soundBtn.append(svg(State.settings.soundEnabled ? ICONS.speakerOn : ICONS.speakerOff, 14));
+      const alerts = getBatteryAlerts();
+      const first = alerts[0];
+      batteryStatus.textContent = first ? `${first.kind === "headset" ? "🎧" : first.kind === "keyboard" ? "⌨" : first.kind === "mouse" ? "🖱" : "🔋"} ${first.percent}%` : "";
+      batteryStatus.title = alerts.length ? alerts.map(a => `${a.name}: ${a.percent}%`).join("\n") : "No low battery reports";
+      batteryStatus.style.display = alerts.length ? "" : "none";
+      batteryStatus.style.color = first?.severity === "critical" ? "#F4505E" : "#F5A524";
+      batteryStatus.style.fontSize = "11px";
       syncPlanPills();
       el.style.opacity = v === "confused" ? "0" : "1";
     },
