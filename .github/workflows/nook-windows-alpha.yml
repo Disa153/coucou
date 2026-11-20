@@ -27,6 +27,8 @@ jobs:
           cache-dependency-path: windows/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Regenerate translations from upstream catalog
+        run: node scripts/gen-strings.mjs
       - name: Run Windows frontend tests
         run: npm test
       - name: Build Windows installers
