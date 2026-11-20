@@ -12,6 +12,7 @@ import {
 } from "../core/layout";
 import { Sound } from "../core/sound";
 import { State } from "../core/state";
+import { subscribeBatteryDevices } from "../core/battery-store";
 import { SPOTIFY_ID, islandDances } from "../core/spotify";
 import { BotEngine, hexToRGB } from "../mochi/engine";
 import { Greeting } from "../mochi/greeting";
@@ -129,6 +130,10 @@ export class Island {
       this.onGreetingDone?.();
     };
     State.subscribe(() => {
+      this.dirty = true;
+      this.ensureRunning();
+    });
+    subscribeBatteryDevices(() => {
       this.dirty = true;
       this.ensureRunning();
     });
