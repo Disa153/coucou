@@ -22,12 +22,12 @@ const PACKAGES = {
     {
       dir: "nsis",
       suffix: "-setup.exe",
-      names: [`Coucou-Windows-${version}-setup.exe`, "Coucou-Windows-setup.exe"],
+      names: [`Nook-Windows-${version}-setup.exe`, "Nook-Windows-setup.exe"],
     },
     {
       dir: "msi",
       suffix: ".msi",
-      names: [`Coucou-Windows-${version}.msi`, "Coucou-Windows.msi"],
+      names: [`Nook-Windows-${version}.msi`, "Coucou-Windows.msi"],
     },
   ],
   linux: [
