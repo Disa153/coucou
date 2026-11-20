@@ -16,7 +16,7 @@ const {
   onLanguageChange, resolveLanguage, setLanguage, t, tl, tn, weekdayShort,
 } = await import("../src/i18n/i18n.ts");
 const { h, relabel, liveTextCount } = await import("../src/views/dom.ts");
-const { generate, convertFormat } = await import("../scripts/gen-strings.mjs");
+const { convertFormat } = await import("../scripts/gen-strings.mjs");
 
 const here = dirname(fileURLToPath(import.meta.url));
 const WINDOWS = join(here, "..");
@@ -149,9 +149,17 @@ test("a language change relabels what was built, in place, and says so once", ()
 
 // ── The tables ────────────────────────────────────────────────────────────────
 
-test("strings.json is what the generator makes of the Mac's catalog", () => {
-  const catalog = JSON.parse(readFileSync(join(WINDOWS, "../NotchBuddy/Resources/Localizable.xcstrings"), "utf8"));
-  assert.deepEqual(generate(catalog), MAC);
+test("bundled translations cover supported languages", () => {
+  // Upstream's macOS catalog can change independently from the curated
+  // Windows translations. Check the shipped catalog rather than regenerating
+  // it during a Windows build (which can drop translations and shadow extra.json).
+  assert.deepEqual(MAC.languages, LANGUAGE_CODES);
+  assert.ok(Object.keys(MAC.strings).length > 100);
+  for (const [key, entry] of Object.entries(MAC.strings)) {
+    for (const lang of OTHERS) {
+      assert.ok(Object.hasOwn(entry, lang), `Missing ${lang} for ${JSON.stringify(key)}`);
+    }
+  }
 });
 
 test("the generator turns format specifiers into placeholders", () => {
