@@ -189,7 +189,7 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcuts: {},
   mochiOutfit: DEFAULT_OUTFIT,
   pillColors: {},
-  language: "",
+  language: "ru",
 };
 
 type Listener = () => void;
